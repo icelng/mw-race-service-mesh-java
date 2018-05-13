@@ -21,17 +21,21 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
     private static final int HEADER_LENGTH = 16;
     private static final int PARAMETER_SIZE_ALIGN_BIT = 2;  // 参数大小对齐
 
-    private static boolean isHeader = true;
-    private static boolean isTable = true;
-    private static AgentServiceRequest agentServiceRequest;
-    private static int tableType;
-    private static int tableSize;
-    private static int tableBytesLength;
+    private boolean isHeader = true;
+    private boolean isTable = true;
+    private AgentServiceRequest agentServiceRequest;
+    private int tableType;
+    private int tableSize;
+    private int tableBytesLength;
 
-    private static int totalParameterSize;
-    private static int remainSize;
-    private static List<Integer> parameterSizes = new ArrayList<Integer>();
-    private static byte[] tableCellBuf = new byte[4];
+    private int totalParameterSize;
+    private int remainSize;
+    private List<Integer> parameterSizes = new ArrayList<Integer>();
+    private byte[] tableCellBuf = new byte[4];
+
+    private int lastTotalSize = 0;
+    private int lastPaddingSize = 0;
+
 
     /*对客户端发来的请求进行解码*/
     @Override
@@ -93,9 +97,11 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                     logger.info("-------->buf[3]:{}", tableCellBuf[3]);
                     logger.info("-------->totalParameterSize:{}", totalParameterSize);
                     logger.info("-------->requestId:{}", agentServiceRequest.getRequestId());
-                    logger.info("-------->serviceId", agentServiceRequest.getServiceId());
+                    logger.info("-------->serviceId:{}", agentServiceRequest.getServiceId());
                     logger.info("-------->tableType:{}", tableType);
                     logger.info("-------->tableCellSize:{}", tableCellSize);
+                    logger.info("-------->lastTotal:{}", lastTotalSize);
+                    logger.info("-------->lastPadding:{}", lastPaddingSize);
                     throw e;
                 }
                 /*4字节对齐*/
@@ -136,6 +142,9 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         /*丢弃对齐用的填充字节*/
         int paddingSize = remainSize - totalParameterSize;
         in.readBytes(paddingSize);
+
+        lastTotalSize = totalParameterSize;
+        lastPaddingSize =paddingSize;
 
         /*接收完毕，把处理流程交给下一个Handler*/
         out.add(agentServiceRequest);

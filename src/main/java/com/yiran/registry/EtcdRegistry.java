@@ -59,6 +59,14 @@ public class EtcdRegistry implements IRegistry{
         // 服务注册的key为:    /dubbomesh/com.some.package.IHelloService/192.168.100.100:2000
         String serviceName = serviceInfo.getServiceName();
 
+
+        /*注册服务名*/
+        logger.info("Register serviceName");
+        String strKey = MessageFormat.format("/{0}/{1}/{2}",rootPath, serviceName, serviceInfo.getServiceId());
+        ByteSequence key = ByteSequence.fromString(strKey);
+        ByteSequence val = ByteSequence.fromString("");
+        kv.put(key,val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();
+
         /*注册方法*/
         /*有可能冲突的，暂不处理*/
         logger.info("Register method");
@@ -70,10 +78,10 @@ public class EtcdRegistry implements IRegistry{
         registMap(serviceName, "parameterType", serviceInfo.getParameterTypeMap());
 
         /*注册节点信息*/
-        String strKey = MessageFormat.format("/{0}/{1}/endpoints/{2}:{3}",rootPath,serviceName,IpHelper.getHostIp(),String.valueOf(port));
+        strKey = MessageFormat.format("/{0}/{1}/endpoints/{2}:{3}",rootPath,serviceName,IpHelper.getHostIp(),String.valueOf(port));
         logger.info("Register a new service at:" + strKey);
-        ByteSequence key = ByteSequence.fromString(strKey);
-        ByteSequence val = ByteSequence.fromString(String.valueOf(loadLevel));
+        key = ByteSequence.fromString(strKey);
+        val = ByteSequence.fromString(String.valueOf(loadLevel));
         kv.put(key,val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();
     }
 
@@ -113,6 +121,7 @@ public class EtcdRegistry implements IRegistry{
         String methodsRegx = "^/(.*?)/(.*?)/(method)/(\\d+)/(\\w+)";
         String parameterTypesRegx = "^/(.*?)/(.*?)/(parameterType)/(\\d+)/(.+)";
         String endpointsRegx = "^/(.*?)/(.*?)/(endpoints)/(.+?):(\\d+)";
+        String serviceNameRegx = "^/(.*?)/(.*?)/(\\d+)";
         List<Endpoint> endpoints = new ArrayList<>();
         ServiceInfo serviceInfo = new ServiceInfo();
         for (com.coreos.jetcd.data.KeyValue kv : kvs){
@@ -150,6 +159,15 @@ public class EtcdRegistry implements IRegistry{
                     Endpoint endpoint = new Endpoint(host, port, loadLevel);
                     endpoint.setSupportedService(serviceInfo);
                     endpoints.add(endpoint);
+                }
+            } else if(keyStr.matches(serviceNameRegx)) {
+                Pattern p = Pattern.compile(parameterTypesRegx);
+                Matcher m = p.matcher(keyStr);
+                m.find();
+                if (m.groupCount() == 3) {
+                    serviceInfo.setServiceId(Integer.parseInt(m.group(3)));
+                    serviceInfo.setServiceName(m.group(2));
+                    logger.info("Get parameterName---id:{}  name:{}", m.group(3), m.group(2));
                 }
             } else {
                 logger.info("No match for:{}", keyStr);

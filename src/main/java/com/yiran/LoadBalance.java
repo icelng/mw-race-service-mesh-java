@@ -81,7 +81,7 @@ public class LoadBalance {
             /*查询支持指定服务名的客户端集合*/
             agentClientNames = serviceNameToAgentClientsMap.getOrDefault(serviceName, null);
             if(agentClientNames == null || agentClientNames.size() == 0){
-                logger.info("Service {} not found!Checking out etcd..tryCount:{}", serviceName ,++tryCount);
+                logger.info("Service {} not found!Checking out etcd..tryCount:{}", serviceName, ++tryCount);
                 if (tryCount == MAX_TRY_COUNT) {
                     throw new Exception("Failed to find the service:" + serviceName);
                 }

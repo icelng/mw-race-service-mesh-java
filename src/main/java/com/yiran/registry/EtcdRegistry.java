@@ -97,16 +97,14 @@ public class EtcdRegistry implements IRegistry{
         GetResponse response = null;
         try {
             response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
-        } catch (InterruptedException e) {
-            logger.error("", e);
-            return null;
-        } catch (ExecutionException e) {
-            logger.error("", e);
+        } catch (Exception e) {
+            logger.error("Failed to get key-values:{}", e.getMessage());
             return null;
         }
 
         List<KeyValue> kvs = response.getKvs();
         if(kvs == null || kvs.size() == 0){
+            logger.error("The response have not key-values");
             return null;
         }
 

@@ -48,10 +48,10 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 byte byteTemp = in.readByte();
                 agentServiceRequest.setTwoWay(0x01 == ((byteTemp >>> 6) & 0x01));  // 是否等待
                 tableType = (byteTemp >>> 4) & 0x03;
-                tableSize = in.readByte();
+                tableSize = in.readByte() & 0xFF;
                 in.readByte();  // 请求不需要status
                 agentServiceRequest.setRequestId(in.readLong());  // 请求的唯一标识
-                tableBytesLength = tableSize << tableType;
+                tableBytesLength = (tableSize & 0xFF) << tableType;
 
                 isHeader = false;
             }
@@ -70,7 +70,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 for(int i = 0;i < tableSize;i++){
                     in.readBytes(tableCellBuf, 0, tableCellSize);
                     int parameterSize = 0;
-                    int parameterType = tableCellBuf[0] >>> 4;
+                    int parameterType = (tableCellBuf[0] >>> 4) & 0x0F;
                     if (parameterType == 0) {
                         /*如果参数类型是0，则认为是填充项*/
                         /*丢弃对齐用的填充字节*/

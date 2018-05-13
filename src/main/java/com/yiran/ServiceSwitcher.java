@@ -106,9 +106,10 @@ public class ServiceSwitcher {
         /*获取到rpc请求相应的agent的请求*/
         AgentServiceRequest agentServiceRequest = processingRequest.get(String.valueOf(rpcResponse.getRequestId()));
         if (agentServiceRequest == null){
-            logger.warn("No requestId for rpcResponse!");
+            logger.warn("No rpcResponse for requestId:{}", rpcResponse.getRequestId());
             return;
         }
+        logger.info("Receive response from provider:" + new String(rpcResponse.getBytes()));
         processingRequest.remove(String.valueOf(rpcResponse.getRequestId()));
 
         /*获取得到consumer-agent 与 provider-agent之间的Channel*/
@@ -120,7 +121,6 @@ public class ServiceSwitcher {
         byte[] intBytes = new byte[4];
         Bytes.int2bytes(JSON.parseObject(rpcResponse.getBytes(), Integer.class), intBytes, 0);
         agentServiceResponse.setReturnValue(intBytes);
-        logger.debug("Receive response from provider:" + new String(rpcResponse.getBytes()));
 
         /*向客户端发送响应*/
         agentChannel.writeAndFlush(agentServiceResponse);

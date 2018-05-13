@@ -45,7 +45,7 @@ public class LoadBalance {
     }
 
     public AgentClient createAgentClient(Endpoint endpoint) throws InterruptedException {
-        String clientName = MessageFormat.format("{0}:{1}", endpoint.getHost(), endpoint.getPort());
+        String clientName = endpoint.getHost() + ":" + String.valueOf(endpoint.getPort());
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(clientName, null);
         if(agentClient == null){
             agentClient = new AgentClient(endpoint.getHost(), endpoint.getPort());

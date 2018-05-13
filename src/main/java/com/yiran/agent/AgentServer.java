@@ -71,8 +71,7 @@ public class AgentServer {
         try {
             registry.register(serviceInfo, this.port, loadLevel);
         } catch (Exception e) {
-            logger.error("Failed to register service!{}", e.getLocalizedMessage());
-
+            logger.error("Failed to register service!:\n{}", e);
         }
         logger.info("Registry success!");
 

@@ -30,8 +30,8 @@ public class HelloController {
             logger.error(e.getMessage(), e);
             return null;
         }
-        int hashCode = (int) agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-        logger.info("Get the hash code:{}" , hashCode);
+        int hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+        logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
 
         return hashCode;  // 直接返回
     }

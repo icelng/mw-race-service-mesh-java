@@ -118,7 +118,7 @@ public class ServiceSwitcher {
         agentServiceResponse.setReturnType(1);  // 写死为整形
         byte[] intStrBytes = Arrays.copyOfRange(rpcResponse.getBytes(), 2, rpcResponse.getBytes().length);
         byte[] intBytes = new byte[4];
-        Bytes.int2bytes(Integer.valueOf(new String(intStrBytes, "UTF-8")), intBytes, 0);
+        Bytes.int2bytes(Integer.valueOf((new String(intStrBytes, "UTF-8")).replace("\"", "")), intBytes, 0);
         agentServiceResponse.setReturnValue(intBytes);
 
         /*向客户端发送响应*/

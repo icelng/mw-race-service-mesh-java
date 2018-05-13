@@ -52,10 +52,6 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 in.readByte();  // 请求不需要status
                 agentServiceRequest.setRequestId(in.readLong());  // 请求的唯一标识
                 tableBytesLength = tableSize << tableType;
-                logger.info("<---------------debug:decoding----------------->");
-                logger.info("requestId:{}", agentServiceRequest.getRequestId());
-                logger.info("serviceId:{}", agentServiceRequest.getServiceId());
-                logger.info("methodId:{}", agentServiceRequest.getMethodId());
 
                 isHeader = false;
             }
@@ -68,7 +64,6 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 /*解析参数表*/
-                logger.info("tableType:{}", tableType);
                 int tableCellSize = 1 << tableType;
                 parameterSizes.clear();
                 totalParameterSize = 0;
@@ -83,25 +78,15 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                     }
                     for(int j = 1;j < tableCellSize;j++){
                         parameterSize |= (tableCellBuf[j] & 0xFF) << ((tableCellSize - j - 1) * 8);
-                        logger.info("-------now----->size:{} tableCellBuf[{}] << {}", parameterSize, j, ((tableCellSize - j - 1) * 8));
                     }
                     parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
-                    logger.info("-------now----->size:{} tableCellBuf[{}] << {}", parameterSize, 0, ((tableCellSize - 1) * 8));
-                    logger.info("------decode----->tableCellBuf[0]:{}", tableCellBuf[0]);
-                    logger.info("------decode----->tableCellBuf[1]:{}", tableCellBuf[1]);
-                    logger.info("------decode----->tableCellBuf[2]:{}", tableCellBuf[2]);
-                    logger.info("------decode----->tableCellBuf[3]:{}", tableCellBuf[3]);
                     agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
-                    logger.info("getParameterType:{}", tableCellBuf[0] >>> 4);
                     parameterSizes.add(parameterSize);
-                    logger.info("getParameterSize:{}", parameterSize);
                     totalParameterSize += parameterSize;
                 }
                 /*4字节对齐*/
                 remainSize = (totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT);
 
-                logger.info("totalParameterSize:{}", totalParameterSize);
-                logger.info("remainSize:{}", remainSize);
 
                 isTable = false;
             }

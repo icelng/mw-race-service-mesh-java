@@ -65,17 +65,12 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
                 /*类型4bit 参数长度28bit*/
                 for(int i = 0;i < parameters.size();i++){
                     int parameterSize = parameters.get(i).length;
-                    logger.info("------decode----->parameterSize:{}", parameterSize);
 
                     totalParameterSize += parameterSize;
                     bytesTemp[0] = (byte) (((parameterTypes.get(i) & 0x0F) << 4) | ((parameterSize >>> 24) & 0x0F));
                     bytesTemp[1] = (byte) ((parameterSize >>> 16) & 0xFF);
                     bytesTemp[2] = (byte) ((parameterSize >>> 8) & 0xFF);
                     bytesTemp[3] = (byte) (parameterSize & 0xFF);
-                    logger.info("------encode----->sizeByte[0]:{}", bytesTemp[0]);
-                    logger.info("------encode----->sizeByte[1]:{}", bytesTemp[1]);
-                    logger.info("------encode----->sizeByte[2]:{}", bytesTemp[2]);
-                    logger.info("------encode----->sizeByte[3]:{}", bytesTemp[3]);
                     out.writeBytes(bytesTemp, 0, 4);
                 }
                 break;

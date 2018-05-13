@@ -26,17 +26,15 @@ public class HelloController {
     public Integer consumer(String interfaceName,String method,String parameterTypesString,String parameter) throws Exception {
         AgentClient agentClient;
         int hashCode;
-        synchronized (lock) {
-            try {
-                agentClient = loadBalance.findOptimalAgentClient(interfaceName);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                return null;
-            }
-            logger.info("Send parameter:{}", parameter);
-            hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-            logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
+        try {
+            agentClient = loadBalance.findOptimalAgentClient(interfaceName);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
         }
+        logger.info("Send parameter:{}", parameter);
+        hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+        logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
         return hashCode;  // 直接返回
     }
 }

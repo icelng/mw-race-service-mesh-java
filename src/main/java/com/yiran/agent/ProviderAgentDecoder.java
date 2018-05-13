@@ -68,22 +68,35 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 int tableCellSize = 1 << tableType;
                 parameterSizes.clear();
                 totalParameterSize = 0;
-                for(int i = 0;i < tableSize;i++){
-                    in.readBytes(tableCellBuf, 0, tableCellSize);
-                    int parameterSize = 0;
-                    int parameterType = (tableCellBuf[0] >>> 4) & 0x0F;
-                    if (parameterType == 0) {
-                        /*如果参数类型是0，则认为是填充项*/
-                        /*丢弃对齐用的填充字节*/
-                        continue;
+                try{
+                    for(int i = 0;i < tableSize;i++){
+                        in.readBytes(tableCellBuf, 0, tableCellSize);
+                        int parameterSize = 0;
+                        int parameterType = (tableCellBuf[0] >>> 4) & 0x0F;
+                        if (parameterType == 0) {
+                            /*如果参数类型是0，则认为是填充项*/
+                            /*丢弃对齐用的填充字节*/
+                            continue;
+                        }
+                        for(int j = 1;j < tableCellSize;j++){
+                            parameterSize |= (tableCellBuf[j] & 0xFF) << ((tableCellSize - j - 1) * 8);
+                        }
+                        parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
+                        agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
+                        parameterSizes.add(parameterSize);
+                        totalParameterSize += parameterSize;
                     }
-                    for(int j = 1;j < tableCellSize;j++){
-                        parameterSize |= (tableCellBuf[j] & 0xFF) << ((tableCellSize - j - 1) * 8);
-                    }
-                    parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
-                    agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
-                    parameterSizes.add(parameterSize);
-                    totalParameterSize += parameterSize;
+                } catch (Exception e) {
+                    logger.info("-------->buf[0]:{}", tableCellBuf[0]);
+                    logger.info("-------->buf[1]:{}", tableCellBuf[1]);
+                    logger.info("-------->buf[2]:{}", tableCellBuf[2]);
+                    logger.info("-------->buf[3]:{}", tableCellBuf[3]);
+                    logger.info("-------->totalParameterSize:{}", totalParameterSize);
+                    logger.info("-------->requestId:{}", agentServiceRequest.getRequestId());
+                    logger.info("-------->serviceId", agentServiceRequest.getServiceId());
+                    logger.info("-------->tableType:{}", tableType);
+                    logger.info("-------->tableCellSize:{}", tableCellSize);
+                    throw e;
                 }
                 /*4字节对齐*/
                 remainSize = (totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT);

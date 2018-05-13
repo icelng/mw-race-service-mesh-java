@@ -138,7 +138,7 @@ public class EtcdRegistry implements IRegistry{
                 /*如果是节点信息*/
                 Pattern p = Pattern.compile(endpointsRegx);
                 Matcher m = p.matcher(keyStr);
-                if(m.groupCount() == 4){
+                if(m.groupCount() == 5){
                     String host = m.group(4);
                     int port = Integer.parseInt(m.group(5));
                     int loadLevel = Integer.parseInt(kv.getValue().toString());
@@ -158,9 +158,11 @@ public class EtcdRegistry implements IRegistry{
         String serviceName = "com.alibaba.performance.dubbomesh.provider.IHelloService";
         String methodName = "hash";
         String testStr = MessageFormat.format("/{0}/{1}/methods/1/{2}", rootPath, serviceName, methodName);
-        String enpointStr = MessageFormat.format("/{0}/{1}/endpoints/192.168.0.1:3000", rootPath, serviceName);
+//        String enpointStr = MessageFormat.format("/{0}/{1}/endpoints/192.168.0.1:3000", rootPath, serviceName);
+        String enpointStr = "/dubbomesh/com.alibaba.dubbo.performance.demo.provider.IHelloService/endpoints/127.0.0.1:30000";
+
         String regex = "^/(.*?)/(.*?)/(method)/(\\d+)/(.+)";
-        String regexEndpoints = "^/(.*?)/(.*?)/(endpoints)/(.*?:\\d+)";
+        String regexEndpoints = "^/(.*?)/(.*?)/(endpoints)/(.*?):(\\d+)";
         if(enpointStr.matches(regexEndpoints)) {
             System.out.print("匹配！\n");
             Pattern pattern = Pattern.compile(regexEndpoints);
@@ -172,6 +174,7 @@ public class EtcdRegistry implements IRegistry{
                 System.out.println("Found value:" + matcher.group(2));
                 System.out.println("Found value:" + matcher.group(3));
                 System.out.println("Found value:" + matcher.group(4));
+                System.out.println("Found value:" + matcher.group(5));
             }
         }
 

@@ -118,7 +118,7 @@ public class EtcdRegistry implements IRegistry{
         for (com.coreos.jetcd.data.KeyValue kv : kvs){
             String keyStr = kv.getKey().toStringUtf8();
             logger.info("Get a key:{}", keyStr);
-            if(keyStr.matches(methodsRegx)){
+            if (keyStr.matches(methodsRegx)){
                 /*如果是方法名与id映射*/
                 /*使用正则从key获取信息*/
                 Pattern p = Pattern.compile(methodsRegx);
@@ -127,7 +127,7 @@ public class EtcdRegistry implements IRegistry{
                     serviceInfo.setMethod(Integer.parseInt(m.group(4)), m.group(5));
                     logger.info("Get method---id:{}  name:{}", m.group(4), m.group(5));
                 }
-            }else if(keyStr.matches(parameterTypesRegx)){
+            } else if (keyStr.matches(parameterTypesRegx)){
                 /*如果是参数;注意，是参数类型与Id的映射表，不是方法对应参数*/
                 Pattern p = Pattern.compile(parameterTypesRegx);
                 Matcher m = p.matcher(keyStr);
@@ -135,7 +135,7 @@ public class EtcdRegistry implements IRegistry{
                     serviceInfo.setParameterType(Integer.parseInt(m.group(4)), m.group(5));
                     logger.info("Get parameterType---id:{}  name:{}", m.group(4), m.group(5));
                 }
-            }else if(keyStr.matches(endpointsRegx)){
+            } else if (keyStr.matches(endpointsRegx)){
                 /*如果是节点信息*/
                 Pattern p = Pattern.compile(endpointsRegx);
                 Matcher m = p.matcher(keyStr);
@@ -148,6 +148,8 @@ public class EtcdRegistry implements IRegistry{
                     endpoint.setSupportedService(serviceInfo);
                     endpoints.add(endpoint);
                 }
+            } else {
+                logger.info("No match for:{}", keyStr);
             }
         }
 

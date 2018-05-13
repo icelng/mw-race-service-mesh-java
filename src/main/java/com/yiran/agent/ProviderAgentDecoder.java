@@ -48,7 +48,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 byte byteTemp = in.readByte();
                 agentServiceRequest.setTwoWay(0x01 == ((byteTemp >>> 6) & 0x01));  // 是否等待
                 tableType = (byteTemp >>> 4) & 0x03;
-                tableSize = in.readByte() & 0xFF;
+                tableSize = in.readByte();
                 in.readByte();  // 请求不需要status
                 agentServiceRequest.setRequestId(in.readLong());  // 请求的唯一标识
                 tableBytesLength = (tableSize & 0xFF) << tableType;
@@ -63,6 +63,9 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
             if (in.readableBytes() < tableBytesLength) {
                 return;
             } else {
+                logger.info("-------->tableBytesLength:{}", tableBytesLength);
+                logger.info("-------->tableType:{}", tableType);
+                /*解析参数表*/
                 /*解析参数表*/
                 int tableCellSize = 1 << tableType;
                 parameterSizes.clear();
@@ -80,12 +83,19 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                         parameterSize |= (tableCellBuf[j] & 0xFF) << ((tableCellSize - j - 1) * 8);
                     }
                     parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
+                    logger.info("-------->buf[0]:{}", tableCellBuf[0]);
+                    logger.info("-------->buf[1]:{}", tableCellBuf[1]);
+                    logger.info("-------->buf[2]:{}", tableCellBuf[2]);
+                    logger.info("-------->buf[3]:{}", tableCellBuf[3]);
+                    logger.info("-------->parameterSize", parameterSize);
                     agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
                     parameterSizes.add(parameterSize);
                     totalParameterSize += parameterSize;
                 }
                 /*4字节对齐*/
                 remainSize = (totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT);
+                logger.info("-------->totalParameterSize", totalParameterSize);
+                logger.info("-------->remainSize", remainSize);
 
 
                 isTable = false;

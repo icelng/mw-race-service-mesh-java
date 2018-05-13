@@ -87,15 +87,15 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                     logger.info("-------->buf[1]:{}", tableCellBuf[1]);
                     logger.info("-------->buf[2]:{}", tableCellBuf[2]);
                     logger.info("-------->buf[3]:{}", tableCellBuf[3]);
-                    logger.info("-------->parameterSize", parameterSize);
+                    logger.info("-------->parameterSize:{}", parameterSize);
                     agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
                     parameterSizes.add(parameterSize);
                     totalParameterSize += parameterSize;
                 }
                 /*4字节对齐*/
                 remainSize = (totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT);
-                logger.info("-------->totalParameterSize", totalParameterSize);
-                logger.info("-------->remainSize", remainSize);
+                logger.info("-------->totalParameterSize:{}", totalParameterSize);
+                logger.info("-------->remainSize:{}", remainSize);
 
 
                 isTable = false;

@@ -122,7 +122,7 @@ public class EtcdRegistry implements IRegistry{
                 if (keyStr.matches(methodsRegx)){
                     /*如果是方法名与id映射*/
                     /*使用正则从key获取信息*/
-                    logger.debug("666");
+                    logger.info("666");
                     Pattern p = Pattern.compile(methodsRegx);
                     Matcher m = p.matcher(keyStr);
                     if (m.groupCount() == 5) {
@@ -131,7 +131,7 @@ public class EtcdRegistry implements IRegistry{
                     }
                 } else if (keyStr.matches(parameterTypesRegx)){
                     /*如果是参数;注意，是参数类型与Id的映射表，不是方法对应参数*/
-                    logger.debug("777");
+                    logger.info("777");
                     Pattern p = Pattern.compile(parameterTypesRegx);
                     Matcher m = p.matcher(keyStr);
                     if (m.groupCount() == 5) {
@@ -140,9 +140,9 @@ public class EtcdRegistry implements IRegistry{
                     }
                 } else if (keyStr.matches(endpointsRegx)){
                     /*如果是节点信息*/
-                    logger.debug("888");
                     Pattern p = Pattern.compile(endpointsRegx);
                     Matcher m = p.matcher(keyStr);
+                    logger.info("groupCount:{}", m.groupCount());
                     if(m.groupCount() == 5){
                         String host = m.group(4);
                         int port = Integer.parseInt(m.group(5));

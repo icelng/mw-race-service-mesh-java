@@ -99,8 +99,10 @@ public class EtcdRegistry implements IRegistry{
             response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
         } catch (InterruptedException e) {
             logger.error("", e);
+            return null;
         } catch (ExecutionException e) {
             logger.error("", e);
+            return null;
         }
 
         List<KeyValue> kvs = response.getKvs();

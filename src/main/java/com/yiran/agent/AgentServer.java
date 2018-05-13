@@ -31,7 +31,7 @@ public class AgentServer {
         do {
             logger.info("Connecting to Dubbo..");
             dubboChannel = dubboConnectManager.getChannel();
-        } while (dubboChannel != null);
+        } while (dubboChannel == null);
         ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
         /*启动netty服务*/

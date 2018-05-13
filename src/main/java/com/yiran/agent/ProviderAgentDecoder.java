@@ -68,6 +68,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 /*解析参数表*/
+                logger.info("tableType:{}", tableType);
                 int tableCellSize = 1 << tableType;
                 parameterSizes.clear();
                 totalParameterSize = 0;
@@ -84,6 +85,10 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                         parameterSize |= tableCellBuf[j] << ((tableCellSize - j - 1) * 8);
                     }
                     parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
+                    logger.info("------decode----->tableCellBuf[0]:{}", tableCellBuf[0]);
+                    logger.info("------decode----->tableCellBuf[1]:{}", tableCellBuf[1]);
+                    logger.info("------decode----->tableCellBuf[2]:{}", tableCellBuf[2]);
+                    logger.info("------decode----->tableCellBuf[3]:{}", tableCellBuf[3]);
                     agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
                     logger.info("getParameterType:{}", tableCellBuf[0] >>> 4);
                     parameterSizes.add(parameterSize);

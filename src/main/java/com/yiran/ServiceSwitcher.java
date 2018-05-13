@@ -13,10 +13,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,7 +99,7 @@ public class ServiceSwitcher {
      * @param rpcResponse
      * Dubbo响应报文
      */
-    public static void responseFromDubbo(RpcResponse rpcResponse){
+    public static void responseFromDubbo(RpcResponse rpcResponse) throws UnsupportedEncodingException {
 
         /*获取到rpc请求相应的agent的请求*/
         AgentServiceRequest agentServiceRequest = processingRequest.get(String.valueOf(rpcResponse.getRequestId()));
@@ -119,9 +116,9 @@ public class ServiceSwitcher {
         AgentServiceResponse agentServiceResponse = new AgentServiceResponse(agentServiceRequest);
         agentServiceResponse.setStatus((byte) 0);  // 暂时写死成0
         agentServiceResponse.setReturnType(1);  // 写死为整形
-        byte[] intStrBytes = Arrays.copyOfRange(rpcResponse.getBytes(), 3, rpcResponse.getBytes().length);
+        byte[] intStrBytes = Arrays.copyOfRange(rpcResponse.getBytes(), 2, rpcResponse.getBytes().length);
         byte[] intBytes = new byte[4];
-        Bytes.int2bytes(Integer.valueOf(new String(intStrBytes)), intBytes, 0);
+        Bytes.int2bytes(Integer.valueOf(new String(intStrBytes, "UTF-8")), intBytes, 0);
         agentServiceResponse.setReturnValue(intBytes);
 
         /*向客户端发送响应*/

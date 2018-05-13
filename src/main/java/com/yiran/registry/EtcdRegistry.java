@@ -118,38 +118,45 @@ public class EtcdRegistry implements IRegistry{
         for (com.coreos.jetcd.data.KeyValue kv : kvs){
             String keyStr = kv.getKey().toStringUtf8();
             logger.info("Get a key:{}", keyStr);
-            if (keyStr.matches(methodsRegx)){
-                /*如果是方法名与id映射*/
-                /*使用正则从key获取信息*/
-                Pattern p = Pattern.compile(methodsRegx);
-                Matcher m = p.matcher(keyStr);
-                if (m.groupCount() == 5) {
-                    serviceInfo.setMethod(Integer.parseInt(m.group(4)), m.group(5));
-                    logger.info("Get method---id:{}  name:{}", m.group(4), m.group(5));
+            try {
+                if (keyStr.matches(methodsRegx)){
+                    /*如果是方法名与id映射*/
+                    /*使用正则从key获取信息*/
+                    logger.debug("666");
+                    Pattern p = Pattern.compile(methodsRegx);
+                    Matcher m = p.matcher(keyStr);
+                    if (m.groupCount() == 5) {
+                        serviceInfo.setMethod(Integer.parseInt(m.group(4)), m.group(5));
+                        logger.info("Get method---id:{}  name:{}", m.group(4), m.group(5));
+                    }
+                } else if (keyStr.matches(parameterTypesRegx)){
+                    /*如果是参数;注意，是参数类型与Id的映射表，不是方法对应参数*/
+                    logger.debug("777");
+                    Pattern p = Pattern.compile(parameterTypesRegx);
+                    Matcher m = p.matcher(keyStr);
+                    if (m.groupCount() == 5) {
+                        serviceInfo.setParameterType(Integer.parseInt(m.group(4)), m.group(5));
+                        logger.info("Get parameterType---id:{}  name:{}", m.group(4), m.group(5));
+                    }
+                } else if (keyStr.matches(endpointsRegx)){
+                    /*如果是节点信息*/
+                    logger.debug("888");
+                    Pattern p = Pattern.compile(endpointsRegx);
+                    Matcher m = p.matcher(keyStr);
+                    if(m.groupCount() == 5){
+                        String host = m.group(4);
+                        int port = Integer.parseInt(m.group(5));
+                        int loadLevel = Integer.parseInt(kv.getValue().toString());
+                        logger.info("Get endpoint---ip:{}  port:{}", host, port);
+                        Endpoint endpoint = new Endpoint(host, port, loadLevel);
+                        endpoint.setSupportedService(serviceInfo);
+                        endpoints.add(endpoint);
+                    }
+                } else {
+                    logger.info("No match for:{}", keyStr);
                 }
-            } else if (keyStr.matches(parameterTypesRegx)){
-                /*如果是参数;注意，是参数类型与Id的映射表，不是方法对应参数*/
-                Pattern p = Pattern.compile(parameterTypesRegx);
-                Matcher m = p.matcher(keyStr);
-                if (m.groupCount() == 5) {
-                    serviceInfo.setParameterType(Integer.parseInt(m.group(4)), m.group(5));
-                    logger.info("Get parameterType---id:{}  name:{}", m.group(4), m.group(5));
-                }
-            } else if (keyStr.matches(endpointsRegx)){
-                /*如果是节点信息*/
-                Pattern p = Pattern.compile(endpointsRegx);
-                Matcher m = p.matcher(keyStr);
-                if(m.groupCount() == 5){
-                    String host = m.group(4);
-                    int port = Integer.parseInt(m.group(5));
-                    int loadLevel = Integer.parseInt(kv.getValue().toString());
-                    logger.info("Get endpoint---ip:{}  port:{}", host, port);
-                    Endpoint endpoint = new Endpoint(host, port, loadLevel);
-                    endpoint.setSupportedService(serviceInfo);
-                    endpoints.add(endpoint);
-                }
-            } else {
-                logger.info("No match for:{}", keyStr);
+            } catch (Exception e) {
+                logger.error("666666666666666666666666:{}", e);
             }
         }
 

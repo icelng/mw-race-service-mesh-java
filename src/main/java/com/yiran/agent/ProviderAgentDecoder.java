@@ -83,8 +83,10 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                     }
                     for(int j = 1;j < tableCellSize;j++){
                         parameterSize |= tableCellBuf[j] << ((tableCellSize - j - 1) * 8);
+                        logger.info("-------now----->size:{} tableCellBuf[{}] << {}", parameterSize, j, ((tableCellSize - j - 1) * 8));
                     }
                     parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
+                    logger.info("-------now----->size:{} tableCellBuf[{}] << {}", parameterSize, 0, ((tableCellSize - 1) * 8));
                     logger.info("------decode----->tableCellBuf[0]:{}", tableCellBuf[0]);
                     logger.info("------decode----->tableCellBuf[1]:{}", tableCellBuf[1]);
                     logger.info("------decode----->tableCellBuf[2]:{}", tableCellBuf[2]);

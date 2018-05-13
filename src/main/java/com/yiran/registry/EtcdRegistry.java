@@ -70,10 +70,10 @@ public class EtcdRegistry implements IRegistry{
 
         /*注册节点信息*/
         String strKey = MessageFormat.format("/{0}/{1}/endpoints/{2}:{3}",rootPath,serviceName,IpHelper.getHostIp(),String.valueOf(port));
+        logger.info("Register a new service at:" + strKey);
         ByteSequence key = ByteSequence.fromString(strKey);
         ByteSequence val = ByteSequence.fromString(String.valueOf(loadLevel));
         kv.put(key,val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();
-        logger.info("Register a new service at:" + strKey);
     }
 
     // 发送心跳到ETCD,表明该host是活着的

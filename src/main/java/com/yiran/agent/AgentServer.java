@@ -69,6 +69,7 @@ public class AgentServer {
         serviceInfo.setMethod(3, "hash");
         int loadLevel = Integer.valueOf(System.getProperty("load.level"));
         registry.register(serviceInfo, this.port, loadLevel);
+        logger.info("Registry success!");
 
     }
 

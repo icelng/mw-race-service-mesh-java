@@ -60,10 +60,12 @@ public class EtcdRegistry implements IRegistry{
 
         /*注册方法*/
         /*有可能冲突的，暂不处理*/
+        logger.info("Register method");
         registMap(serviceName, "method", serviceInfo.getMethodMap());
 
         /*注册参数类型*/
         /*有可能冲突的，暂不处理*/
+        logger.info("Register parameterType");
         registMap(serviceName, "parameterType", serviceInfo.getParameterTypeMap());
 
         /*注册节点信息*/

@@ -39,29 +39,25 @@ public class AgentServer {
         ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
         /*启动netty服务*/
-        logger.info("String netty server for agent...");
+        logger.info("Staring netty server for agent...");
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try{
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ProviderAgentDecoder());
-                            ch.pipeline().addLast(new ProviderAgentEncoder());
-                            ch.pipeline().addLast(new ProviderAgentServerHandler());
-                        }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-            ChannelFuture f = b.bind(port).sync();
-            f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-        }
+        ServerBootstrap b = new ServerBootstrap();
+
+        b.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new ProviderAgentDecoder());
+                        ch.pipeline().addLast(new ProviderAgentEncoder());
+                        ch.pipeline().addLast(new ProviderAgentServerHandler());
+                    }
+                })
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        ChannelFuture f = b.bind(port).sync();
+        f.channel().closeFuture().sync();
 
         /*向etcd注册服务*/
         logger.info("Registry service!");

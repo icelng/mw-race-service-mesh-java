@@ -27,7 +27,7 @@ public class HelloController {
         try {
              agentClient = loadBalance.findOptimalAgentClient(interfaceName);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
             return null;
         }
         int hashCode = (int) agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);

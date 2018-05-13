@@ -161,13 +161,13 @@ public class EtcdRegistry implements IRegistry{
                     endpoints.add(endpoint);
                 }
             } else if(keyStr.matches(serviceNameRegx)) {
-                Pattern p = Pattern.compile(parameterTypesRegx);
+                Pattern p = Pattern.compile(serviceNameRegx);
                 Matcher m = p.matcher(keyStr);
                 m.find();
                 if (m.groupCount() == 3) {
                     serviceInfo.setServiceId(Integer.parseInt(m.group(3)));
                     serviceInfo.setServiceName(m.group(2));
-                    logger.info("Get parameterName---id:{}  name:{}", m.group(3), m.group(2));
+                    logger.info("Get serviceName---id:{}  name:{}", m.group(3), m.group(2));
                 }
             } else {
                 logger.info("No match for:{}", keyStr);

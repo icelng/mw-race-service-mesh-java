@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
+    private Object lock;
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
@@ -24,16 +25,18 @@ public class HelloController {
 
     public Integer consumer(String interfaceName,String method,String parameterTypesString,String parameter) throws Exception {
         AgentClient agentClient;
-        try {
-             agentClient = loadBalance.findOptimalAgentClient(interfaceName);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return null;
+        int hashCode;
+        synchronized (lock) {
+            try {
+                agentClient = loadBalance.findOptimalAgentClient(interfaceName);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                return null;
+            }
+            logger.info("Send parameter:{}", parameter);
+            hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+            logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
         }
-        logger.info("Send parameter:", parameter);
-        int hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-        logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
-
         return hashCode;  // 直接返回
     }
 }

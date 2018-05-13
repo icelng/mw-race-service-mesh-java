@@ -6,10 +6,7 @@ import com.yiran.registry.EtcdRegistry;
 import com.yiran.registry.IRegistry;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -29,8 +26,12 @@ public class AgentServer {
 
     public void run() throws Exception {
         /*先与Dubbo进行连接*/
-        logger.info("Connecting to Dubbo..");
         DubboConnectManager dubboConnectManager = new DubboConnectManager();
+        Channel dubboChannel;
+        do {
+            logger.info("Connecting to Dubbo..");
+            dubboChannel = dubboConnectManager.getChannel();
+        } while (dubboChannel != null);
         ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
         /*启动netty服务*/

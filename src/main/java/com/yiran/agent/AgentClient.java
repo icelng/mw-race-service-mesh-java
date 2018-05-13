@@ -46,6 +46,7 @@ public class AgentClient {
         this.name = host + ":" + String.valueOf(port);
         requestId = new AtomicLong(100);
         processingRequestNum = new AtomicLong(0);
+        supportedServiceMap = new ConcurrentHashMap<>();
     }
 
     public void run() throws InterruptedException {

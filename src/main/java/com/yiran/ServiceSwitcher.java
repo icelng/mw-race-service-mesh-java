@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,8 +119,9 @@ public class ServiceSwitcher {
         AgentServiceResponse agentServiceResponse = new AgentServiceResponse(agentServiceRequest);
         agentServiceResponse.setStatus((byte) 0);  // 暂时写死成0
         agentServiceResponse.setReturnType(1);  // 写死为整形
+        byte[] intStrBytes = Arrays.copyOfRange(rpcResponse.getBytes(), 2, rpcResponse.getBytes().length);
         byte[] intBytes = new byte[4];
-        Bytes.int2bytes(JSON.parseObject(rpcResponse.getBytes(), Integer.class), intBytes, 0);
+        Bytes.int2bytes(Integer.valueOf(new String(intStrBytes)), intBytes, 0);
         agentServiceResponse.setReturnValue(intBytes);
 
         /*向客户端发送响应*/

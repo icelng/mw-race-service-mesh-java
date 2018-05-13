@@ -27,11 +27,15 @@ public class AgentServer {
     public void run() throws Exception {
         /*先与Dubbo进行连接*/
         DubboConnectManager dubboConnectManager = new DubboConnectManager();
-        Channel dubboChannel;
-        do {
+        Channel dubboChannel = null;
+        while(dubboChannel == null) {
             logger.info("Connecting to Dubbo..");
-            dubboChannel = dubboConnectManager.getChannel();
-        } while (dubboChannel == null);
+            try{
+                dubboChannel = dubboConnectManager.getChannel();
+            } catch (Exception e){
+                logger.error(e.getMessage());
+            }
+        }
         ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
         /*启动netty服务*/

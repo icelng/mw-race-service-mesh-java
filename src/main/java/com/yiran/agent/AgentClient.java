@@ -90,7 +90,7 @@ public class AgentClient {
         return response;
     }
 
-    public Object serviceRequest(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public int serviceRequest(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
         ServiceInfo serviceInfo = supportedServiceMap.get(interfaceName);
         if (serviceInfo == null) {
             throw new Exception("Service not found when requesting!!");
@@ -104,7 +104,8 @@ public class AgentClient {
         parameterTypes.add(parameterTypeId);
         parameters.add(parameter.getBytes("UTF-8"));
         AgentServiceResponse agentServiceResponse = this.request(serviceId, (byte) methodId, parameterTypes, parameters);
-        return agentServiceResponse.getReturnValue();
+        byte[] hashCodeBytes = agentServiceResponse.getReturnValue();
+        return Bytes.bytes2int(hashCodeBytes, 0);
     }
 
     public AtomicLong getProcessingRequestNum() {

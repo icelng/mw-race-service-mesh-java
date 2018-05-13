@@ -5,10 +5,13 @@ import com.yiran.dubbo.model.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class DubboRpcDecoder extends ByteToMessageDecoder {
+    private static Logger logger = LoggerFactory.getLogger(DubboRpcDecoder.class);
     // header length.
     protected static final int HEADER_LENGTH = 16;
     private Boolean isHeader = true;
@@ -25,6 +28,9 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
             byte[] header = new byte[HEADER_LENGTH];
             requestId = Bytes.bytes2long(header, 4);
             dataLength = Bytes.bytes2int(header, 12);
+
+            logger.info("-------dubbo-decode--->requestId:{}", requestId);
+            logger.info("-------dubbo-decode--->dataLength:{}", dataLength);
 
             isHeader = false;
         }

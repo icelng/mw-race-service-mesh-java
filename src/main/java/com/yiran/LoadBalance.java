@@ -83,7 +83,6 @@ public class LoadBalance {
             if(agentClientNames == null || agentClientNames.size() == 0){
                 logger.info("Service {} not found!Checking out etcd..tryCount:{}", serviceName ,++tryCount);
                 if (tryCount == MAX_TRY_COUNT) {
-                    logger.error("Failed to find the service:{}" , serviceName);
                     throw new Exception("Failed to find the service:" + serviceName);
                 }
                 /*如果针对服务名找不到对应的客户端，则向ETCD中心查询服务*/

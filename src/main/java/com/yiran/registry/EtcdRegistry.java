@@ -90,11 +90,18 @@ public class EtcdRegistry implements IRegistry{
     }
 
 
-    public List<Endpoint> find(String serviceName) throws Exception {
+    public List<Endpoint> find(String serviceName){
        /*获取服务对应的所有信息*/
         String strKey = MessageFormat.format("/{0}/{1}",rootPath,serviceName);
         ByteSequence key  = ByteSequence.fromString(strKey);
-        GetResponse response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
+        GetResponse response = null;
+        try {
+            response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
+        } catch (InterruptedException e) {
+            logger.error("", e);
+        } catch (ExecutionException e) {
+            logger.error("", e);
+        }
 
         List<KeyValue> kvs = response.getKvs();
         if(kvs == null || kvs.size() == 0){

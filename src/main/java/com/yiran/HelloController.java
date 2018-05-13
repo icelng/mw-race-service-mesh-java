@@ -23,7 +23,13 @@ public class HelloController {
     }
 
     public Integer consumer(String interfaceName,String method,String parameterTypesString,String parameter) throws Exception {
-        AgentClient agentClient = loadBalance.findOptimalAgentClient(interfaceName);
+        AgentClient agentClient;
+        try {
+             agentClient = loadBalance.findOptimalAgentClient(interfaceName);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return null;
+        }
         int hashCode = (int) agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
         logger.info("Get the hash code:{}" , hashCode);
 

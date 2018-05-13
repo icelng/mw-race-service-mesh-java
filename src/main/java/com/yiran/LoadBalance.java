@@ -49,6 +49,7 @@ public class LoadBalance {
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(clientName, null);
         if(agentClient == null){
             agentClient = new AgentClient(endpoint.getHost(), endpoint.getPort());
+            clientNameToAgentClientMap.put(clientName, agentClient);
             agentClient.setLoadLevel(endpoint.getLoadLevel());
             agentClient.run();
         }

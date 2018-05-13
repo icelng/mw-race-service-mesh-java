@@ -22,6 +22,7 @@ public class AgentApp {
     public static void main(String[] args) {
         String type = System.getProperty("type");
         if ("consumer".equals(type)) {
+//        if (true) {
             /*consumer-agent需要受理consumer发来的请求*/
             SpringApplication.run(AgentApp.class,args);
         } else if("provider".equals(type)) {

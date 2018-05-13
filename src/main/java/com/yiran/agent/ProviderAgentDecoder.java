@@ -82,7 +82,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                         continue;
                     }
                     for(int j = 1;j < tableCellSize;j++){
-                        parameterSize |= tableCellBuf[j] << ((tableCellSize - j - 1) * 8);
+                        parameterSize |= (tableCellBuf[j] & 0xFF) << ((tableCellSize - j - 1) * 8);
                         logger.info("-------now----->size:{} tableCellBuf[{}] << {}", parameterSize, j, ((tableCellSize - j - 1) * 8));
                     }
                     parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
@@ -134,6 +134,18 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
 
         isHeader = true;
         isTable = true;
+    }
+
+    public static void main(String[] args){
+        byte[] intBytes = new byte[4];
+        intBytes[0] = 32;
+        intBytes[1] = 0;
+        intBytes[2] = 0;
+        intBytes[3] = -1;
+        int size;
+        size = ((intBytes[0] << 24) | (intBytes[1] << 16) | (intBytes[2] << 8) | (intBytes[3] & 0xFF));
+        System.out.println(size);
+
     }
 
 }

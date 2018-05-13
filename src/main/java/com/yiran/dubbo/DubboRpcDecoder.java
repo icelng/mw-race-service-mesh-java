@@ -30,8 +30,8 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
             requestId = Bytes.bytes2long(header, 4);
             dataLength = Bytes.bytes2int(header, 12);
 
-            logger.info("-------dubbo-decode--->requestId:{}", requestId);
-            logger.info("-------dubbo-decode--->dataLength:{}", dataLength);
+            logger.debug("-------dubbo-decode--->requestId:{}", requestId);
+            logger.debug("-------dubbo-decode--->dataLength:{}", dataLength);
 
             isHeader = false;
         }

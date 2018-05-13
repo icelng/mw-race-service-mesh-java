@@ -26,6 +26,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
             }
             /*解析报头*/
             byte[] header = new byte[HEADER_LENGTH];
+            byteBuf.readBytes(header, 0, HEADER_LENGTH);
             requestId = Bytes.bytes2long(header, 4);
             dataLength = Bytes.bytes2int(header, 12);
 

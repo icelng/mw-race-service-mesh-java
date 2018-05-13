@@ -30,7 +30,7 @@ public class AgentApp {
             try {
                 new AgentServer(Integer.valueOf(System.getProperty("server.port"))).run();
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.error(e.getLocalizedMessage());
             }
         } else {
             logger.error("Environment variable type is needed to set to provider or consumer.");

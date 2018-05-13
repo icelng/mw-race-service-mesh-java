@@ -68,7 +68,12 @@ public class AgentServer {
         serviceInfo.setParameterType(2, "Ljava/lang/String;");
         serviceInfo.setMethod(3, "hash");
         int loadLevel = Integer.valueOf(System.getProperty("load.level"));
-        registry.register(serviceInfo, this.port, loadLevel);
+        try {
+            registry.register(serviceInfo, this.port, loadLevel);
+        } catch (Exception e) {
+            logger.error("Failed to register service!{}", e.getLocalizedMessage());
+
+        }
         logger.info("Registry success!");
 
     }

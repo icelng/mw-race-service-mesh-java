@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
-    private Object lock;
+    private Object lock = new Object();
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 

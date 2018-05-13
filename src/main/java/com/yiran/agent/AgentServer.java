@@ -34,6 +34,7 @@ public class AgentServer {
                 dubboChannel = dubboConnectManager.getChannel();
             } catch (Exception e){
                 logger.error(e.getMessage());
+                Thread.sleep(500);
             }
         }
         ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());

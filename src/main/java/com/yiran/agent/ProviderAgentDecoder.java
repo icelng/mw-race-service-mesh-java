@@ -144,7 +144,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         in.readBytes(paddingSize);
 
         lastTotalSize = totalParameterSize;
-        lastPaddingSize =paddingSize;
+        lastPaddingSize = paddingSize;
 
         /*接收完毕，把处理流程交给下一个Handler*/
         out.add(agentServiceRequest);

@@ -3,6 +3,8 @@ package com.yiran.agent;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,8 @@ import java.util.List;
  * 自定义协议解码
  */
 public class ProviderAgentDecoder extends ByteToMessageDecoder {
+    private static Logger logger = LoggerFactory.getLogger(ProviderAgentDecoder.class);
+
     private static final int TABLE_TYPE_1 = 0;
     private static final int TABLE_TYPE_2 = 1;
     private static final int TABLE_TYPE_4 = 2;
@@ -48,6 +52,10 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 in.readByte();  // 请求不需要status
                 agentServiceRequest.setRequestId(in.readLong());  // 请求的唯一标识
                 tableBytesLength = tableSize << tableType;
+                logger.info("<---------------debug:decoding----------------->");
+                logger.info("requestId:{}", agentServiceRequest.getRequestId());
+                logger.info("serviceId:{}", agentServiceRequest.getServiceId());
+                logger.info("methodId:{}", agentServiceRequest.getMethodId());
 
                 isHeader = false;
             }
@@ -73,15 +81,20 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                         continue;
                     }
                     for(int j = 1;j < tableCellSize;j++){
-                        parameterSize += tableCellBuf[j] << ((tableCellSize - j - 1) * 8);
+                        parameterSize |= tableCellBuf[j] << ((tableCellSize - j - 1) * 8);
                     }
-                    parameterSize += (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
+                    parameterSize |= (tableCellBuf[0] & 0x0F) << ((tableCellSize - 1) * 8);
                     agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
+                    logger.info("getParameterType:{}", tableCellBuf[0] >>> 4);
                     parameterSizes.add(parameterSize);
+                    logger.info("getParameterSize:{}", parameterSize);
                     totalParameterSize += parameterSize;
                 }
                 /*4字节对齐*/
                 remainSize = (totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT);
+
+                logger.info("totalParameterSize:{}", totalParameterSize);
+                logger.info("remainSize:{}", remainSize);
 
                 isTable = false;
             }

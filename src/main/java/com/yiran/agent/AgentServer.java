@@ -63,7 +63,7 @@ public class AgentServer {
         logger.info("Registry service!");
         registry = new EtcdRegistry(System.getProperty("etcd.url"));
         ServiceInfo serviceInfo = new ServiceInfo();
-        serviceInfo.setServiceName("com.alibaba.performance.dubbomesh.provider.IHelloService");
+        serviceInfo.setServiceName("com.alibaba.dubbo.performance.demo.provider.IHelloService");
         serviceInfo.setServiceId(1);
         serviceInfo.setParameterType(2, "Ljava/lang/String;");
         serviceInfo.setMethod(3, "hash");

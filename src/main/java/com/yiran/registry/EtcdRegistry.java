@@ -47,6 +47,7 @@ public class EtcdRegistry implements IRegistry{
         String prefix = MessageFormat.format("/{0}/{1}/{2}", rootPath, serviceName, mapName);
         for(int id : map.keySet()){
             String keyStr = MessageFormat.format("{0}/{1}/{2}", prefix, id, map.get(id));
+            logger.info("Register key:{}", keyStr);
             ByteSequence key = ByteSequence.fromString(keyStr);
             ByteSequence val = ByteSequence.fromString("");
             kv.put(key,val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();

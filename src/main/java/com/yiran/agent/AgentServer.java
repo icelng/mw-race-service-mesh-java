@@ -75,6 +75,7 @@ public class AgentServer {
             return;
         }
         logger.info("Registry success!");
+        ServiceSwitcher.addSupportedService(serviceInfo);
 
     }
 

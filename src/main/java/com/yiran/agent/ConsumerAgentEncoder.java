@@ -52,11 +52,24 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
                 for(int i = 0;i < parameters.size();i++){
                     int parameterSize = parameters.get(i).length;
                     totalParameterSize += parameterSize;
-                    bytesTemp[0] = (byte) (((parameterTypes.get(i) & 0x0F) << 4) | ((parameterSize >> 8) & 0x0F));
+                    bytesTemp[0] = (byte) (((parameterTypes.get(i) & 0x0F) << 4) | ((parameterSize >>> 8) & 0x0F));
                     bytesTemp[1] = (byte) (parameterSize & 0xFF);
                     out.writeBytes(bytesTemp, 0, 2);
                 }
                 break;
+            case PARAMETER_TABLE_TYPE_4:
+                /*类型4bit 参数长度28bit*/
+                for(int i = 0;i < parameters.size();i++){
+                    int parameterSize = parameters.get(i).length;
+                    totalParameterSize += parameterSize;
+                    bytesTemp[0] = (byte) (((parameterTypes.get(i) & 0x0F) << 4) | ((parameterSize >>> 24) & 0x0F));
+                    bytesTemp[1] = (byte) ((parameterSize >>> 16) & 0xFF);
+                    bytesTemp[2] = (byte) ((parameterSize >>> 8) & 0xFF);
+                    bytesTemp[3] = (byte) (parameterSize & 0xFF);
+                    out.writeBytes(bytesTemp, 0, 4);
+                }
+                break;
+
             default:
                 /*抛异常才对*/
                 /*或者报告错误*/

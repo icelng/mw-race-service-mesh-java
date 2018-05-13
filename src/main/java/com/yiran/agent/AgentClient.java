@@ -75,7 +75,7 @@ public class AgentClient {
         agentServiceRequest.setServiceId(serviceId);
         agentServiceRequest.setMethodId(methodId);
         agentServiceRequest.setTwoWay(false);
-        agentServiceRequest.setTableType((byte) 1);
+        agentServiceRequest.setTableType((byte) 2);
         agentServiceRequest.setParameterTypes(new ArrayList<Integer>(parameterTypes));
         agentServiceRequest.setParameters(new ArrayList<byte[]>(parameters));
         agentServiceRequest.setRequestId(requestId.addAndGet(1));

@@ -30,6 +30,7 @@ public class HelloController {
             logger.error(e.getMessage(), e);
             return null;
         }
+        logger.info("Send parameter:", parameter);
         int hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
         logger.info("Get the hash code:{}, the local hashcode is:{}" , hashCode, parameter.hashCode());
 

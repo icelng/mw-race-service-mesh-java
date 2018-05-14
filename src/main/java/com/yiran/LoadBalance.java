@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,13 +25,16 @@ public class LoadBalance {
     private IRegistry registry;
     private ConcurrentHashMap<String, HashSet<String>>  serviceNameToAgentClientsMap;
     private ConcurrentHashMap<String, AgentClient> clientNameToAgentClientMap;
+    private ConcurrentHashMap<Integer, AgentClient> loadLevelToAgentClientMap;
     private final Object lock = new Object();
     private int tryCount = 0;
+    private Random random = new Random();
 
     public LoadBalance(String registryAddress){
         registry = new EtcdRegistry(registryAddress);
         serviceNameToAgentClientsMap = new ConcurrentHashMap<>();
         clientNameToAgentClientMap = new ConcurrentHashMap<>();
+        loadLevelToAgentClientMap = new ConcurrentHashMap<>();
     }
 
     public boolean findService(String serviceName) throws Exception {
@@ -63,6 +67,7 @@ public class LoadBalance {
             serviceNameToAgentClientsMap.put(serviceName, agentClients);
         }
         agentClients.add(clientName);
+        loadLevelToAgentClientMap.put(agentClient.getLoadLevel(), agentClient);
 
 
         return agentClient;
@@ -117,6 +122,23 @@ public class LoadBalance {
         }
 
         return optimalAgentClient;
+    }
+
+    private AgentClient getOptimalByRandom(){
+        int randomNum = random.nextInt(6);
+        int selectedLoadLevel = 0;
+
+        if (randomNum == 0) {
+            selectedLoadLevel = 1;
+        } else if (randomNum > 0 && randomNum <= 2) {
+            selectedLoadLevel = 2;
+        } else if (randomNum > 2 && randomNum <= 6) {
+            selectedLoadLevel = 3;
+        }
+
+        AgentClient agentClient = loadLevelToAgentClientMap.getOrDefault(selectedLoadLevel, null);
+
+        return agentClient;
     }
 
 }

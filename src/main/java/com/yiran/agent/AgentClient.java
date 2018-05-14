@@ -13,11 +13,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -85,7 +83,7 @@ public class AgentClient {
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
-        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
+        logger.debug("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
         AgentServiceResponse response;
         try{
@@ -96,7 +94,7 @@ public class AgentClient {
             AgentServiceRequestHolder.remove(String.valueOf(agentServiceRequest.getRequestId()));
             throw new Exception("request time out!");
         }
-        logger.info("requestId:{}<<<<<<<<<:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
+        logger.debug("requestId:{}<<<<<<<<<:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         processingRequestNum.decrementAndGet();  // 请求数减一
 
         return response;

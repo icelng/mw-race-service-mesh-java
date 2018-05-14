@@ -88,7 +88,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 /*解析参数表*/
-                /*解析参数表*/
+                List<Integer> parameterTypes = agentServiceRequest.getParameterTypes();
                 int tableCellSize = 1 << tableType;
                 parameterSizes.clear();
                 totalParameterSize = 0;
@@ -106,9 +106,27 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                             parameterSize |= (tableCellBuf[j] & 0xFFL) << ((tableCellSize - j - 1) * 8);
                         }
                         parameterSize |= (tableCellBuf[0] & 0x0FL) << ((tableCellSize - 1) * 8);
-                        agentServiceRequest.getParameterTypes().add(tableCellBuf[0] >>> 4);
+                        parameterTypes.add(parameterType);
                         parameterSizes.add(parameterSize);
                         totalParameterSize += parameterSize;
+
+                        if (parameterType != 2) {
+                            logger.info("-------->requestId:{}", agentServiceRequest.getRequestId());
+                            logger.info("-------->serviceId:{}", agentServiceRequest.getServiceId());
+                            logger.info("-------->tableType:{}", tableType);
+                            logger.info("-------->parameterSize:{}", parameterSize);
+                            logger.info("-------->parameterType:{}", parameterType);
+                            logger.info("-------->lastRequestId:{}", lastRequestId);
+                            logger.info("-------->lastFirstParameterType:{}", lastFirstParameterType);
+                            logger.info("-------->lastTableType:{}", lastTableType);
+                            logger.info("-------->lastTableSize:{}", lastTableSize);
+                            logger.info("-------->lastTotalParameterSize:{}", lastTotalSize);
+                            logger.info("-------->lastPadding:{}", lastPaddingSize);
+                            logger.info("-------->buf[0]:{}", tableCellBuf[0]);
+                            logger.info("-------->buf[1]:{}", tableCellBuf[1]);
+                            logger.info("-------->buf[2]:{}", tableCellBuf[2]);
+                            logger.info("-------->buf[3]:{}", tableCellBuf[3]);
+                        }
                     }
                 } catch (Exception e) {
                     logger.info("-------->buf[0]:{}", tableCellBuf[0]);
@@ -132,13 +150,12 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
             }
         }
 
-
+        List<Integer> parameterTypes = agentServiceRequest.getParameterTypes();
         /*接收参数*/
         if (in.readableBytes() < remainSize) {
             return;
         }
         /*解析参数*/
-        List<Integer> parameterTypes = agentServiceRequest.getParameterTypes();
         List<byte[]> parameters = agentServiceRequest.getParameters();
         try{
             for(int i = 0;i < parameterTypes.size();i++){

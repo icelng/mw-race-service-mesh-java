@@ -64,7 +64,7 @@ public class ServiceSwitcher {
         }
 
         long requestId = agentServiceRequest.getRequestId();
-        logger.info("Switch service for requestId:" + requestId);
+        logger.info("Switch service for requestId:{}  dataSize:{}", requestId, agentServiceRequest.getParameters().get(0).length);
 
 
         RpcInvocation invocation = new RpcInvocation();

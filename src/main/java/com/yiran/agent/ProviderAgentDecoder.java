@@ -33,10 +33,12 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
     private List<Integer> parameterSizes = new ArrayList<Integer>();
     private byte[] tableCellBuf = new byte[4];
 
+    private long lastRequestId = 0;
     private int lastTableType = 0;
     private int lastTableSize = 0;
     private int lastTotalSize = 0;
     private int lastPaddingSize = 0;
+    private int lastFirstParameterType = 0;
 
 
     /*对客户端发来的请求进行解码*/
@@ -67,6 +69,8 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
             logger.info("-------->requestId:{}", agentServiceRequest.getRequestId());
             logger.info("-------->serviceId:{}", agentServiceRequest.getServiceId());
             logger.info("-------->tableType:{}", tableType);
+            logger.info("-------->lastRequestId:{}", lastRequestId);
+            logger.info("-------->lastFirstParameterType:{}", lastFirstParameterType);
             logger.info("-------->lastTableType:{}", lastTableType);
             logger.info("-------->lastTableSize:{}", lastTableSize);
             logger.info("-------->lastTotalParameterSize:{}", lastTotalSize);
@@ -160,6 +164,8 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         lastTableSize = tableSize;
         lastTotalSize = totalParameterSize;
         lastPaddingSize = paddingSize;
+        lastRequestId = agentServiceRequest.getRequestId();
+        lastTableType = parameterTypes.get(0);
 
         /*接收完毕，把处理流程交给下一个Handler*/
         out.add(agentServiceRequest);

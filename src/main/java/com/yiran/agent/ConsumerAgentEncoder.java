@@ -89,8 +89,8 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
 
         /*对参数进行编码*/
         paddingSize = ((totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) - totalParameterSize;
-        logger.info("-----encoder------>requestId:{}  paramSize:{}  paddingSize:{}", msg.getRequestId(), totalParameterSize, paddingSize);
-        logger.info("-----encoder------>requestId:{} buf[0]:{} buf[1]:{} buf[2]:{} buf[3]:{}", msg.getRequestId(), bytesTemp[0], bytesTemp[1], bytesTemp[2], bytesTemp[3]);
+        logger.debug("-----encoder------>requestId:{}  paramSize:{}  paddingSize:{}", msg.getRequestId(), totalParameterSize, paddingSize);
+        logger.debug("-----encoder------>requestId:{} buf[0]:{} buf[1]:{} buf[2]:{} buf[3]:{}", msg.getRequestId(), bytesTemp[0], bytesTemp[1], bytesTemp[2], bytesTemp[3]);
         for (int i = 0;i < parameters.size();i++){
             out.writeBytes(parameters.get(i));
         }

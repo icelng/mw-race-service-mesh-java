@@ -33,6 +33,8 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
     private List<Integer> parameterSizes = new ArrayList<Integer>();
     private byte[] tableCellBuf = new byte[4];
 
+    private int lastTableType = 0;
+    private int lastTableSize = 0;
     private int lastTotalSize = 0;
     private int lastPaddingSize = 0;
 
@@ -59,6 +61,17 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
 
                 isHeader = false;
             }
+        }
+
+        if (agentServiceRequest.getRequestId() > 3000000 || agentServiceRequest.getServiceId() > 10) {
+            logger.info("-------->requestId:{}", agentServiceRequest.getRequestId());
+            logger.info("-------->serviceId:{}", agentServiceRequest.getServiceId());
+            logger.info("-------->tableType:{}", tableType);
+            logger.info("-------->lastTableType:{}", lastTableType);
+            logger.info("-------->lastTableSize:{}", lastTableSize);
+            logger.info("-------->lastTotalParameterSize:{}", lastTotalSize);
+            logger.info("-------->lastPadding:{}", lastPaddingSize);
+
         }
 
 
@@ -143,6 +156,8 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         int paddingSize = remainSize - totalParameterSize;
         in.readBytes(paddingSize);
 
+        lastTableType = tableType;
+        lastTableSize = tableSize;
         lastTotalSize = totalParameterSize;
         lastPaddingSize = paddingSize;
 

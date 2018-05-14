@@ -23,7 +23,7 @@ public class AgentServiceRequestFuture implements Future<Object> {
         return agentServiceResponse;
     }
 
-    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public Object get(long timeout, TimeUnit unit) throws InterruptedException{
         latch.await(timeout, unit);
         return agentServiceResponse;
     }

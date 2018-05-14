@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AgentClient {
@@ -69,7 +70,7 @@ public class AgentClient {
 
     }
 
-    public AgentServiceResponse request(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws ExecutionException, InterruptedException {
+    public AgentServiceResponse request(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setServiceId(serviceId);
@@ -86,7 +87,15 @@ public class AgentClient {
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
         logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
-        AgentServiceResponse response = (AgentServiceResponse) future.get(); // 阻塞获取
+        AgentServiceResponse response;
+        try{
+             response = (AgentServiceResponse) future.get(2, TimeUnit.SECONDS); // 阻塞获取,超时2s
+        } catch (InterruptedException e) {
+            processingRequestNum.decrementAndGet();  // 请求数减一
+            logger.info("requestId:{} timeout! loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
+            AgentServiceRequestHolder.remove(String.valueOf(agentServiceRequest.getRequestId()));
+            throw new Exception("request time out!");
+        }
         logger.info("requestId:{}<<<<<<<<<:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         processingRequestNum.decrementAndGet();  // 请求数减一
 

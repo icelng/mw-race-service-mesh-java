@@ -185,7 +185,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         lastTotalSize = totalParameterSize;
         lastPaddingSize = paddingSize;
         lastRequestId = agentServiceRequest.getRequestId();
-        lastTableType = parameterTypes.get(0);
+        lastFirstParameterType = parameterTypes.get(0);
 
         /*接收完毕，把处理流程交给下一个Handler*/
         out.add(agentServiceRequest);

@@ -64,7 +64,7 @@ public class ServiceSwitcher {
         }
 
         long requestId = agentServiceRequest.getRequestId();
-        logger.info("Switch service for requestId:{}  dataSize:{}", requestId, agentServiceRequest.getParameters().get(0).length);
+//        logger.info("Switch service for requestId:{}  dataSize:{}", requestId, agentServiceRequest.getParameters().get(0).length);
 
 
         RpcInvocation invocation = new RpcInvocation();
@@ -107,7 +107,7 @@ public class ServiceSwitcher {
             logger.warn("No rpcResponse for requestId:{}", rpcResponse.getRequestId());
             return;
         }
-        logger.info("Receive response(id:{}) from provider:{}", rpcResponse.getRequestId(), new String(rpcResponse.getBytes()));
+//        logger.info("Receive response(id:{}) from provider:{}", rpcResponse.getRequestId(), new String(rpcResponse.getBytes()));
         processingRequest.remove(String.valueOf(rpcResponse.getRequestId()));
 
         /*获取得到consumer-agent 与 provider-agent之间的Channel*/

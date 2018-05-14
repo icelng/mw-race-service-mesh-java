@@ -43,7 +43,8 @@ public class AgentServer {
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true);
         b.bind(port).sync();
 
         /*向etcd注册服务*/

@@ -49,11 +49,12 @@ public class AgentClient {
 
     public void run() throws InterruptedException {
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup(64);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
         bootstrap = new Bootstrap();
         bootstrap.group(workerGroup);
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap.option(ChannelOption.TCP_NODELAY, true);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(new ConsumerAgentDecoder());

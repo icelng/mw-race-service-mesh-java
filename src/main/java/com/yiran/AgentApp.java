@@ -1,6 +1,8 @@
 package com.yiran;
 
 import com.yiran.agent.AgentServer;
+import com.yiran.dubbo.DubboConnectManager;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +21,7 @@ public class AgentApp {
      * provider-agent没必要用web服务器
      * 两个agent之间使用基于TCP的自定义协议通信，通过Netty实现
     * */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String type = System.getProperty("type");
         if ("consumer".equals(type)) {
 //        if (true) {
@@ -28,10 +30,30 @@ public class AgentApp {
         } else if("provider".equals(type)) {
             /*provider-agent不需要启动web服务器*/
             //new ProviderAgentBootstrap().boot();
-            try {
-                new AgentServer(Integer.valueOf(System.getProperty("server.port"))).run();
-            } catch (Exception e) {
-                logger.error(e.getLocalizedMessage(), e);
+
+            /*先与Dubbo进行连接*/
+            DubboConnectManager dubboConnectManager = new DubboConnectManager();
+            Channel dubboChannel = null;
+            while(dubboChannel == null) {
+                logger.info("Connecting to Dubbo..");
+                try{
+                    dubboChannel = dubboConnectManager.getChannel();
+                } catch (Exception e){
+                    logger.error(e.getMessage());
+                    Thread.sleep(500);
+                }
+            }
+            /*往服务交换机注册支持的通道*/
+            ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
+
+            /*启动4个Agent服务*/
+            for (int i = 0;i < 4;i++){
+                try {
+                    int port = Integer.valueOf(System.getProperty("server.port" + i));
+                    new AgentServer(port).run();
+                } catch (Exception e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
             }
         } else {
             logger.error("Environment variable type is needed to set to provider or consumer.");

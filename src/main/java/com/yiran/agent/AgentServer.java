@@ -25,19 +25,6 @@ public class AgentServer {
     }
 
     public void run() throws Exception {
-        /*先与Dubbo进行连接*/
-        DubboConnectManager dubboConnectManager = new DubboConnectManager();
-        Channel dubboChannel = null;
-        while(dubboChannel == null) {
-            logger.info("Connecting to Dubbo..");
-            try{
-                dubboChannel = dubboConnectManager.getChannel();
-            } catch (Exception e){
-                logger.error(e.getMessage());
-                Thread.sleep(500);
-            }
-        }
-        ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
         /*启动netty服务*/
         logger.info("Staring netty server for agent...");
@@ -57,7 +44,7 @@ public class AgentServer {
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
-        ChannelFuture f = b.bind(port).sync();
+        b.bind(port).sync();
 
         /*向etcd注册服务*/
         logger.info("Registry service!");

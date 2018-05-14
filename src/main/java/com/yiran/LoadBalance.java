@@ -8,11 +8,8 @@ import com.yiran.registry.ServiceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
@@ -25,16 +22,17 @@ public class LoadBalance {
     private IRegistry registry;
     private ConcurrentHashMap<String, HashSet<String>>  serviceNameToAgentClientsMap;
     private ConcurrentHashMap<String, AgentClient> clientNameToAgentClientMap;
-    private ConcurrentHashMap<Integer, AgentClient> loadLevelToAgentClientMap;
+    private ConcurrentHashMap<Integer, List<String>> loadLevelToAgentClientsMap;
     private final Object lock = new Object();
     private int tryCount = 0;
-    private Random random = new Random();
+    private Random random1 = new Random();
+    private Random random2 = new Random();
 
     public LoadBalance(String registryAddress){
         registry = new EtcdRegistry(registryAddress);
         serviceNameToAgentClientsMap = new ConcurrentHashMap<>();
         clientNameToAgentClientMap = new ConcurrentHashMap<>();
-        loadLevelToAgentClientMap = new ConcurrentHashMap<>();
+        loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
     }
 
     public boolean findService(String serviceName) throws Exception {
@@ -61,14 +59,11 @@ public class LoadBalance {
         ServiceInfo service = endpoint.getSupportedService();
         agentClient.addSupportedService(service);
         String serviceName = service.getServiceName();
-        HashSet<String> agentClients = serviceNameToAgentClientsMap.get(serviceName);
-        if(agentClients == null){
-            agentClients = new HashSet<>();
-            serviceNameToAgentClientsMap.put(serviceName, agentClients);
-        }
-        agentClients.add(clientName);
-        loadLevelToAgentClientMap.put(agentClient.getLoadLevel(), agentClient);
+        HashSet<String> serviceNameAgentClients = serviceNameToAgentClientsMap.computeIfAbsent(serviceName, k -> new HashSet<>());
+        serviceNameAgentClients.add(clientName);
 
+        List<String> loadLevelAgentClients = loadLevelToAgentClientsMap.computeIfAbsent(endpoint.getLoadLevel(), k -> new ArrayList<>());
+        loadLevelAgentClients.add(clientName);
 
         return agentClient;
     }
@@ -125,8 +120,8 @@ public class LoadBalance {
         return optimalAgentClient;
     }
 
-    private AgentClient getOptimalByRandom(){
-        int randomNum = random.nextInt(60);
+    private AgentClient getOptimalByRandom() throws Exception {
+        int randomNum = random1.nextInt(60);
         int selectedLoadLevel = 0;
 
         if (randomNum >= 0 && randomNum < 8) {
@@ -137,7 +132,15 @@ public class LoadBalance {
             selectedLoadLevel = 3;
         }
 
-        AgentClient agentClient = loadLevelToAgentClientMap.getOrDefault(selectedLoadLevel, null);
+        List<String> loadLevelAgentClients = loadLevelToAgentClientsMap.getOrDefault(selectedLoadLevel, null);
+        if (loadLevelAgentClients == null || loadLevelAgentClients.size() == 0) {
+            logger.error("No agentClient for loadLevel:{} when getting optimal client!", selectedLoadLevel);
+            return null;
+        }
+
+        randomNum = random2.nextInt(loadLevelAgentClients.size());
+        String agentClientName = loadLevelAgentClients.get(randomNum);
+        AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
         return agentClient;
     }

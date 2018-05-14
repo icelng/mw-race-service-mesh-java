@@ -85,6 +85,7 @@ public class AgentClient {
 
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
         AgentServiceResponse response = (AgentServiceResponse) future.get(); // 阻塞获取
+        logger.info("Response:{}, loadLevel:{}", response.getRequestId(), loadLevel);
         processingRequestNum.decrementAndGet();  // 请求数减一
 
         return response;

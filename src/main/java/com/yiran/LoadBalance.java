@@ -80,7 +80,7 @@ public class LoadBalance {
      * @param serviceName
      * @return
      */
-    public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
+    synchronized public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
         HashSet<String> agentClientNames;
         do {
             /*查询支持指定服务名的客户端集合*/

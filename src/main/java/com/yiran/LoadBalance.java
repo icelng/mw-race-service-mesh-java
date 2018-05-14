@@ -8,12 +8,10 @@ import com.yiran.registry.ServiceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
@@ -26,6 +24,8 @@ public class LoadBalance {
     private IRegistry registry;
     private ConcurrentHashMap<String, HashSet<String>>  serviceNameToAgentClientsMap;
     private ConcurrentHashMap<String, AgentClient> clientNameToAgentClientMap;
+    private final Object lock = new Object();
+    private int tryCount = 0;
 
     public LoadBalance(String registryAddress){
         registry = new EtcdRegistry(registryAddress);
@@ -75,19 +75,20 @@ public class LoadBalance {
      * @param serviceName
      * @return
      */
-    synchronized public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
-        int tryCount = 0;
+    public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
         HashSet<String> agentClientNames;
         do {
             /*查询支持指定服务名的客户端集合*/
             agentClientNames = serviceNameToAgentClientsMap.getOrDefault(serviceName, null);
             if(agentClientNames == null || agentClientNames.size() == 0){
-                logger.info("Service {} not found!Checking out etcd..tryCount:{}", serviceName, ++tryCount);
-                if (tryCount == MAX_TRY_COUNT) {
-                    throw new Exception("Failed to find the service:" + serviceName);
+                synchronized (lock) {
+                    agentClientNames = serviceNameToAgentClientsMap.getOrDefault(serviceName, null);
+                    if(agentClientNames == null || agentClientNames.size() == 0){
+                        logger.info("Service {} not found!Checking out etcd..tryCount:{}", serviceName, ++tryCount);
+                        /*如果针对服务名找不到对应的客户端，则向ETCD中心查询服务*/
+                        findService(serviceName);
+                    }
                 }
-                /*如果针对服务名找不到对应的客户端，则向ETCD中心查询服务*/
-                findService(serviceName);
             }
         } while (agentClientNames == null || agentClientNames.size() == 0);
 

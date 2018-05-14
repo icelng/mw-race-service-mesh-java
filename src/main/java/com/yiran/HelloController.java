@@ -33,6 +33,8 @@ public class HelloController {
             return null;
         }
         hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+        float ppl = ((float)agentClient.getProcessingRequestNum().get())/((float) agentClient.getLoadLevel());
+        logger.info("Get result from:{}  loadLevel:{}  ppl:{}", agentClient.getName(), agentClient.getLoadLevel(), ppl);
         return hashCode;  // 直接返回
     }
 }

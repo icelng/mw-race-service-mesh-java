@@ -68,9 +68,9 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
 
                     totalParameterSize += parameterSize;
                     bytesTemp[0] = (byte) (((parameterTypes.get(i) & 0x0F) << 4) | ((parameterSize >>> 24) & 0x0F));
-                    bytesTemp[1] = (byte) ((parameterSize >>> 16) & 0xFF);
-                    bytesTemp[2] = (byte) ((parameterSize >>> 8) & 0xFF);
-                    bytesTemp[3] = (byte) (parameterSize & 0xFF);
+                    bytesTemp[1] = (byte) (parameterSize >>> 16);
+                    bytesTemp[2] = (byte) (parameterSize >>> 8);
+                    bytesTemp[3] = (byte) parameterSize;
                     out.writeBytes(bytesTemp, 0, 4);
                 }
                 break;
@@ -89,7 +89,8 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
 
         /*对参数进行编码*/
         paddingSize = ((totalParameterSize + ~(0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) & (0xFFFFFFFF << PARAMETER_SIZE_ALIGN_BIT)) - totalParameterSize;
-        logger.info("-----{}:decoder------>requestId:{}  paramSize:{}  paddingSize:{}", msg.getRequestId(), totalParameterSize, paddingSize);
+        logger.info("-----encoder------>requestId:{}  paramSize:{}  paddingSize:{}", msg.getRequestId(), totalParameterSize, paddingSize);
+        logger.info("-----encoder------>requestId:{} buf[0]:{} buf[1]:{} buf[2]:{} buf[3]:{}", msg.getRequestId(), bytesTemp[0], bytesTemp[1], bytesTemp[2], bytesTemp[3]);
         for (int i = 0;i < parameters.size();i++){
             out.writeBytes(parameters.get(i));
         }
@@ -97,5 +98,9 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
             out.writeByte(0);
         }
 
+    }
+
+    public static void main(String args[]){
+        byte[] bytestemp = new byte[4];
     }
 }

@@ -114,7 +114,6 @@ public class LoadBalance {
         if (optimalAgentClient != null) {
             /*这里提前增加了请求数*/
             optimalAgentClient.requestReady();
-            logger.info(">>>>>>>>>:{}, loadLevel:{} ppl:{}", optimalAgentClient.getName(), optimalAgentClient.getLoadLevel(), minPPL);
         }
 
         return optimalAgentClient;

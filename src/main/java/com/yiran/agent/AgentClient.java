@@ -83,9 +83,11 @@ public class AgentClient {
         AgentServiceRequestFuture future = new AgentServiceRequestFuture();
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
+        float ppl =((float) processingRequestNum.get())/((float) loadLevel);
+        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
         AgentServiceResponse response = (AgentServiceResponse) future.get(); // 阻塞获取
-        logger.info("Response:{}, loadLevel:{}", response.getRequestId(), loadLevel);
+        logger.info("requestId:{}<<<<<<<<<:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         processingRequestNum.decrementAndGet();  // 请求数减一
 
         return response;

@@ -16,7 +16,7 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
     private static final int PARAMETER_TABLE_TYPE_4 = 2;
     private static final int PARAMETER_SIZE_ALIGN_BIT = 2;  // 参数大小对齐
 
-    private static byte[] bytesTemp = new byte[4];
+    private byte[] bytesTemp = new byte[4];
 
 
 
@@ -101,6 +101,21 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
     }
 
     public static void main(String args[]){
-        byte[] bytestemp = new byte[4];
+        byte[] bytesTemp = new byte[4];
+        int intTest = 437;
+        int cTest = 0;
+        bytesTemp[0] = 0;
+        bytesTemp[1] = 0;
+        bytesTemp[2] = (byte) (intTest >>> 8);
+        bytesTemp[3] = (byte) intTest;
+
+        cTest |= ((bytesTemp[0] & 0xFFL) << 24);
+        cTest |= ((bytesTemp[1] & 0xFFL) << 16);
+        cTest |= ((bytesTemp[2] & 0xFFL) << 8);
+        cTest |= (bytesTemp[3] & 0xFFL);
+
+        System.out.println("bytesTemp[3]:" + bytesTemp[3]);
+        System.out.println("intTest:" + intTest);
+        System.out.println("cTest:" + cTest);
     }
 }

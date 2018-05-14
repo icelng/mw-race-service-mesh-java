@@ -24,7 +24,7 @@ public class AgentClient {
     private String host;
     private int port;
     private Channel channel;
-    private AtomicLong requestId;
+    private static AtomicLong requestId = new AtomicLong(0);
 
     /*表示正在处理的请求数，负载均衡用*/
     private AtomicLong processingRequestNum;
@@ -43,7 +43,6 @@ public class AgentClient {
         this.host = host;
         this.port = port;
         this.name = host + ":" + String.valueOf(port);
-        requestId = new AtomicLong(100);
         processingRequestNum = new AtomicLong(0);
         supportedServiceMap = new ConcurrentHashMap<>();
     }

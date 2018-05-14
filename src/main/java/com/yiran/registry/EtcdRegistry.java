@@ -155,7 +155,7 @@ public class EtcdRegistry implements IRegistry{
                     String host = m.group(4);
                     int port = Integer.parseInt(m.group(5));
                     int loadLevel = Integer.parseInt(kv.getValue().toStringUtf8());
-                    logger.info("Get endpoint---ip:{}  port:{}", host, port);
+                    logger.info("Get endpoint---ip:{}  port:{}  loadLevel:{}", host, port, loadLevel);
                     Endpoint endpoint = new Endpoint(host, port, loadLevel);
                     endpoint.setSupportedService(serviceInfo);
                     endpoints.add(endpoint);

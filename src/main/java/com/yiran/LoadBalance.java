@@ -80,7 +80,7 @@ public class LoadBalance {
      * @param serviceName
      * @return
      */
-    synchronized public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
+    public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
         HashSet<String> agentClientNames;
         do {
             /*查询支持指定服务名的客户端集合*/
@@ -97,25 +97,26 @@ public class LoadBalance {
             }
         } while (agentClientNames == null || agentClientNames.size() == 0);
 
-        /*现在已经找到服务名对应agent客户端的集合，下面选出最优的agent客户端*/
+        ///*现在已经找到服务名对应agent客户端的集合，下面选出最优的agent客户端*/
         AgentClient optimalAgentClient = null;
-        float minPPL = MAX_PPL;  //  minimum processingRequestNum per loadLevel
-        for (String clientName : agentClientNames) {
-            AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
-            if(agentClient == null){
-                logger.error("AgentClient {} not found!", clientName);
-                return null;
-            }
-
-            /*计算最小的ppl*/
-            long processingRequestNum = agentClient.getProcessingRequestNum().get();
-            int loadLevel = agentClient.getLoadLevel();
-            float currentPPL = ((float) processingRequestNum)/((float) loadLevel);
-            if (currentPPL < minPPL) {
-                minPPL = currentPPL;
-                optimalAgentClient = agentClient;
-            }
-        }
+//        float minPPL = MAX_PPL;  //  minimum processingRequestNum per loadLevel
+//        for (String clientName : agentClientNames) {
+//            AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
+//            if(agentClient == null){
+//                logger.error("AgentClient {} not found!", clientName);
+//                return null;
+//            }
+//
+//            /*计算最小的ppl*/
+//            long processingRequestNum = agentClient.getProcessingRequestNum().get();
+//            int loadLevel = agentClient.getLoadLevel();
+//            float currentPPL = ((float) processingRequestNum)/((float) loadLevel);
+//            if (currentPPL < minPPL) {
+//                minPPL = currentPPL;
+//                optimalAgentClient = agentClient;
+//            }
+//        }
+        optimalAgentClient = getOptimalByRandom();
         if (optimalAgentClient != null) {
             /*这里提前增加了请求数*/
             optimalAgentClient.requestReady();
@@ -125,14 +126,14 @@ public class LoadBalance {
     }
 
     private AgentClient getOptimalByRandom(){
-        int randomNum = random.nextInt(6);
+        int randomNum = random.nextInt(60);
         int selectedLoadLevel = 0;
 
-        if (randomNum == 0) {
+        if (randomNum >= 0 && randomNum < 8) {
             selectedLoadLevel = 1;
-        } else if (randomNum > 0 && randomNum <= 2) {
+        } else if (randomNum >= 8 && randomNum < 27) {
             selectedLoadLevel = 2;
-        } else if (randomNum > 2 && randomNum <= 6) {
+        } else if (randomNum >= 27 && randomNum < 60) {
             selectedLoadLevel = 3;
         }
 

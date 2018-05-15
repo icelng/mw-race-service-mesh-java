@@ -14,6 +14,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +87,8 @@ public class AgentClient {
     }
 
 
-    public AgentServiceRequestFuture request(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
-        long reqeustId = requestId.addAndGet(1);
+    public AgentServiceRequestFuture request(DeferredResult result, int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
+        long requestId = this.requestId.addAndGet(1);
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setServiceId(serviceId);
@@ -95,9 +97,9 @@ public class AgentClient {
         agentServiceRequest.setTableType((byte) 2);
         agentServiceRequest.setParameterTypes(new ArrayList<>(parameterTypes));
         agentServiceRequest.setParameters(new ArrayList<>(parameters));
-        agentServiceRequest.setRequestId(reqeustId);
+        agentServiceRequest.setRequestId(requestId);
 
-        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, reqeustId);
+        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, requestId, result);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
@@ -107,7 +109,7 @@ public class AgentClient {
         return future;
     }
 
-    public AgentServiceRequestFuture serviceRequest(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public AgentServiceRequestFuture serviceRequest(DeferredResult result, String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
         ServiceInfo serviceInfo = supportedServiceMap.get(interfaceName);
         if (serviceInfo == null) {
             throw new Exception("Service not found when requesting!!");
@@ -120,7 +122,7 @@ public class AgentClient {
         List<byte[]> parameters = new ArrayList<>();
         parameterTypes.add(parameterTypeId);
         parameters.add(parameter.getBytes("UTF-8"));
-        return this.request(serviceId, (byte) methodId, parameterTypes, parameters);
+        return this.request(result, serviceId, (byte) methodId, parameterTypes, parameters);
     }
 
     public AtomicLong getProcessingRequestNum() {

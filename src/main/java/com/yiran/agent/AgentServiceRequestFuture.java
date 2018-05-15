@@ -1,11 +1,19 @@
 package com.yiran.agent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
-    private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(8);
+    private static Logger logger = LoggerFactory.getLogger(AgentServiceRequestFuture.class);
+
+    private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(4);
 
     private final long requestId;
     private AgentClient agentClient;
@@ -19,10 +27,13 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private Object lock = new Object();
 
+    private DeferredResult<ResponseEntity> result;
 
-    public AgentServiceRequestFuture(AgentClient agentClient, long requestId){
+
+    public AgentServiceRequestFuture(AgentClient agentClient, long requestId, DeferredResult<ResponseEntity> result){
         this.requestId = requestId;
         this.agentClient = agentClient;
+        this.result = result;
     }
 
 
@@ -69,24 +80,35 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         }
     }
 
-    public void done(AgentServiceResponse response){
-        /*尝试停止超时任务的调度*/
-        if(timeoutScheduledFuture != null){
-            timeoutScheduledFuture.cancel(false);
-        }
-        synchronized (lock) {
-            if (!isCancelled() && !isDone()) {
-                this.agentServiceResponse = response;
-                latch.countDown();
-                isDone.set(true);  // 设置完成
-                agentClient.requestDone();  // 请求数减一
-                if (listener != null) {
-                    /*执行监听线程*/
-                    listenerExecutor.execute(listener);
-                }
-            }
+    public void done(AgentServiceResponse response) {
+        if (response != null) {
+            int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+            ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
+            result.setResult(responseEntity);
+        } else {
+            logger.error("Request:{} error!", requestId);
         }
     }
+
+
+//    public void done(AgentServiceResponse response){
+//        /*尝试停止超时任务的调度*/
+//        if(timeoutScheduledFuture != null){
+//            timeoutScheduledFuture.cancel(false);
+//        }
+//        synchronized (lock) {
+//            if (!isCancelled() && !isDone()) {
+//                this.agentServiceResponse = response;
+//                latch.countDown();
+//                isDone.set(true);  // 设置完成
+//                agentClient.requestDone();  // 请求数减一
+//                if (listener != null) {
+//                    /*执行监听线程*/
+//                    listenerExecutor.execute(listener);
+//                }
+//            }
+//        }
+//    }
 
     public void addListener(@NotNull Runnable listener, @NotNull Executor listenerExecutor) {
         synchronized (lock) {

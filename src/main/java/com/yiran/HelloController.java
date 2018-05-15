@@ -40,22 +40,22 @@ public class HelloController {
             return null;
         }
 
-        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-        future.addListener(() -> {
-            try {
-                AgentServiceResponse response = future.get();
-                if (response != null) {
-                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
-                    result.setResult(responseEntity);
-                } else {
-                    logger.error("Request:{} error!", future.getRequestId());
-                }
-            } catch (InterruptedException e) {
-                logger.error("", e);
-            }
-
-        }, listenerExecutor, 2, TimeUnit.SECONDS);
+        AgentServiceRequestFuture future = agentClient.serviceRequest(result, interfaceName, method, parameterTypesString, parameter);
+//        future.addListener(() -> {
+//            try {
+//                AgentServiceResponse response = future.get();
+//                if (response != null) {
+//                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+//                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
+//                    result.setResult(responseEntity);
+//                } else {
+//                    logger.error("Request:{} error!", future.getRequestId());
+//                }
+//            } catch (InterruptedException e) {
+//                logger.error("", e);
+//            }
+//
+//        }, listenerExecutor, 2, TimeUnit.SECONDS);
 
 //        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
 //        AgentServiceResponse response = future.get(2, TimeUnit.SECONDS);

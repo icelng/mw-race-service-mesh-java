@@ -50,7 +50,7 @@ public class ConsumerAgentDecoder extends ByteToMessageDecoder {
 
         /*计算对齐用的填充大小,并且discard*/
         int paddingSize = remainSize - returnValueSize;
-        in.readBytes(paddingSize);
+        in.readBytes(paddingSize).release();
 
         /*添加到out，解码得到response*/
         out.add(agentServiceResponse);

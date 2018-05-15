@@ -178,7 +178,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
 
         /*丢弃对齐用的填充字节*/
         int paddingSize = remainSize - totalParameterSize;
-        in.readBytes(paddingSize);
+        (in.readBytes(paddingSize)).release();
 
         lastTableType = tableType;
         lastTableSize = tableSize;

@@ -51,7 +51,7 @@ public class AgentClient {
 
     public void run() throws InterruptedException {
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         bootstrap = new Bootstrap();
         bootstrap.group(workerGroup);
         bootstrap.channel(NioSocketChannel.class);

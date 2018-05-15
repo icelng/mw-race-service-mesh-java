@@ -23,7 +23,7 @@ public class HelloController {
 
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
-    private Executor listenerExecutor = Executors.newFixedThreadPool(8);
+    private Executor listenerExecutor = Executors.newFixedThreadPool(16);
 
     @RequestMapping(value = "")
     public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,

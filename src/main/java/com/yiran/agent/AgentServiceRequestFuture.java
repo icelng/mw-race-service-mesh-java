@@ -103,6 +103,10 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         addListener(listener, listenerExecutor);
         /*使用计划任务来实现超时机制*/
         // 超时取消
+        if(isDone() || isCancelled()) {
+            /*不用设置超时了*/
+            return;
+        }
         timeoutScheduledFuture = timeoutExecutorService.schedule((Runnable) this::cancel, timeout, unit);
     }
 

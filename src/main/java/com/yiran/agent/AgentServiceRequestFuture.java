@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(10);
+    private static Executor listenerExecutor = Executors.newFixedThreadPool(256);
 
     private final long requestId;
     private AgentClient agentClient;
@@ -60,7 +61,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
                 agentClient.requestDone();  // 请求数减一
                 if (listener != null) {
                     /*执行监听线程*/
-                    listener.run();
+                    listenerExecutor.execute(listener);
                 }
             }
         }
@@ -77,7 +78,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
                 agentClient.requestDone();  // 请求数减一
                 if (listener != null) {
                     /*执行监听线程*/
-                    listener.run();
+                    listenerExecutor.execute(listener);
                 }
             }
         }
@@ -88,7 +89,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
             this.listener = listener;
             if (isDone()) {
                 /*如果已经完成，则马上调用*/
-                listener.run();
+                listenerExecutor.execute(listener);
             }
         }
     }
@@ -96,9 +97,8 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void addListener(@NotNull Runnable listener, long timeout, TimeUnit unit) {
         addListener(listener);
         /*使用计划任务来实现超时机制*/
-        timeoutScheduledFuture = timeoutExecutorService.schedule(() -> {
-            cancel();  // 超时取消
-        }, timeout, unit);
+        // 超时取消
+        timeoutScheduledFuture = timeoutExecutorService.schedule((Runnable) this::cancel, timeout, unit);
     }
 
     public static void main(String args[]){

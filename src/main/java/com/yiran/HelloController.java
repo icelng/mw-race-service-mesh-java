@@ -6,12 +6,9 @@ import com.yiran.agent.AgentServiceResponse;
 import com.yiran.agent.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.TimeUnit;
 
@@ -56,8 +53,11 @@ public class HelloController {
 
         AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
         AgentServiceResponse response = future.get(2, TimeUnit.SECONDS);
-        int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+        if(response == null) {
+            logger.error("Request: time out!", future.getRequestId());
+            return null;
+        }
 
-        return hashCode;
+        return Bytes.bytes2int(response.getReturnValue(), 0);
     }
 }

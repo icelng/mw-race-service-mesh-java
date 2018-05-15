@@ -23,11 +23,11 @@ public class HelloController {
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
     @RequestMapping(value = "")
-    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
+    public Object invoke(@RequestParam("interface") String interfaceName,
                                                  @RequestParam("method") String method,
                                                  @RequestParam("parameterTypesString") String parameterTypesString,
                                                  @RequestParam("parameter") String parameter) throws Exception {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+//        DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         AgentClient agentClient;
         try {
@@ -37,23 +37,27 @@ public class HelloController {
             return null;
         }
 
+//        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+//        future.addListener(() -> {
+//            try {
+//                AgentServiceResponse response = future.get();
+//                if (response != null) {
+//                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+//                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
+//                    result.setResult(responseEntity);
+//                } else {
+//                    logger.error("Request:{} error!", future.getRequestId());
+//                }
+//            } catch (InterruptedException e) {
+//                logger.error("", e);
+//            }
+//
+//        }, 2, TimeUnit.SECONDS);
+
         AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-        future.addListener(() -> {
-            try {
-                AgentServiceResponse response = future.get();
-                if (response != null) {
-                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
-                    result.setResult(responseEntity);
-                } else {
-                    logger.error("Request:{} error!", future.getRequestId());
-                }
-            } catch (InterruptedException e) {
-                logger.error("", e);
-            }
+        AgentServiceResponse response = future.get(2, TimeUnit.SECONDS);
+        int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
 
-        }, 2, TimeUnit.SECONDS);
-
-        return result;
+        return hashCode;
     }
 }

@@ -1,5 +1,6 @@
 package com.yiran.agent;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.yiran.ServiceSwitcher;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
@@ -68,39 +69,43 @@ public class AgentClient {
 
     }
 
-    public AgentServiceResponse request(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
+    /**
+     * 异步发起请求
+     * @param serviceId
+     * @param methodId
+     * @param parameterTypes
+     * @param parameters
+     * @return
+     */
+    public ListenableFuture asynRequest(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters){
+
+        return null;
+    }
+
+
+    public AgentServiceRequestFuture request(int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
+        long reqeustId = requestId.addAndGet(1);
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setServiceId(serviceId);
         agentServiceRequest.setMethodId(methodId);
         agentServiceRequest.setTwoWay(false);
         agentServiceRequest.setTableType((byte) 2);
-        agentServiceRequest.setParameterTypes(new ArrayList<Integer>(parameterTypes));
-        agentServiceRequest.setParameters(new ArrayList<byte[]>(parameters));
-        agentServiceRequest.setRequestId(requestId.addAndGet(1));
+        agentServiceRequest.setParameterTypes(new ArrayList<>(parameterTypes));
+        agentServiceRequest.setParameters(new ArrayList<>(parameters));
+        agentServiceRequest.setRequestId(reqeustId);
 
-        AgentServiceRequestFuture future = new AgentServiceRequestFuture();
+        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, reqeustId);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
         logger.debug("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
-        AgentServiceResponse response;
-        try{
-             response = (AgentServiceResponse) future.get(2, TimeUnit.SECONDS); // 阻塞获取,超时2s
-        } catch (InterruptedException e) {
-            processingRequestNum.decrementAndGet();  // 请求数减一
-            logger.info("requestId:{} timeout! loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
-            AgentServiceRequestHolder.remove(String.valueOf(agentServiceRequest.getRequestId()));
-            throw new Exception("request time out!");
-        }
-        logger.debug("requestId:{}<<<<<<<<<:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
-        processingRequestNum.decrementAndGet();  // 请求数减一
 
-        return response;
+        return future;
     }
 
-    public int serviceRequest(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public AgentServiceRequestFuture serviceRequest(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
         ServiceInfo serviceInfo = supportedServiceMap.get(interfaceName);
         if (serviceInfo == null) {
             throw new Exception("Service not found when requesting!!");
@@ -113,9 +118,7 @@ public class AgentClient {
         List<byte[]> parameters = new ArrayList<>();
         parameterTypes.add(parameterTypeId);
         parameters.add(parameter.getBytes("UTF-8"));
-        AgentServiceResponse agentServiceResponse = this.request(serviceId, (byte) methodId, parameterTypes, parameters);
-        byte[] hashCodeBytes = agentServiceResponse.getReturnValue();
-        return Bytes.bytes2int(hashCodeBytes, 0);
+        return this.request(serviceId, (byte) methodId, parameterTypes, parameters);
     }
 
     public AtomicLong getProcessingRequestNum() {
@@ -170,7 +173,7 @@ public class AgentClient {
         this.processingRequestNum.addAndGet(1);
     }
 
-    public void discardRequest(){
+    public void requestDone(){
         this.processingRequestNum.decrementAndGet();
     }
 }

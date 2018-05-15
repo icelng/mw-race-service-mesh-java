@@ -1,38 +1,60 @@
 package com.yiran;
 
 import com.yiran.agent.AgentClient;
+import com.yiran.agent.AgentServiceRequestFuture;
+import com.yiran.agent.AgentServiceResponse;
+import com.yiran.agent.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.concurrent.TimeUnit;
 
 
 @RestController
 public class HelloController {
 
-    private Object lock = new Object();
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
     @RequestMapping(value = "")
-    public Object invoke(@RequestParam("interface") String interfaceName,
-                         @RequestParam("method") String method,
-                         @RequestParam("parameterTypesString") String parameterTypesString,
-                         @RequestParam("parameter") String parameter) throws Exception {
-        return consumer(interfaceName,method,parameterTypesString,parameter);
-    }
+    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
+                                                 @RequestParam("method") String method,
+                                                 @RequestParam("parameterTypesString") String parameterTypesString,
+                                                 @RequestParam("parameter") String parameter) throws Exception {
+        DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-    public Integer consumer(String interfaceName,String method,String parameterTypesString,String parameter) throws Exception {
         AgentClient agentClient;
-        int hashCode;
         try {
             agentClient = loadBalance.findOptimalAgentClient(interfaceName);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return null;
         }
-        hashCode = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-        return hashCode;  // 直接返回
+
+        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+        future.addListener(() -> {
+            try {
+                AgentServiceResponse response = future.get();
+                if (response != null) {
+                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
+                    result.setResult(responseEntity);
+                } else {
+                    logger.error("Request:{} error!", future.getRequestId());
+                }
+            } catch (InterruptedException e) {
+                logger.error("", e);
+            }
+
+        }, 2, TimeUnit.SECONDS);
+
+        return result;
     }
 }

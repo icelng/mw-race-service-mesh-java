@@ -50,7 +50,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
 
     public void cancel() {
         /*尝试停止超时任务的调度*/
-        if(timeoutExecutorService != null){
+        if(timeoutScheduledFuture != null){
             timeoutScheduledFuture.cancel(false);
         }
         synchronized (lock) {
@@ -71,7 +71,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
 
     public void done(AgentServiceResponse response){
         /*尝试停止超时任务的调度*/
-        if(timeoutExecutorService != null){
+        if(timeoutScheduledFuture != null){
             timeoutScheduledFuture.cancel(false);
         }
         synchronized (lock) {

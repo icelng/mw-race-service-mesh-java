@@ -55,7 +55,7 @@ public class AgentClient {
         bootstrap.group(workerGroup);
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-        bootstrap.option(ChannelOption.TCP_NODELAY, true);
+//        bootstrap.option(ChannelOption.TCP_NODELAY, true);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(new ConsumerAgentDecoder());

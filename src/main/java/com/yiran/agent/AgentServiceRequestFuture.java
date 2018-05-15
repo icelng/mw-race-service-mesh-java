@@ -6,11 +6,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(10);
-    private static Executor listenerExecutor = Executors.newFixedThreadPool(256);
 
     private final long requestId;
     private AgentClient agentClient;
 
+    private Executor listenerExecutor;
     private CountDownLatch latch = new CountDownLatch(1);
     private AgentServiceResponse agentServiceResponse = null;
     private ScheduledFuture timeoutScheduledFuture;
@@ -88,9 +88,10 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         }
     }
 
-    public void addListener(@NotNull Runnable listener) {
+    public void addListener(@NotNull Runnable listener, @NotNull Executor listenerExecutor) {
         synchronized (lock) {
             this.listener = listener;
+            this.listenerExecutor = listenerExecutor;
             if (isDone()) {
                 /*如果已经完成，则马上调用*/
                 listenerExecutor.execute(listener);
@@ -98,8 +99,8 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         }
     }
 
-    public void addListener(@NotNull Runnable listener, long timeout, TimeUnit unit) {
-        addListener(listener);
+    public void addListener(@NotNull Runnable listener, @NotNull Executor listenerExecutor, long timeout, TimeUnit unit) {
+        addListener(listener, listenerExecutor);
         /*使用计划任务来实现超时机制*/
         // 超时取消
         timeoutScheduledFuture = timeoutExecutorService.schedule((Runnable) this::cancel, timeout, unit);

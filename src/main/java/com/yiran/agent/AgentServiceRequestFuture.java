@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
-    private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(10);
+    private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(8);
 
     private final long requestId;
     private AgentClient agentClient;

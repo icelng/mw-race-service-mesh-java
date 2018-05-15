@@ -6,6 +6,7 @@ import com.yiran.registry.EtcdRegistry;
 import com.yiran.registry.IRegistry;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -27,9 +28,9 @@ public class AgentServer {
     public void run() throws Exception {
 
         /*启动netty服务*/
-        logger.info("Staring netty server for agent...");
-        EventLoopGroup bossGroup = new NioEventLoopGroup(8);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        logger.info("Starting netty server for agent...");
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
         ServerBootstrap b = new ServerBootstrap();
 
         b.group(bossGroup, workerGroup)
@@ -43,12 +44,13 @@ public class AgentServer {
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
-//                .childOption(ChannelOption.TCP_NODELAY, true);
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         b.bind(port).sync();
 
         /*向etcd注册服务*/
-        logger.info("Registry service!");
+        logger.info("Register service!");
         registry = new EtcdRegistry(System.getProperty("etcd.url"));
         ServiceInfo serviceInfo = new ServiceInfo();
         serviceInfo.setServiceName("com.alibaba.dubbo.performance.demo.provider.IHelloService");
@@ -62,7 +64,7 @@ public class AgentServer {
             logger.error("Failed to register service!:{}", e);
             return;
         }
-        logger.info("Registry success!");
+        logger.info("Register success!");
         ServiceSwitcher.addSupportedService(serviceInfo);
 
     }

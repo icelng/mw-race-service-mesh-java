@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.yiran.ServiceSwitcher;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -55,7 +56,8 @@ public class AgentClient {
         bootstrap.group(workerGroup);
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-//        bootstrap.option(ChannelOption.TCP_NODELAY, true);
+        bootstrap.option(ChannelOption.TCP_NODELAY, true);
+        bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(new ConsumerAgentDecoder());
@@ -99,7 +101,7 @@ public class AgentClient {
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
-        logger.debug("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
+        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
 
         return future;

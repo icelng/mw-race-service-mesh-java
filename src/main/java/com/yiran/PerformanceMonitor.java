@@ -49,7 +49,6 @@ public class PerformanceMonitor {
                 currentTime = (new Date()).getTime() / 1000;
                 String line;
                 long totalCpuTime = 0;
-                logger.info("----------------monitor----------------");
                 while((line=in.readLine()) != null){
                     if(line.startsWith("cpu")){
                         if (!cpuFlag) {

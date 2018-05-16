@@ -35,6 +35,7 @@ public class AgentApp {
             logger.info("----------------->Free memory:{}", Runtime.getRuntime().freeMemory());
             logger.info("----------------->Max memory:{}", Runtime.getRuntime().maxMemory());
             logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
+            logger.info("----------------->Cpu usage:{}", CpuUsage.getInstance().get());
         }, 0, 2, TimeUnit.SECONDS);
 
         if ("consumer".equals(type)) {

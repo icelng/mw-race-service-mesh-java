@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 @SpringBootApplication
 public class AgentApp {
     // agent会作为sidecar，部署在每一个Provider和Consumer机器上
@@ -23,6 +26,17 @@ public class AgentApp {
     * */
     public static void main(String[] args) throws Exception {
         String type = System.getProperty("type");
+        logger.info("<---------------------Hello {}--------------------->", type);
+        logger.info("MaxMemory:{}", Runtime.getRuntime().maxMemory());
+        logger.info("TotalMemory:{}", Runtime.getRuntime().totalMemory());
+
+        /*监听内存使用*/
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            logger.info("----------------->Free memory:{}", Runtime.getRuntime().freeMemory());
+            logger.info("----------------->Max memory:{}", Runtime.getRuntime().maxMemory());
+            logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
+        }, 0, 2, TimeUnit.SECONDS);
+
         if ("consumer".equals(type)) {
 //        if (true) {
             /*consumer-agent需要受理consumer发来的请求*/

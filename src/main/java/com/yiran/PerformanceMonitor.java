@@ -49,6 +49,7 @@ public class PerformanceMonitor {
                 currentTime = (new Date()).getTime() / 1000;
                 String line;
                 long totalCpuTime = 0;
+                logger.info("----------------monitor----------------");
                 while((line=in.readLine()) != null){
                     if(line.startsWith("cpu")){
                         if (!cpuFlag) {
@@ -72,7 +73,7 @@ public class PerformanceMonitor {
                         /*上下文切换数*/
                         line = line.trim();
                         lastCtxt = currentCtxt;
-                        currentCtxt = Long.parseLong(line);
+                        currentCtxt = Long.parseLong(line.split("\\s+")[1]);
                     }
                 }
             } catch (IOException e) {

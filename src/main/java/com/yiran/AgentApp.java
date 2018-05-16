@@ -18,6 +18,7 @@ public class AgentApp {
     // 在Consumer端启动agent时，添加JVM参数-Dtype=consumer -Dserver.port=20000
     // 添加日志保存目录: -Dlogs.dir=/path/to/your/logs/dir。请安装自己的环境来设置日志目录。
     private static Logger logger = LoggerFactory.getLogger(AgentApp.class);
+    private static PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
 
 
     /**
@@ -35,7 +36,8 @@ public class AgentApp {
             logger.info("----------------->Free memory:{}", Runtime.getRuntime().freeMemory());
             logger.info("----------------->Max memory:{}", Runtime.getRuntime().maxMemory());
             logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
-            logger.info("----------------->Cpu usage:{}", CpuUsage.getInstance().get());
+            logger.info("----------------->Cpu usage:{}", performanceMonitor.getCpuUsage());
+            logger.info("----------------->Ctxt per second:{}", performanceMonitor.getCtxtPerSecond());
         }, 0, 2, TimeUnit.SECONDS);
 
         if ("consumer".equals(type)) {

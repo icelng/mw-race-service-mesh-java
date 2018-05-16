@@ -82,7 +82,7 @@ public class PerformanceMonitor {
             cpuUsage = 1 - (float) (currentIdleCpuTime - lastIdleCpuTime) / (float) (currentTotalCpuTime - lastTotalCpuTime);
             ctxtPerSecond = (currentCtxt - lastCtxt) / (currentTime - lastTime);
 
-        }, 0, 100, TimeUnit.MICROSECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     public float getCpuUsage(){

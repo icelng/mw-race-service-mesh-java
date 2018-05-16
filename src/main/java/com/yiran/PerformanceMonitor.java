@@ -67,6 +67,7 @@ public class PerformanceMonitor {
                         lastTotalCpuTime = currentTotalCpuTime;
                         currentTotalCpuTime = totalCpuTime;
                         cpuFlag = false;
+                        continue;
                     }
 
                     if(line.startsWith("ctxt")){
@@ -76,12 +77,18 @@ public class PerformanceMonitor {
                         currentCtxt = Long.parseLong(line.split("\\s+")[1]);
                     }
                 }
+                in.close();
+                process.destroy();
             } catch (IOException e) {
                 logger.error("", e);
             }
 
-            cpuUsage = 1 - (float) (currentIdleCpuTime - lastIdleCpuTime) / (float) (currentTotalCpuTime - lastTotalCpuTime);
-            ctxtPerSecond = (currentCtxt - lastCtxt) / (currentTime - lastTime);
+            if (currentTotalCpuTime != lastTotalCpuTime) {
+                cpuUsage = 1 - (float) (currentIdleCpuTime - lastIdleCpuTime) / (float) (currentTotalCpuTime - lastTotalCpuTime);
+            }
+            if (currentTime != lastTime) {
+                ctxtPerSecond = (currentCtxt - lastCtxt) / (currentTime - lastTime);
+            }
 
         }, 0, 100, TimeUnit.MILLISECONDS);
     }

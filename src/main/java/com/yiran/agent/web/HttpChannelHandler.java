@@ -32,14 +32,12 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             if (buf.isReadable()) {
                 contentBuf.writeBytes(buf);
             }
-            buf.release();
             if (msg instanceof LastHttpContent) {
                 try{
                     Map<String, String> parameterMap = formDataParser.parse(contentBuf);
                     if(parameterMap == null) {
                         logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
                         ctx.close();
-                        buf.release();
                         return;
                     }
 

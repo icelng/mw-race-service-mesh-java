@@ -32,50 +32,46 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             if (buf.isReadable()) {
                 contentBuf.writeBytes(buf);
             }
-            logger.info("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
             buf.release();
-            if (msg instanceof LastHttpContent) {
-                try{
-                    Map<String, String> parameterMap = formDataParser.parse(contentBuf);
-                    if(parameterMap == null) {
-                        logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
-                        ctx.close();
-                        buf.release();
-                        return;
-                    }
-
-                    Channel channel = ctx.channel();
-                    executor.execute(() -> {
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            logger.error("", e);
-                        }
-                        String parameter = parameterMap.getOrDefault("parameter", null);
-                        if (parameter == null) {
-                            logger.error("Failed to get parameter!please check the FormDataParser!");
-                            logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
-                            contentBuf.release();
-                            channel.close();
-                            return;
-                        }
-                        String res = String.valueOf(parameterMap.get("parameter").hashCode());
-                        FullHttpResponse response;
-                        try {
-                            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                            setHeaders(response);
-                            contentBuf.release();
-                            channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                        } catch (UnsupportedEncodingException e) {
-                            logger.error("", e);
-                        }
-
-                    });
-
-                } catch (Exception e) {
-                    logger.error("", e);
+            try{
+                Map<String, String> parameterMap = formDataParser.parse(contentBuf);
+                if(parameterMap == null) {
+                    logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
+                    ctx.close();
+                    buf.release();
+                    return;
                 }
 
+                Channel channel = ctx.channel();
+                executor.execute(() -> {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        logger.error("", e);
+                    }
+                    String parameter = parameterMap.getOrDefault("parameter", null);
+                    if (parameter == null) {
+                        logger.error("Failed to get parameter!please check the FormDataParser!");
+                        logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
+                        contentBuf.release();
+                        channel.close();
+                        return;
+                    }
+                    String res = String.valueOf(parameterMap.get("parameter").hashCode());
+                    FullHttpResponse response;
+                    try {
+                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
+                        setHeaders(response);
+                        contentBuf.release();
+                        channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("", e);
+                    }
+
+                });
+
+            } catch (Exception e) {
+                logger.error("", e);
             }
         }
     }

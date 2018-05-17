@@ -116,7 +116,10 @@ public class ServiceSwitcher {
         AgentServiceResponse agentServiceResponse = new AgentServiceResponse(agentServiceRequest);
         agentServiceResponse.setStatus((byte) 0);  // 暂时写死成0
         agentServiceResponse.setReturnType(1);  // 写死为整形
-        String intStr = new String(rpcResponse.getBytes()).split("\r|\n")[1];
+        String returnStr = new String(rpcResponse.getBytes());
+//        int valueStart = returnStr.indexOf("\n") + 1;
+        String intStr = returnStr.substring(2);
+        logger.info("Int string:{}", intStr);
         byte[] intBytes = new byte[4];
         Bytes.int2bytes(Integer.valueOf(intStr), intBytes, 0);
         agentServiceResponse.setReturnValue(intBytes);

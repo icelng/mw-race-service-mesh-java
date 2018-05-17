@@ -50,12 +50,11 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                         logger.error("", e);
                     }
                     String parameter = parameterMap.getOrDefault("parameter", null);
-                    logger.info("parameter:{}", parameter);
                     if (parameter == null) {
                         logger.error("Failed to get parameter!please check the FormDataParser!");
                         logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
                         contentBuf.release();
-                        channel.close();
+                        ctx.close();
                         return;
                     }
                     String res = String.valueOf(parameterMap.get("parameter").hashCode());
@@ -63,8 +62,9 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     try {
                         response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
                         setHeaders(response);
+                        logger.info("parameter:{}", parameter);
                         contentBuf.release();
-                        channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
                     } catch (UnsupportedEncodingException e) {
                         logger.error("", e);
                     }

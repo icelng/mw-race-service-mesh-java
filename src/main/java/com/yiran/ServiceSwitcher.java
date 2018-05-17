@@ -118,7 +118,7 @@ public class ServiceSwitcher {
         agentServiceResponse.setReturnType(1);  // 写死为整形
         String returnStr = new String(rpcResponse.getBytes(), "utf-8");
 //        int valueStart = returnStr.indexOf("\n") + 1;
-        String intStr = returnStr.substring(2);
+        String intStr = returnStr.substring(2, returnStr.length());
         logger.info("Int string:{}", intStr);
         byte[] intBytes = new byte[4];
         Bytes.int2bytes(Integer.valueOf(intStr), intBytes, 0);

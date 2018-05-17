@@ -46,6 +46,7 @@ public class AgentApp {
             /*consumer-agent需要受理consumer发来的请求*/
 //            SpringApplication.run(AgentApp.class,args);
             HttpServer httpServer = new HttpServer(Integer.valueOf(System.getProperty("server.port")));
+            httpServer.run();
         } else if("provider".equals(type)) {
             /*provider-agent不需要启动web服务器*/
             //new ProviderAgentBootstrap().boot();

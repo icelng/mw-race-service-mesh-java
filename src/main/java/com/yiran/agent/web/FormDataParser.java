@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,9 +53,12 @@ public class FormDataParser implements ByteProcessor {
                 parameterMap.put(key, value);
             }
             if (i == -1) {
-                buffer.readerIndex(oldReaderIndex);  // 恢复buffer
                 buffer.writerIndex(buffer.writerIndex() - 1);
-                logger.info("Parse segments:{}", k);
+                if (k != 8) {
+                    buffer.readerIndex(oldReaderIndex);  // 恢复buffer
+                    logger.info("Parse segments:{}", k);
+                    logger.info("The request body is:{}", buffer.toString(Charset.forName("utf-8")));
+                }
                 return parameterMap;
             }
             buffer.readerIndex(i + 1);

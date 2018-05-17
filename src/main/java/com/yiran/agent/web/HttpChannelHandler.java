@@ -48,6 +48,11 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     } catch (InterruptedException e) {
                         logger.error("", e);
                     }
+                    String parameter = parameterMap.getOrDefault("parameter", null);
+                    if (parameter == null) {
+                        logger.error("Failed to get parameter!please check the FormDataParser!");
+                        channel.close();
+                    }
                     String res = String.valueOf(parameterMap.get("parameter").hashCode());
                     FullHttpResponse response;
                     try {

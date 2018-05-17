@@ -80,8 +80,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
      * 设置HTTP返回头信息
      */
     private void setHeaders(FullHttpResponse response) {
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
-        response.headers().set(HttpHeaderNames.CONTENT_LANGUAGE, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
 //        if (HttpUtil.isKeepAlive(request)) {
 //            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 //        }

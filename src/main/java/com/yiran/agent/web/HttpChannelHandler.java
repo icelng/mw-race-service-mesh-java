@@ -32,7 +32,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             if (buf.isReadable()) {
                 contentBuf.writeBytes(buf);
             }
-            logger.info("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
             buf.release();
             try{
                 Map<String, String> parameterMap = formDataParser.parse(contentBuf);
@@ -42,6 +41,8 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     buf.release();
                     return;
                 }
+                logger.info("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
+                logger.info("parameter:{}", parameterMap.get("parameter"));
 
                 Channel channel = ctx.channel();
                 executor.execute(() -> {

@@ -40,6 +40,7 @@ public class HelloController {
 //            return null;
 //        }
 
+        Thread.sleep(50);
         ResponseEntity responseEntity = new ResponseEntity(parameter.hashCode(), HttpStatus.OK);
         result.setResult(responseEntity);
 

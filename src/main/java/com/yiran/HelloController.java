@@ -15,11 +15,13 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
 @RestController
 public class HelloController {
+    private static ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(256);
 
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
@@ -40,9 +42,10 @@ public class HelloController {
 //            return null;
 //        }
 
-        Thread.sleep(50);
-        ResponseEntity responseEntity = new ResponseEntity(parameter.hashCode(), HttpStatus.OK);
-        result.setResult(responseEntity);
+        scheduleExecutor.scheduleWithFixedDelay(() -> {
+            ResponseEntity responseEntity = new ResponseEntity(parameter.hashCode(), HttpStatus.OK);
+            result.setResult(responseEntity);
+        }, 0, 50, TimeUnit.MILLISECONDS);
 
 //        AgentServiceRequestFuture future = agentClient.serviceRequest(result, interfaceName, method, parameterTypesString, parameter);
 //        future.addListener(() -> {

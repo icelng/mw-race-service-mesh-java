@@ -46,7 +46,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         buf.release();
                         return;
                     }
-                    contentBuf.release();
 
                     Channel channel = ctx.channel();
                     executor.execute(() -> {
@@ -57,14 +56,18 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         }
                         String parameter = parameterMap.getOrDefault("parameter", null);
                         if (parameter == null) {
-                        logger.error("Failed to get parameter!please check the FormDataParser!");
+                            logger.error("Failed to get parameter!please check the FormDataParser!");
+                            logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
+                            contentBuf.release();
                             channel.close();
+                            return;
                         }
                         String res = String.valueOf(parameterMap.get("parameter").hashCode());
                         FullHttpResponse response;
                         try {
                             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
                             setHeaders(response);
+                            contentBuf.release();
                             channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
                         } catch (UnsupportedEncodingException e) {
                             logger.error("", e);

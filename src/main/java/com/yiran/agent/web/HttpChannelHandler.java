@@ -13,13 +13,14 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
-    private static ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(16);
+    private static Executor executor = Executors.newFixedThreadPool(256);
 
     private HttpRequest request = null;
     private FormDataParser formDataParser = new FormDataParser(2048);
@@ -41,7 +42,12 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 buf.release();
 
                 Channel channel = ctx.channel();
-                scheduleExecutor.scheduleWithFixedDelay(() -> {
+                executor.execute(() -> {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        logger.error("", e);
+                    }
                     String res = String.valueOf(parameterMap.get("parameter").hashCode());
                     FullHttpResponse response;
                     try {
@@ -52,7 +58,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         logger.error("", e);
                     }
 
-                }, 0, 50, TimeUnit.MILLISECONDS);
+                });
 
             } catch (Exception e) {
                 e.printStackTrace();

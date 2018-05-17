@@ -22,7 +22,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static Executor executor = Executors.newFixedThreadPool(256);
 
-    private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.buffer();
+    private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.buffer(2048);
 
     private HttpRequest request = null;
     private FormDataParser formDataParser = new FormDataParser(2048);

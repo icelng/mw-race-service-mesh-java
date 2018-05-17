@@ -54,6 +54,9 @@ public class FormDataParser implements ByteProcessor {
             }
             if (i == -1) {
                 buffer.readerIndex(oldReaderIndex);  // 恢复buffer
+                if (k != 8) {
+                    logger.warn("The num of segments is {}", k);
+                }
                 return parameterMap;
             }
             buffer.readerIndex(i + 1);

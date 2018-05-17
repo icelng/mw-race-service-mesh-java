@@ -33,8 +33,10 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;
             ByteBuf buf = content.content();
-            contentBuf.writeBytes(buf);
-            buf.release();
+            if (buf.isReadable()) {
+                contentBuf.writeBytes(buf);
+                buf.release();
+            }
             if (msg instanceof LastHttpContent) {
                 try{
                     Map<String, String> parameterMap = formDataParser.parse(contentBuf);

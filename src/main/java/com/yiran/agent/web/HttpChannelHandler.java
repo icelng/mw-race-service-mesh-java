@@ -2,6 +2,7 @@ package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -32,7 +33,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
             String uri = request.uri();
             String res = null;
 
-            logger.info("Get request in uri:" + uri);
             try {
             } catch (Exception e) {//处理出错，返回错误信息
                 res = "<html><body>Server Error</body></html>";
@@ -50,10 +50,9 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     ctx.close();
                     return;
                 }
-                for (String key : parameterMap.keySet()) {
-                    logger.info("key:{}, value:{}", key, parameterMap.get(key));
-                }
                 buf.release();
+
+                Channel channel = ctx.channel();
                 scheduleExecutor.scheduleWithFixedDelay(() -> {
                     String res = String.valueOf(parameterMap.get("parameter").hashCode());
                     try {
@@ -61,8 +60,9 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     } catch (UnsupportedEncodingException e) {
                     }
                     setHeaders(response);
-                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                    channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
                 }, 0, 50, TimeUnit.MILLISECONDS);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -2,12 +2,8 @@ package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
+public class HttpChannelHandler extends SimpleChannelInboundHandler {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static Executor executor = Executors.newFixedThreadPool(256);
 
@@ -28,7 +24,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private FormDataParser formDataParser = new FormDataParser(2048);
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    public void channelRead0(ChannelHandlerContext ctx, Object msg)
             throws Exception {
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;

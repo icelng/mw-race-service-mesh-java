@@ -25,50 +25,8 @@ public class HelloController {
     private LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
     private Executor listenerExecutor = Executors.newFixedThreadPool(16);
 
-//    @RequestMapping(value = "")
-//    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
-//                                                 @RequestParam("method") String method,
-//                                                 @RequestParam("parameterTypesString") String parameterTypesString,
-//                                                 @RequestParam("parameter") String parameter) throws Exception {
-//        DeferredResult<ResponseEntity> result = new DeferredResult<>();
-//
-//        AgentClient agentClient;
-//        try {
-//            agentClient = loadBalance.findOptimalAgentClient(interfaceName);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage(), e);
-//            return null;
-//        }
-//
-//        AgentServiceRequestFuture future = agentClient.serviceRequest(result, interfaceName, method, parameterTypesString, parameter);
-////        future.addListener(() -> {
-////            try {
-////                AgentServiceResponse response = future.get();
-////                if (response != null) {
-////                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-////                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
-////                    result.setResult(responseEntity);
-////                } else {
-////                    logger.error("Request:{} error!", future.getRequestId());
-////                }
-////            } catch (InterruptedException e) {
-////                logger.error("", e);
-////            }
-////
-////        }, listenerExecutor, 2, TimeUnit.SECONDS);
-//
-////        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
-////        AgentServiceResponse response = future.get(2, TimeUnit.SECONDS);
-////        if(response == null) {
-////            logger.error("Request: time out!", future.getRequestId());
-////            return null;
-////        }
-//
-//        return result;
-//    }
-
     @RequestMapping(value = "")
-    public Object invoke(@RequestParam("interface") String interfaceName,
+    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
                                                  @RequestParam("method") String method,
                                                  @RequestParam("parameterTypesString") String parameterTypesString,
                                                  @RequestParam("parameter") String parameter) throws Exception {
@@ -81,8 +39,34 @@ public class HelloController {
 //            logger.error(e.getMessage(), e);
 //            return null;
 //        }
-        Thread.sleep(50);
 
-        return parameter.hashCode();
+        ResponseEntity responseEntity = new ResponseEntity(parameter.hashCode(), HttpStatus.OK);
+        result.setResult(responseEntity);
+
+//        AgentServiceRequestFuture future = agentClient.serviceRequest(result, interfaceName, method, parameterTypesString, parameter);
+//        future.addListener(() -> {
+//            try {
+//                AgentServiceResponse response = future.get();
+//                if (response != null) {
+//                    int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+//                    ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
+//                    result.setResult(responseEntity);
+//                } else {
+//                    logger.error("Request:{} error!", future.getRequestId());
+//                }
+//            } catch (InterruptedException e) {
+//                logger.error("", e);
+//            }
+//
+//        }, listenerExecutor, 2, TimeUnit.SECONDS);
+
+//        AgentServiceRequestFuture future = agentClient.serviceRequest(interfaceName, method, parameterTypesString, parameter);
+//        AgentServiceResponse response = future.get(2, TimeUnit.SECONDS);
+//        if(response == null) {
+//            logger.error("Request: time out!", future.getRequestId());
+//            return null;
+//        }
+
+        return result;
     }
 }

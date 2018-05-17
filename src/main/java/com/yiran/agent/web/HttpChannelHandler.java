@@ -61,7 +61,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                         try {
                             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
                             setHeaders(response);
-                            logger.info("parameter:{}", parameter);
                             contentBuf.release();
                             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
                         } catch (UnsupportedEncodingException e) {

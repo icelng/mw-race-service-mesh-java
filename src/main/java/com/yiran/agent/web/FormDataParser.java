@@ -41,8 +41,14 @@ public class FormDataParser implements ByteProcessor {
             k++;
             if (k % 2 == 1) {
                 key = URLDecoder.decode(seq.toString(), "utf-8");
+                if (key == null) {
+                    logger.error("Failed to parse key!");
+                }
             } else if (k % 2 == 0) {
                 value = URLDecoder.decode(seq.toString(), "utf-8");
+                if (value == null) {
+                    logger.error("Failed to parse value!");
+                }
                 parameterMap.put(key, value);
             }
             if (i == -1) {

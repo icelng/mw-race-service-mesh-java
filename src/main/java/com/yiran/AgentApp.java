@@ -1,11 +1,11 @@
 package com.yiran;
 
 import com.yiran.agent.AgentServer;
+import com.yiran.agent.web.HttpServer;
 import com.yiran.dubbo.DubboConnectManager;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.concurrent.Executors;
@@ -44,7 +44,8 @@ public class AgentApp {
         if ("consumer".equals(type)) {
 //        if (true) {
             /*consumer-agent需要受理consumer发来的请求*/
-            SpringApplication.run(AgentApp.class,args);
+//            SpringApplication.run(AgentApp.class,args);
+            HttpServer httpServer = new HttpServer(Integer.valueOf(System.getProperty("server.port")));
         } else if("provider".equals(type)) {
             /*provider-agent不需要启动web服务器*/
             //new ProviderAgentBootstrap().boot();

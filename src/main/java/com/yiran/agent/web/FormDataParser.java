@@ -5,6 +5,8 @@ import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.util.ByteProcessor;
 import io.netty.util.internal.AppendableCharSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FormDataParser implements ByteProcessor {
+    private static Logger logger = LoggerFactory.getLogger(FormDataParser.class);
     private static final byte CHAR_AND = 38;  // &符号
     private static final byte CHAR_EQUAL = 61;  // =号
 
@@ -45,6 +48,7 @@ public class FormDataParser implements ByteProcessor {
             if (i == -1) {
                 buffer.readerIndex(oldReaderIndex);  // 恢复buffer
                 buffer.writerIndex(buffer.writerIndex() - 1);
+                logger.info("Parse segments:{}", k);
                 return parameterMap;
             }
             buffer.readerIndex(i + 1);

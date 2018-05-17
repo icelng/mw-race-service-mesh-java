@@ -15,8 +15,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
@@ -50,7 +48,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     }
                     String parameter = parameterMap.getOrDefault("parameter", null);
                     if (parameter == null) {
-                        logger.error("Failed to get parameter!please check the FormDataParser!");
+//                        logger.error("Failed to get parameter!please check the FormDataParser!");
                         channel.close();
                     }
                     String res = String.valueOf(parameterMap.get("parameter").hashCode());

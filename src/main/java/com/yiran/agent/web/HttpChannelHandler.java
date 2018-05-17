@@ -76,9 +76,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 
             }
         }
-        if (msg instanceof LastHttpContent) {
-
-        }
     }
     /**
      * 设置HTTP返回头信息

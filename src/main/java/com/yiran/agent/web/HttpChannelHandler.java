@@ -19,10 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
-    private static ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(256);
+    private static ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(16);
 
     private HttpRequest request = null;
-    private FullHttpResponse response = null;
     private FormDataParser formDataParser = new FormDataParser(2048);
 
     @Override
@@ -36,18 +35,24 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 if(parameterMap == null) {
                     logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
                     ctx.close();
+                    buf.release();
                     return;
                 }
                 buf.release();
 
-                Thread.sleep(50);
-                String res = String.valueOf(parameterMap.get("parameter").hashCode());
-                try {
-                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                } catch (UnsupportedEncodingException e) {
-                }
-                setHeaders(response);
-                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                Channel channel = ctx.channel();
+                scheduleExecutor.scheduleWithFixedDelay(() -> {
+                    String res = String.valueOf(parameterMap.get("parameter").hashCode());
+                    FullHttpResponse response;
+                    try {
+                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
+                        setHeaders(response);
+                        channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("", e);
+                    }
+
+                }, 0, 50, TimeUnit.MILLISECONDS);
 
             } catch (Exception e) {
                 e.printStackTrace();

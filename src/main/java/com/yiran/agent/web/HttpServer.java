@@ -25,7 +25,6 @@ public class HttpServer {
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .childHandler(new HttpChannelInitService())
-                .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
         b.bind(this.port).sync();
     }

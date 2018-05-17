@@ -28,18 +28,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg)
             throws Exception {
-        if (msg instanceof HttpRequest) {
-            request = (HttpRequest) msg;
-            String uri = request.uri();
-            String res = null;
-
-            try {
-            } catch (Exception e) {//处理出错，返回错误信息
-                res = "<html><body>Server Error</body></html>";
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                setHeaders(response);
-            }
-        }
         if (msg instanceof HttpContent) {
             try{
                 HttpContent content = (HttpContent) msg;
@@ -52,16 +40,14 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 }
                 buf.release();
 
-                Channel channel = ctx.channel();
-                scheduleExecutor.scheduleWithFixedDelay(() -> {
-                    String res = String.valueOf(parameterMap.get("parameter").hashCode());
-                    try {
-                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                    } catch (UnsupportedEncodingException e) {
-                    }
-                    setHeaders(response);
-                    channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                }, 0, 50, TimeUnit.MILLISECONDS);
+                Thread.sleep(50);
+                String res = String.valueOf(parameterMap.get("parameter").hashCode());
+                try {
+                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
+                } catch (UnsupportedEncodingException e) {
+                }
+                setHeaders(response);
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 
             } catch (Exception e) {
                 e.printStackTrace();

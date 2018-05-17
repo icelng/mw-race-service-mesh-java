@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class HttpChannelHandler extends SimpleChannelInboundHandler {
+public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static Executor executor = Executors.newFixedThreadPool(256);
 
@@ -31,10 +31,11 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler {
             ByteBuf buf = content.content();
             if (buf.isReadable()) {
                 contentBuf.writeBytes(buf);
-                buf.release();
             }
+            buf.release();
             if (msg instanceof LastHttpContent) {
                 try{
+                    logger.info("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
                     Map<String, String> parameterMap = formDataParser.parse(contentBuf);
                     if(parameterMap == null) {
                         logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));

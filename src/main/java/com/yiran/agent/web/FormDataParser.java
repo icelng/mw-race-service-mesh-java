@@ -54,8 +54,6 @@ public class FormDataParser implements ByteProcessor {
             }
             if (i == -1) {
                 buffer.readerIndex(oldReaderIndex);  // 恢复buffer
-                logger.info("Parse segments:{}", k);
-                logger.info("The request body is:{}", buffer.toString(Charset.forName("utf-8")));
                 return parameterMap;
             }
             buffer.readerIndex(i + 1);

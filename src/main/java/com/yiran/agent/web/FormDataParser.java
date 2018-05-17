@@ -53,7 +53,6 @@ public class FormDataParser implements ByteProcessor {
                 parameterMap.put(key, value);
             }
             if (i == -1) {
-                buffer.writerIndex(buffer.writerIndex() - 1);
                 buffer.readerIndex(oldReaderIndex);  // 恢复buffer
                 logger.info("Parse segments:{}", k);
                 logger.info("The request body is:{}", buffer.toString(Charset.forName("utf-8")));

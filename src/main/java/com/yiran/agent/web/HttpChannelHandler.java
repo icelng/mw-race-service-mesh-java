@@ -1,6 +1,8 @@
 package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -20,6 +22,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static Executor executor = Executors.newFixedThreadPool(256);
 
+    private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.buffer();
+
     private HttpRequest request = null;
     private FormDataParser formDataParser = new FormDataParser(2048);
 
@@ -27,45 +31,53 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg)
             throws Exception {
         if (msg instanceof HttpContent) {
-            try{
-                HttpContent content = (HttpContent) msg;
-                ByteBuf buf = content.content();
-                Map<String, String> parameterMap = formDataParser.parse(buf);
-                if(parameterMap == null) {
-                    logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
-                    ctx.close();
-                    buf.release();
-                    return;
-                }
-                buf.release();
-
-                Channel channel = ctx.channel();
-                executor.execute(() -> {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        logger.error("", e);
+            HttpContent content = (HttpContent) msg;
+            ByteBuf buf = content.content();
+            contentBuf.writeBytes(buf);
+            buf.release();
+            if (msg instanceof LastHttpContent) {
+                try{
+                    Map<String, String> parameterMap = formDataParser.parse(contentBuf);
+                    if(parameterMap == null) {
+                        logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
+                        ctx.close();
+                        buf.release();
+                        return;
                     }
-                    String parameter = parameterMap.getOrDefault("parameter", null);
-                    if (parameter == null) {
+                    contentBuf.release();
+
+                    Channel channel = ctx.channel();
+                    executor.execute(() -> {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            logger.error("", e);
+                        }
+                        String parameter = parameterMap.getOrDefault("parameter", null);
+                        if (parameter == null) {
 //                        logger.error("Failed to get parameter!please check the FormDataParser!");
-                        channel.close();
-                    }
-                    String res = String.valueOf(parameterMap.get("parameter").hashCode());
-                    FullHttpResponse response;
-                    try {
-                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                        setHeaders(response);
-                        channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                    } catch (UnsupportedEncodingException e) {
-                        logger.error("", e);
-                    }
+                            channel.close();
+                        }
+                        String res = String.valueOf(parameterMap.get("parameter").hashCode());
+                        FullHttpResponse response;
+                        try {
+                            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
+                            setHeaders(response);
+                            channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                        } catch (UnsupportedEncodingException e) {
+                            logger.error("", e);
+                        }
 
-                });
+                    });
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
+        }
+        if (msg instanceof LastHttpContent) {
+
         }
     }
     /**

@@ -71,7 +71,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     });
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("", e);
                 }
 
             }

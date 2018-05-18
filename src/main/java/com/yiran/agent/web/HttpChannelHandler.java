@@ -48,7 +48,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     String parameterTypesString = parameterMap.get("parameterTypesString");
                     String parameter = parameterMap.get("parameter");
 
-                    logger.info("serviceName:{} method:{} parameterTypesString:{} parameter:{}", serviceName, method, parameterTypesString, parameter);
+//                    logger.info("serviceName:{} method:{} parameterTypesString:{} parameter:{}", serviceName, method, parameterTypesString, parameter);
 
                     /*选出最优客户端*/
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);

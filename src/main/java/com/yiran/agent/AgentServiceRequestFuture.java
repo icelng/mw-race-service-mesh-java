@@ -87,10 +87,10 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void done(AgentServiceResponse response) throws UnsupportedEncodingException {
         if (response != null) {
             int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-            logger.info("Return hash code:{}", hashCode);
+//            logger.info("Return hash code:{}", hashCode);
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer((String.valueOf(hashCode)).getBytes("UTF-8")));
             setHeaders(httpResponse);
-            httpChannel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
         } else {
             logger.error("Request:{} error!", requestId);
         }

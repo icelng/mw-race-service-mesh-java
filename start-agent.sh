@@ -12,7 +12,7 @@ if [[ "$1" == "consumer" ]]; then
        -Xms1536M \
        -Xmx1536M \
        -Dtype=consumer \
-       -Dserver.port=20000\
+       -Dserver.port=20000 \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
@@ -28,7 +28,7 @@ elif [[ "$1" == "provider-small" ]]; then
        -Dserver.port1=30002\
        -Dserver.port2=30003\
        -Dserver.port3=30004\
-       -Ddubbo.protocol.port=20889 \
+       -Ddubbo.protocol.port=20880 \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
@@ -44,7 +44,7 @@ elif [[ "$1" == "provider-medium" ]]; then
        -Dserver.port1=30012\
        -Dserver.port2=30013\
        -Dserver.port3=30014\
-       -Ddubbo.protocol.port=20890 \
+       -Ddubbo.protocol.port=20880 \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
@@ -60,7 +60,7 @@ elif [[ "$1" == "provider-large" ]]; then
        -Dserver.port1=30022\
        -Dserver.port2=30023\
        -Dserver.port3=30024\
-       -Ddubbo.protocol.port=20891 \
+       -Ddubbo.protocol.port=20880 \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar

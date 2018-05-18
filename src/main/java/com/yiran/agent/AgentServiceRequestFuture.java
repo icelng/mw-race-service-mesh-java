@@ -1,5 +1,9 @@
 package com.yiran.agent;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -7,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.constraints.NotNull;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,13 +32,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private Object lock = new Object();
 
-    private DeferredResult<ResponseEntity> result;
+    private Channel httpChannel;
 
-
-    public AgentServiceRequestFuture(AgentClient agentClient, long requestId, DeferredResult<ResponseEntity> result){
+    public AgentServiceRequestFuture(AgentClient agentClient, long requestId, Channel httpChannel){
         this.requestId = requestId;
         this.agentClient = agentClient;
-        this.result = result;
+        this.httpChannel = httpChannel;
     }
 
 
@@ -80,11 +84,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         }
     }
 
-    public void done(AgentServiceResponse response) {
+    public void done(AgentServiceResponse response) throws UnsupportedEncodingException {
         if (response != null) {
             int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-            ResponseEntity responseEntity = new ResponseEntity(hashCode, HttpStatus.OK);
-            result.setResult(responseEntity);
+            DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer((String.valueOf(hashCode)).getBytes("UTF-8")));
+            setHeaders(httpResponse);
+            httpChannel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } else {
             logger.error("Request:{} error!", requestId);
         }
@@ -141,5 +146,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
 
     public long getRequestId() {
         return requestId;
+    }
+
+    private void setHeaders(FullHttpResponse response) {
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
+//        if (HttpUtil.isKeepAlive(request)) {
+//            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+//        }
     }
 }

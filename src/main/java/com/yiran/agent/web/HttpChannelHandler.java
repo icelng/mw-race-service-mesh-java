@@ -1,22 +1,20 @@
 package com.yiran.agent.web;
 
+import com.yiran.LoadBalance;
+import com.yiran.agent.AgentClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
-    private static Executor executor = Executors.newFixedThreadPool(256);
+    private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
     private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.buffer(2048);
     private int contentLength = 0;
@@ -40,38 +38,20 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                 try{
                     Map<String, String> parameterMap = formDataParser.parse(contentBuf);
                     if(parameterMap == null) {
-                        logger.error("Failed to parse form data!{}.", buf.toString(Charset.forName("utf-8")));
+                        logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
                         ctx.close();
                         return;
                     }
+                    /*开始调用服务*/
+                    String serviceName = parameterMap.get("interface");
+                    String method = parameterMap.get("method");
+                    String parameterTypeString = parameterMap.get("parameterTypeString");
+                    String parameter = parameterMap.get("parameter");
 
-                    Channel channel = ctx.channel();
-                    executor.execute(() -> {
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            logger.error("", e);
-                        }
-                        String parameter = parameterMap.getOrDefault("parameter", null);
-                        if (parameter == null) {
-                            logger.error("Failed to get parameter!please check the FormDataParser! Content length:{}", this.contentLength);
-                            logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
-                            contentBuf.release();
-                            ctx.close();
-                            return;
-                        }
-                        String res = String.valueOf(parameterMap.get("parameter").hashCode());
-                        FullHttpResponse response;
-                        try {
-                            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(res.getBytes("UTF-8")));
-                            setHeaders(response);
-                            contentBuf.release();
-                            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                        } catch (UnsupportedEncodingException e) {
-                            logger.error("", e);
-                        }
-
-                    });
+                    /*选出最优客户端*/
+                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+                    /*调用服务*/
+                    agentClient.serviceRequest(ctx.channel(), serviceName, method, parameterTypeString, parameter);
 
                 } catch (Exception e) {
                     logger.error("", e);

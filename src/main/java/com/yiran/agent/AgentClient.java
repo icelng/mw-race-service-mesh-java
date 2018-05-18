@@ -87,7 +87,7 @@ public class AgentClient {
     }
 
 
-    public AgentServiceRequestFuture request(DeferredResult result, int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
+    public AgentServiceRequestFuture request(Channel httpChannel, int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
         long requestId = this.requestId.addAndGet(1);
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
@@ -99,7 +99,7 @@ public class AgentClient {
         agentServiceRequest.setParameters(new ArrayList<>(parameters));
         agentServiceRequest.setRequestId(requestId);
 
-        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, requestId, result);
+        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, requestId, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl =((float) processingRequestNum.get())/((float) loadLevel);
@@ -109,7 +109,7 @@ public class AgentClient {
         return future;
     }
 
-    public AgentServiceRequestFuture serviceRequest(DeferredResult result, String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public AgentServiceRequestFuture serviceRequest(Channel httpChannel, String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
         ServiceInfo serviceInfo = supportedServiceMap.get(interfaceName);
         if (serviceInfo == null) {
             throw new Exception("Service not found when requesting!!");
@@ -122,7 +122,7 @@ public class AgentClient {
         List<byte[]> parameters = new ArrayList<>();
         parameterTypes.add(parameterTypeId);
         parameters.add(parameter.getBytes("UTF-8"));
-        return this.request(result, serviceId, (byte) methodId, parameterTypes, parameters);
+        return this.request(httpChannel, serviceId, (byte) methodId, parameterTypes, parameters);
     }
 
     public AtomicLong getProcessingRequestNum() {

@@ -85,7 +85,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         if (response != null) {
             int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
             String hashCodeString = String.valueOf(hashCode);
-            logger.info("Return hash code:{}", hashCodeString);
+//            logger.info("Return hash code:{}", hashCodeString);
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
             httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);

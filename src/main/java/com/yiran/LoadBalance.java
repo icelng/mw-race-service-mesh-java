@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
@@ -121,7 +122,7 @@ public class LoadBalance {
     }
 
     private AgentClient getOptimalByRandom() throws Exception {
-        int randomNum = random1.nextInt(60);
+        int randomNum = ThreadLocalRandom.current().nextInt(60);
         int selectedLoadLevel = 0;
 
         if (randomNum >= 0 && randomNum < 8) {
@@ -138,8 +139,7 @@ public class LoadBalance {
             return null;
         }
 
-        randomNum = random2.nextInt(loadLevelAgentClients.size());
-        String agentClientName = loadLevelAgentClients.get(randomNum);
+        String agentClientName = loadLevelAgentClients.get(0);
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
         return agentClient;

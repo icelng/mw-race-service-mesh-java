@@ -29,10 +29,13 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private Object lock = new Object();
 
+    private AgentServiceRequest agentServiceRequest;
+
     private Channel httpChannel;
 
-    public AgentServiceRequestFuture(AgentClient agentClient, long requestId, Channel httpChannel){
-        this.requestId = requestId;
+    public AgentServiceRequestFuture(AgentClient agentClient, AgentServiceRequest agentServiceRequest, Channel httpChannel){
+        this.agentServiceRequest = agentServiceRequest;
+        this.requestId = agentServiceRequest.getRequestId();
         this.agentClient = agentClient;
         this.httpChannel = httpChannel;
     }
@@ -89,6 +92,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
             httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            agentServiceRequest.getData().release();  // 释放buf
         } else {
             logger.error("Request:{} error!", requestId);
         }

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.yiran.ServiceSwitcher;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -87,19 +88,14 @@ public class AgentClient {
     }
 
 
-    public AgentServiceRequestFuture request(Channel httpChannel, int serviceId, byte methodId, List<Integer> parameterTypes, List<byte[]> parameters) throws Exception {
+    public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
         long requestId = this.requestId.addAndGet(1);
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
-        agentServiceRequest.setServiceId(serviceId);
-        agentServiceRequest.setMethodId(methodId);
-        agentServiceRequest.setTwoWay(false);
-        agentServiceRequest.setTableType((byte) 2);
-        agentServiceRequest.setParameterTypes(new ArrayList<>(parameterTypes));
-        agentServiceRequest.setParameters(new ArrayList<>(parameters));
         agentServiceRequest.setRequestId(requestId);
+        agentServiceRequest.setData(data);
 
-        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, requestId, httpChannel);
+        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
         float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
@@ -109,45 +105,9 @@ public class AgentClient {
         return future;
     }
 
-    public AgentServiceRequestFuture serviceRequest(Channel httpChannel, String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
-        ServiceInfo serviceInfo = supportedServiceMap.get(interfaceName);
-        if (serviceInfo == null) {
-            throw new Exception("Service not found when requesting!!");
-        }
-        int serviceId = serviceInfo.getServiceId();
-        int methodId = serviceInfo.getMethodId(method);
-        int parameterTypeId = serviceInfo.getParameterTypeId(parameterTypesString);
-
-        List<Integer> parameterTypes = new ArrayList<>();
-        List<byte[]> parameters = new ArrayList<>();
-        parameterTypes.add(parameterTypeId);
-        parameters.add(parameter.getBytes("UTF-8"));
-        return this.request(httpChannel, serviceId, (byte) methodId, parameterTypes, parameters);
-    }
-
     public AtomicLong getProcessingRequestNum() {
         return processingRequestNum;
     }
-
-//    public static void main(String args[]) throws InterruptedException, UnsupportedEncodingException, ExecutionException {
-//        System.out.println("starting client");
-//        AgentClient agentClient = new AgentClient("127.0.0.1", 2334);
-//        agentClient.run();
-//
-//        int count1 = 0;
-//        while(true) {
-//            String sendString = "hhhhhhhh-count:" + count1++;
-//            byte[] hashCodeBytes = (byte[]) agentClient.serviceRequest("com.alibaba.performance.dubbomesh.provider.IHelloService", "method", "Ljava/lang/String;", sendString);
-//            int hashCode = Bytes.bytes2int(hashCodeBytes, 0);
-//            logger.info("<-------------------------->");
-//            logger.info("sendString:" + sendString);
-//            logger.info("localHashCode:" + sendString.hashCode());
-//            logger.info("hashCode:" + hashCode);
-//
-//            Thread.sleep(1);
-//
-//        }
-//    }
 
     public void addSupportedService(ServiceInfo service){
         supportedServiceMap.put(service.getServiceName(), service);

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.yiran.agent.AgentServiceRequest;
 import com.yiran.agent.AgentServiceResponse;
 import com.yiran.agent.Bytes;
+import com.yiran.agent.web.FormDataParser;
 import com.yiran.dubbo.model.JsonUtils;
 import com.yiran.dubbo.model.Request;
 import com.yiran.dubbo.model.RpcInvocation;
@@ -54,7 +55,7 @@ public class ServiceSwitcher {
      * 接收请求对应的Netty Channel
      * @throws IOException
      */
-    public static void switchToDubbo(AgentServiceRequest agentServiceRequest, Channel agentChannel) throws IOException {
+    public static void switchToDubbo(AgentServiceRequest agentServiceRequest, FormDataParser formDataParser, Channel agentChannel) throws IOException {
         try {
             /*转换服务协议之前，一定要保证已经跟dubbo建立好连接*/
             rpcChannelReady.await();
@@ -65,18 +66,17 @@ public class ServiceSwitcher {
 
         long requestId = agentServiceRequest.getRequestId();
 //        logger.info("Switch service for requestId:{}", requestId, agentServiceRequest.getParameters().get(0).length);
-
+        Map<String, String> argumentsMap = formDataParser.parse(agentServiceRequest.getData());
 
         RpcInvocation invocation = new RpcInvocation();
-        int serviceId = agentServiceRequest.getServiceId();
-        invocation.setMethodName(methodIdToName(serviceId, agentServiceRequest.getMethodId()));
-        invocation.setAttachment("path", serviceIdToName(agentServiceRequest.getServiceId()));
+        invocation.setMethodName(argumentsMap.get("method"));
+        invocation.setAttachment("path", argumentsMap.get("interface"));
         /*先写死一个参数*/
-        String parameterTypeName = parameterTypeIdToName(serviceId, agentServiceRequest.getParameterTypes().get(0));
+        String parameterTypeName = argumentsMap.get("parameterTypesString");
         invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String
 
         /*转换参数，先固定成一个，并且是String类型的*/
-        String parameter = new String(agentServiceRequest.getParameters().get(0));
+        String parameter = argumentsMap.get("parameter");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
         JsonUtils.writeObject(parameter, writer);
@@ -112,10 +112,12 @@ public class ServiceSwitcher {
 
         /*获取得到consumer-agent 与 provider-agent之间的Channel*/
         Channel agentChannel =  agentServiceRequest.getChannel();
+
         /*生成响应报文*/
-        AgentServiceResponse agentServiceResponse = new AgentServiceResponse(agentServiceRequest);
-        agentServiceResponse.setStatus((byte) 0);  // 暂时写死成0
-        agentServiceResponse.setReturnType(1);  // 写死为整形
+        AgentServiceResponse agentServiceResponse = new AgentServiceResponse();
+        agentServiceResponse.setRequestId(agentServiceRequest.getRequestId());
+
+        /*设置返回值为整形，hashcode*/
         String returnStr = new String(rpcResponse.getBytes(), "utf-8");
         String intStr = returnStr.substring(2, returnStr.length() - 1);
         byte[] intBytes = new byte[4];

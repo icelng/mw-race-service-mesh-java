@@ -19,14 +19,14 @@ public class HttpServer {
 
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(8);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new HttpChannelInitService());
-//                .option(ChannelOption.SO_BACKLOG, 512)
-//                .childOption(ChannelOption.SO_KEEPALIVE, true)
-//                .childOption(ChannelOption.TCP_NODELAY, true);
+                .childHandler(new HttpChannelInitService())
+                .option(ChannelOption.SO_BACKLOG, 512)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true);
         b.bind(this.port).sync();
     }
 

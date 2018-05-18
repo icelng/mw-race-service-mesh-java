@@ -32,14 +32,14 @@ public class AgentApp {
         logger.info("TotalMemory:{}", Runtime.getRuntime().totalMemory());
 
         /*监听内存使用*/
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            logger.info("<----------------------monitor------------------------>");
-            logger.info("----------------->Free memory:{}", Runtime.getRuntime().freeMemory());
-            logger.info("----------------->Max memory:{}", Runtime.getRuntime().maxMemory());
-            logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
-            logger.info("----------------->Cpu usage:{}", performanceMonitor.getCpuUsage());
-            logger.info("----------------->Ctxt per second:{}", performanceMonitor.getCtxtPerSecond());
-        }, 0, 2, TimeUnit.SECONDS);
+//        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+//            logger.info("<----------------------monitor------------------------>");
+//            logger.info("----------------->Free memory:{}", Runtime.getRuntime().freeMemory());
+//            logger.info("----------------->Max memory:{}", Runtime.getRuntime().maxMemory());
+//            logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
+//            logger.info("----------------->Cpu usage:{}", performanceMonitor.getCpuUsage());
+//            logger.info("----------------->Ctxt per second:{}", performanceMonitor.getCtxtPerSecond());
+//        }, 0, 2, TimeUnit.SECONDS);
 
         if ("consumer".equals(type)) {
 //        if (true) {

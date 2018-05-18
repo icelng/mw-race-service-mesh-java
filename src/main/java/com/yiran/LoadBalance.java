@@ -125,11 +125,11 @@ public class LoadBalance {
         int randomNum = ThreadLocalRandom.current().nextInt(60);
         int selectedLoadLevel = 0;
 
-        if (randomNum >= 0 && randomNum < 8) {
+        if (randomNum >= 0 && randomNum < 10) {
             selectedLoadLevel = 1;
-        } else if (randomNum >= 8 && randomNum < 27) {
+        } else if (randomNum >= 10 && randomNum < 30) {
             selectedLoadLevel = 2;
-        } else if (randomNum >= 27 && randomNum < 60) {
+        } else if (randomNum >= 30 && randomNum < 60) {
             selectedLoadLevel = 3;
         }
 

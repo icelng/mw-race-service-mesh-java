@@ -6,9 +6,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.constraints.NotNull;
 import java.io.UnsupportedEncodingException;
@@ -87,8 +84,9 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void done(AgentServiceResponse response) throws UnsupportedEncodingException {
         if (response != null) {
             int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
-//            logger.info("Return hash code:{}", hashCode);
-            DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer((String.valueOf(hashCode)).getBytes("UTF-8")));
+            String hashCodeString = String.valueOf(hashCode);
+            logger.info("Return hash code:{}", hashCodeString);
+            DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
             httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
         } else {

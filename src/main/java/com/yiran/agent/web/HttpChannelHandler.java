@@ -55,6 +55,8 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     /*调用服务*/
                     agentClient.serviceRequest(ctx.channel(), serviceName, method, parameterTypesString, parameter);
 
+                    contentBuf.release();
+
                 } catch (Exception e) {
                     logger.error("", e);
                 }

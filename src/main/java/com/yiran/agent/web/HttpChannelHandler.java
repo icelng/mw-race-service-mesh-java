@@ -19,6 +19,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Executor executor = Executors.newFixedThreadPool(256);
 
     private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.buffer(2048);
+    private int contentLength = 0;
 
     private HttpRequest request = null;
     private FormDataParser formDataParser = new FormDataParser(2048);
@@ -26,6 +27,9 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg)
             throws Exception {
+        if (msg instanceof HttpRequest) {
+            contentLength = HttpUtil.getContentLength((HttpMessage) msg, 0);
+        }
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;
             ByteBuf buf = content.content();
@@ -36,7 +40,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                 try{
                     Map<String, String> parameterMap = formDataParser.parse(contentBuf);
                     if(parameterMap == null) {
-                        logger.error("Failed to parse form data!{}", buf.toString(Charset.forName("utf-8")));
+                        logger.error("Failed to parse form data!{}.", buf.toString(Charset.forName("utf-8")));
                         ctx.close();
                         return;
                     }
@@ -50,7 +54,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                         }
                         String parameter = parameterMap.getOrDefault("parameter", null);
                         if (parameter == null) {
-                            logger.error("Failed to get parameter!please check the FormDataParser!");
+                            logger.error("Failed to get parameter!please check the FormDataParser! Content length:{}", this.contentLength);
                             logger.error("Content:{}", contentBuf.toString(Charset.forName("utf-8")));
                             contentBuf.release();
                             ctx.close();
@@ -93,6 +97,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
+        cause.printStackTrace();
         ctx.close();
     }
 

@@ -18,8 +18,8 @@ public class HttpServer {
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(8);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(16);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)

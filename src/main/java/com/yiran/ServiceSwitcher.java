@@ -82,7 +82,7 @@ public class ServiceSwitcher {
         JsonUtils.writeObject(parameter, writer);
         invocation.setArguments(out.toByteArray());
 
-        Request request = new Request();
+        Request request = Request.get();
         request.setVersion("2.0.0");
         request.setTwoWay(true);
         request.setData(invocation);
@@ -116,6 +116,7 @@ public class ServiceSwitcher {
         /*生成响应报文*/
         AgentServiceResponse agentServiceResponse = new AgentServiceResponse();
         agentServiceResponse.setRequestId(agentServiceRequest.getRequestId());
+        agentServiceRequest.release();
 
         /*设置返回值为整形，hashcode*/
         String returnStr = new String(rpcResponse.getBytes(), "utf-8");

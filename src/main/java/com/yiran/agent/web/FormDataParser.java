@@ -29,6 +29,41 @@ public class FormDataParser implements ByteProcessor {
         this.seq = new AppendableCharSequence(maxLength);
     }
 
+    public String parseInterface(ByteBuf buffer) throws UnsupportedEncodingException {
+
+        int oldReaderIndex = buffer.readerIndex();
+        int k = 0;
+        this.nextIsValue = false;
+        size = 0;
+        String key = null;
+        String value;
+        while(true){
+            seq.reset();
+            int i = buffer.forEachByte(this);
+            k++;
+            if (k % 2 == 1) {
+                /*key*/
+                key = URLDecoder.decode(seq.toString(), "utf-8");
+                if (key == null) {
+                    logger.error("Failed to parse key!");
+                }
+            } else if (k % 2 == 0) {
+                /*value*/
+                value = URLDecoder.decode(seq.toString(), "utf-8");
+                if ("interface".equals(key)) {
+                    buffer.readerIndex(oldReaderIndex);  // 恢复buffer
+                    return value;
+                }
+            }
+            if (i == -1) {
+                buffer.readerIndex(oldReaderIndex);  // 恢复buffer
+                return null;
+            }
+            buffer.readerIndex(i + 1);
+        }
+
+    }
+
     public Map<String, String> parse(ByteBuf buffer) throws UnsupportedEncodingException {
         Map<String, String> parameterMap = new HashMap<>();
 
@@ -59,9 +94,6 @@ public class FormDataParser implements ByteProcessor {
             }
             if (i == -1) {
                 buffer.readerIndex(oldReaderIndex);  // 恢复buffer
-                if (k != 8) {
-                    logger.warn("The num of segments is {}", k);
-                }
                 return parameterMap;
             }
             buffer.readerIndex(i + 1);

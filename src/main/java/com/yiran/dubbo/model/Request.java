@@ -1,9 +1,20 @@
 package com.yiran.dubbo.model;
 
 
+import io.netty.util.Recycler;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Request {
+    private static final Recycler<Request> RECYCLER = new Recycler<Request>() {
+        @Override
+        protected Request newObject(Handle<Request> handle) {
+            return new Request(handle);
+        }
+    };
+
+    private Recycler.Handle<Request> recyclerHandle;
+
     private static AtomicLong atomicLong = new AtomicLong();
     private long id;
     private String interfaceName = "com.alibaba.dubbo.performance.demo.provider.IHelloService";
@@ -17,8 +28,16 @@ public class Request {
 
     private Object mData;
 
-    public Request(){
-        id = atomicLong.getAndIncrement();
+    public Request(Recycler.Handle<Request> handle){
+        this.recyclerHandle = handle;
+    }
+
+    public static Request get(){
+        return RECYCLER.get();
+    }
+
+    public void release(){
+        recyclerHandle.recycle(this);
     }
 
     public long getId() {

@@ -91,14 +91,14 @@ public class AgentClient {
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
         long requestId = this.requestId.addAndGet(1);
 
-        AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
+        AgentServiceRequest agentServiceRequest = AgentServiceRequest.get();
         agentServiceRequest.setRequestId(requestId);
         agentServiceRequest.setData(data);
 
-        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
+        AgentServiceRequestFuture future = AgentServiceRequestFuture.getFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
-        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
+//        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
 //        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
 

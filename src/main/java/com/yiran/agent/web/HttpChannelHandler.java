@@ -36,19 +36,15 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (msg instanceof LastHttpContent) {
                 try{
-                    Map<String, String> parameterMap = formDataParser.parse(contentBuf);
-                    if(parameterMap == null) {
+                    String serviceName = formDataParser.parseInterface(contentBuf);
+                    if(serviceName == null) {
                         logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
                         ctx.close();
                         return;
                     }
                     /*开始调用服务*/
-                    String serviceName = parameterMap.get("interface");
-                    String method = parameterMap.get("method");
-                    String parameterTypesString = parameterMap.get("parameterTypesString");
-                    String parameter = parameterMap.get("parameter");
 
-//                    logger.info("serviceName:{} method:{} parameterTypesString:{} parameter:{}", serviceName, method, parameterTypesString, parameter);
+//                    logger.info("serviceName:{}", serviceName);
 
                     /*选出最优客户端*/
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);

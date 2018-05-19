@@ -33,7 +33,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 /*解析头部*/
-                agentServiceRequest = new AgentServiceRequest();
+                agentServiceRequest = AgentServiceRequest.get();
                 /*获取requestId*/
                 agentServiceRequest.setRequestId(in.readLong());
                 /*获取数据长度*/

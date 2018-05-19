@@ -2,17 +2,38 @@ package com.yiran.agent;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.util.Recycler;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class AgentServiceRequest {
+    private static final Recycler<AgentServiceRequest> RECYCLER = new Recycler<AgentServiceRequest>() {
+        @Override
+        protected AgentServiceRequest newObject(Handle<AgentServiceRequest> handle) {
+            return new AgentServiceRequest(handle);
+        }
+    };
+
+    /*对象池使用*/
+    private Recycler.Handle<AgentServiceRequest> recyclerHandle;
 
     /*Netty用的成员变量*/
     private Channel channel;
 
     private long requestId;
     private ByteBuf data;
+
+    public static AgentServiceRequest get(){
+        return RECYCLER.get();
+    }
+
+    public AgentServiceRequest(Recycler.Handle<AgentServiceRequest> handle){
+        this.recyclerHandle = handle;
+    }
+
+    public void release(){
+        data.release();
+        recyclerHandle.recycle(this);
+    }
 
     public Channel getChannel() {
         return channel;

@@ -39,7 +39,7 @@ public class AgentApp {
             logger.info("----------------->Total memory:{}", Runtime.getRuntime().totalMemory());
             logger.info("----------------->Cpu usage:{}", performanceMonitor.getCpuUsage());
             logger.info("----------------->Ctxt per second:{}", performanceMonitor.getCtxtPerSecond());
-            logger.info("----------------->gc:\n{}", performanceMonitor.jstatGc());
+//            logger.info("----------------->gc:\n{}", performanceMonitor.jstatGc());
         }, 0, 2, TimeUnit.SECONDS);
 
         if ("consumer".equals(type)) {

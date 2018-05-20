@@ -2,6 +2,7 @@ package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.util.ByteProcessor;
@@ -27,7 +28,7 @@ public class FormDataParser implements ByteProcessor {
 
     public FormDataParser(int maxLength){
         this.maxLength = maxLength;
-        this.seq = ByteBufAllocator.DEFAULT.buffer(maxLength);
+        this.seq = PooledByteBufAllocator.DEFAULT.buffer(64);
     }
 
     public String parseInterface(ByteBuf buffer) throws UnsupportedEncodingException {

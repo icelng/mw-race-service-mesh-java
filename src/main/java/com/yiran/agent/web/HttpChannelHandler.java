@@ -4,6 +4,7 @@ import com.yiran.LoadBalance;
 import com.yiran.agent.AgentClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
-    private ByteBuf contentBuf = ByteBufAllocator.DEFAULT.compositeBuffer();
+    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.compositeBuffer();
     private int contentLength = 0;
 
     private HttpRequest request = null;

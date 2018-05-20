@@ -150,6 +150,7 @@ public class PerformanceMonitor {
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line = in.readLine();
                 logger.info("dump file:{}", line);
+                in.close();
                 process.destroy();
             } catch (IOException e) {
                 logger.error("", e);

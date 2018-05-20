@@ -32,6 +32,8 @@ public class PerformanceMonitor {
     private float cpuUsage;
     private long ctxtPerSecond;  // 每秒上下文切换
 
+    private int jmapCnt = 0;
+
     public static PerformanceMonitor getInstance(){
         return INSTANCE;
     }
@@ -40,7 +42,7 @@ public class PerformanceMonitor {
     public PerformanceMonitor(){
 
         runCpuMonitor();
-
+        runMemoryMonitor();
     }
 
     private void runCpuMonitor(){
@@ -134,8 +136,22 @@ public class PerformanceMonitor {
             in.close();
             process.destroy();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("", e);
         }
         return gcInfo;
     }
+
+    public void runMemoryMonitor(){
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            String command = "jmap -dump:format=b,file=" + System.getProperty("logs.dir")  + "/dumpfile" + jmapCnt++ + ".hprof " + getProcessID();
+            try {
+                Runtime.getRuntime().exec(command);
+            } catch (IOException e) {
+                logger.error("", e);
+            }
+
+        }, 0, 10, TimeUnit.SECONDS);
+
+    }
+
 }

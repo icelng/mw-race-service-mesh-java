@@ -14,12 +14,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<AgentServiceRequest> {
     private static Logger logger = LoggerFactory.getLogger(ProviderAgentServerHandler.class);
-    private FormDataParser formDataParser = new FormDataParser(2048);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AgentServiceRequest agentServiceRequest) throws Exception {
 
         /*协议转换*/
-        ServiceSwitcher.switchToDubbo(agentServiceRequest, formDataParser, ctx.channel());
+        ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
     }
 }

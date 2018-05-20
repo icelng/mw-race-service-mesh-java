@@ -1,11 +1,10 @@
 package com.yiran.agent.web;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.*;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.util.ByteProcessor;
+import io.netty.util.Recycler;
 import io.netty.util.internal.AppendableCharSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FormDataParser implements ByteProcessor {
+    private static final Recycler<FormDataParser> RECYCLER = new Recycler<FormDataParser>() {
+        @Override
+        protected FormDataParser newObject(Handle<FormDataParser> handle) {
+            return new FormDataParser(handle);
+        }
+    };
+
     private static Logger logger = LoggerFactory.getLogger(FormDataParser.class);
     private static final byte CHAR_AND = 38;  // &符号
     private static final byte CHAR_EQUAL = 61;  // =号
@@ -25,10 +31,21 @@ public class FormDataParser implements ByteProcessor {
     private int size;
     private ByteBuf seq;
     private final int maxLength;
+    private Recycler.Handle<FormDataParser> recyclerHandle;
 
-    public FormDataParser(int maxLength){
-        this.maxLength = maxLength;
-        this.seq = PooledByteBufAllocator.DEFAULT.buffer(64);
+    public FormDataParser(Recycler.Handle<FormDataParser> handle){
+        this.recyclerHandle = handle;
+        this.maxLength = 2048;
+        this.seq = Unpooled.directBuffer(2048);
+    }
+
+    public void release(){
+        this.seq.clear();
+        recyclerHandle.recycle(this);
+    }
+
+    public static FormDataParser get(){
+        return RECYCLER.get();
     }
 
     public String parseInterface(ByteBuf buffer) throws UnsupportedEncodingException {

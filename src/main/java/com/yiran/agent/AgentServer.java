@@ -29,7 +29,7 @@ public class AgentServer {
 
         /*启动netty服务*/
         logger.info("Starting netty server for agent...");
-        EventLoopGroup bossGroup = new NioEventLoopGroup(4);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         ServerBootstrap b = new ServerBootstrap();
 

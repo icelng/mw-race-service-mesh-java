@@ -21,7 +21,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private int contentLength = 0;
 
     private HttpRequest request = null;
-    private FormDataParser formDataParser = new FormDataParser(2048);
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg)
@@ -37,6 +36,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (msg instanceof LastHttpContent) {
                 try{
+                    FormDataParser formDataParser = FormDataParser.get();
                     String serviceName = formDataParser.parseInterface(contentBuf);
                     if(serviceName == null) {
                         logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
@@ -51,6 +51,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                     /*调用服务*/
                     agentClient.request(ctx.channel(), contentBuf);
+                    formDataParser.release();
                     contentBuf.release();
 
                 } catch (Exception e) {

@@ -156,7 +156,7 @@ public class PerformanceMonitor {
                 logger.error("", e);
             }
 
-        }, 0, 10, TimeUnit.SECONDS);
+        }, 0, 250, TimeUnit.SECONDS);
 
     }
 

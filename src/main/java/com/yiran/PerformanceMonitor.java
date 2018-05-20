@@ -144,8 +144,13 @@ public class PerformanceMonitor {
     public void runMemoryMonitor(){
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             String command = "jmap -dump:format=b,file=" + System.getProperty("logs.dir")  + "/dumpfile" + jmapCnt++ + ".hprof " + getProcessID();
+            Process process;
             try {
-                Runtime.getRuntime().exec(command);
+                process = Runtime.getRuntime().exec(command);
+                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line = in.readLine();
+                logger.info("dump file:{}", line);
+                process.destroy();
             } catch (IOException e) {
                 logger.error("", e);
             }

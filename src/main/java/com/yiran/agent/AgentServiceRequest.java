@@ -1,6 +1,7 @@
 package com.yiran.agent;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.util.Recycler;
 
@@ -27,11 +28,12 @@ public class AgentServiceRequest {
     }
 
     public AgentServiceRequest(Recycler.Handle<AgentServiceRequest> handle){
+        this.data = PooledByteBufAllocator.DEFAULT.buffer(2048);
         this.recyclerHandle = handle;
     }
 
     public void release(){
-        data.release();
+        this.data.clear();
         recyclerHandle.recycle(this);
     }
 

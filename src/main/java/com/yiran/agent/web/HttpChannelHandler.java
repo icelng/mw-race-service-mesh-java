@@ -51,6 +51,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                     /*调用服务*/
                     agentClient.request(ctx.channel(), contentBuf);
+                    contentBuf.release();
 
                 } catch (Exception e) {
                     logger.error("", e);

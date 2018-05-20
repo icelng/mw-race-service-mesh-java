@@ -93,7 +93,7 @@ public class AgentClient {
 
         AgentServiceRequest agentServiceRequest = AgentServiceRequest.get();
         agentServiceRequest.setRequestId(requestId);
-        agentServiceRequest.setData(data);
+        agentServiceRequest.getData().writeBytes(data);
 
         AgentServiceRequestFuture future = AgentServiceRequestFuture.getFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);

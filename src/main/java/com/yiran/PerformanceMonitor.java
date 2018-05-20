@@ -6,9 +6,14 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 
 
 public class PerformanceMonitor {
@@ -34,7 +39,7 @@ public class PerformanceMonitor {
 
     public PerformanceMonitor(){
 
-        runCpuMonitor();
+//        runCpuMonitor();
 
     }
 
@@ -98,5 +103,39 @@ public class PerformanceMonitor {
 
     public long getCtxtPerSecond() {
         return ctxtPerSecond;
+    }
+
+    public static void main(String args[]) throws InterruptedException {
+        PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+        while(true) {
+            String gcInfo = performanceMonitor.jstatGc();
+            System.out.println(gcInfo);
+            Thread.sleep(1000);
+        }
+    }
+
+    public int getProcessID() {
+        RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        return Integer.valueOf(runtimeMXBean.getName().split("@")[0])
+                .intValue();
+    }
+
+    public String jstatGc(){
+        String command = "jstat -gc " + getProcessID();
+        Process process;
+        String gcInfo = "";
+        try {
+            process = Runtime.getRuntime().exec(command);
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                gcInfo += (line + "\n");
+            }
+            in.close();
+            process.destroy();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return gcInfo;
     }
 }

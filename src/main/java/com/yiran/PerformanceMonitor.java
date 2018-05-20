@@ -42,7 +42,7 @@ public class PerformanceMonitor {
     public PerformanceMonitor(){
 
         runCpuMonitor();
-        runMemoryMonitor();
+//        runMemoryMonitor();
     }
 
     private void runCpuMonitor(){

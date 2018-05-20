@@ -1,6 +1,7 @@
 package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.util.ByteProcessor;
@@ -21,12 +22,12 @@ public class FormDataParser implements ByteProcessor {
 
     private boolean nextIsValue = false;
     private int size;
-    private AppendableCharSequence seq;
+    private ByteBuf seq;
     private final int maxLength;
 
     public FormDataParser(int maxLength){
         this.maxLength = maxLength;
-        this.seq = new AppendableCharSequence(maxLength);
+        this.seq = ByteBufAllocator.DEFAULT.buffer(maxLength);
     }
 
     public String parseInterface(ByteBuf buffer) throws UnsupportedEncodingException {
@@ -38,18 +39,18 @@ public class FormDataParser implements ByteProcessor {
         String key = null;
         String value;
         while(true){
-            seq.reset();
+            seq.clear();
             int i = buffer.forEachByte(this);
             k++;
             if (k % 2 == 1) {
                 /*key*/
-                key = URLDecoder.decode(seq.toString(), "utf-8");
+                key = URLDecoder.decode(seq.toString(Charset.forName("utf-8")), "utf-8");
                 if (key == null) {
                     logger.error("Failed to parse key!");
                 }
             } else if (k % 2 == 0) {
                 /*value*/
-                value = URLDecoder.decode(seq.toString(), "utf-8");
+                value = URLDecoder.decode(seq.toString(Charset.forName("utf-8")), "utf-8");
                 if ("interface".equals(key)) {
                     buffer.readerIndex(oldReaderIndex);  // 恢复buffer
                     return value;
@@ -74,18 +75,18 @@ public class FormDataParser implements ByteProcessor {
         String key = null;
         String value = null;
         while(true){
-            seq.reset();
+            seq.clear();
             int i = buffer.forEachByte(this);
             k++;
             if (k % 2 == 1) {
                 /*key*/
-                key = URLDecoder.decode(seq.toString(), "utf-8");
+                key = URLDecoder.decode(seq.toString(Charset.forName("utf-8")), "utf-8");
                 if (key == null) {
                     logger.error("Failed to parse key!");
                 }
             } else if (k % 2 == 0) {
                 /*value*/
-                value = URLDecoder.decode(seq.toString(), "utf-8");
+                value = URLDecoder.decode(seq.toString(Charset.forName("utf-8")), "utf-8");
                 if (value == null && this.nextIsValue) {
                     parameterMap.put(key, "");
                 } else {
@@ -102,7 +103,7 @@ public class FormDataParser implements ByteProcessor {
 
     @Override
     public boolean process(byte value) throws Exception {
-        char nextByte = (char) (value & 0xFF);
+        byte nextByte = value;
         if (nextByte == CHAR_EQUAL) {
             this.nextIsValue = true;
             return false;
@@ -122,7 +123,7 @@ public class FormDataParser implements ByteProcessor {
             throw newException(maxLength);
         }
 
-        seq.append(nextByte);
+        seq.writeByte(nextByte);
         return true;
     }
 

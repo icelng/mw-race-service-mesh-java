@@ -29,7 +29,7 @@ public class AgentClient {
     private String host;
     private int port;
     private Channel channel;
-    private AtomicLong requestId = new AtomicLong(0);
+    private static AtomicLong requestId = new AtomicLong(0);
 
     /*表示正在处理的请求数，负载均衡用*/
     private AtomicLong processingRequestNum;
@@ -104,10 +104,10 @@ public class AgentClient {
 
 
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
-        long requestId = this.requestId.addAndGet(1);
+        long reqId = requestId.addAndGet(1);
 
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
-        agentServiceRequest.setRequestId(requestId);
+        agentServiceRequest.setRequestId(reqId);
         agentServiceRequest.setData(data);
         //agentServiceRequest.getData().writeBytes(data);
 

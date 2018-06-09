@@ -17,7 +17,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
     private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
 
-    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.compositeBuffer();
+    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private int contentLength = 0;
 
     private HttpRequest request = null;

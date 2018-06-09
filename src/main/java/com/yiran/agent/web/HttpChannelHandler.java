@@ -57,6 +57,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                     /*调用服务*/
                     agentClient.request(ctx.channel(), contentBuf);
+                    parseTempBuf.release();
                     //formDataParser.release();
                     //contentBuf.release();
 

@@ -61,6 +61,8 @@ public class AgentClient {
         this.host = host;
         this.port = port;
         this.name = host + ":" + String.valueOf(port);
+        processingRequestNum = new AtomicLong(0);
+        supportedServiceMap = new ConcurrentHashMap<>();
     }
 
     //public void run() throws InterruptedException {
@@ -104,7 +106,8 @@ public class AgentClient {
 
         AgentServiceRequest agentServiceRequest = AgentServiceRequest.get();
         agentServiceRequest.setRequestId(requestId);
-        agentServiceRequest.getData().writeBytes(data);
+        agentServiceRequest.setData(data);
+        //agentServiceRequest.getData().writeBytes(data);
 
         AgentServiceRequestFuture future = AgentServiceRequestFuture.getFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);

@@ -45,7 +45,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 agentServiceRequest.setRequestId(in.readLong());
                 /*获取数据长度*/
                 dataLength = in.readInt();
-                agentServiceRequest.setData(byteBufAllocator.buffer(dataLength));
+                //agentServiceRequest.setData(byteBufAllocator.buffer(dataLength));
                 isHeader = false;
             }
         }

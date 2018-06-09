@@ -16,14 +16,17 @@ import java.util.Map;
 
 public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
-    private static AgentClientManager agentClientManager = new AgentClientManager(HttpServer.WORKER_GROUP);
-    private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);
 
+    private LoadBalance loadBalance;
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private int contentLength = 0;
 
     private HttpRequest request = null;
+
+    public HttpChannelHandler (LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg)

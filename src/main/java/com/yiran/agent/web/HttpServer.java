@@ -1,5 +1,7 @@
 package com.yiran.agent.web;
 
+import com.yiran.LoadBalance;
+import com.yiran.agent.AgentClientManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
@@ -12,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 public class HttpServer {
     private static Logger logger = LoggerFactory.getLogger(HttpServer.class);
-    public static EventLoopGroup BOSS_GROUP = new NioEventLoopGroup(1);
-    public static EventLoopGroup WORKER_GROUP = new NioEventLoopGroup(16);
 
     private int port;
 
@@ -22,10 +22,16 @@ public class HttpServer {
     }
 
     public void run() throws Exception {
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+
+        AgentClientManager agentClientManager = new AgentClientManager(workerGroup);
+        LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);
+
         ServerBootstrap b = new ServerBootstrap();
-        b.group(BOSS_GROUP, WORKER_GROUP)
+        b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new HttpChannelInitService())
+                .childHandler(new HttpChannelInitService(loadBalance))
                 .option(ChannelOption.SO_BACKLOG, 512)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)

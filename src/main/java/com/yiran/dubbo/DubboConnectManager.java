@@ -6,6 +6,8 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
@@ -16,7 +18,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DubboConnectManager {
     private static Logger logger = LoggerFactory.getLogger(DubboConnectManager.class);
 
-    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(16);
 
     private Bootstrap bootstrap;
 
@@ -30,13 +31,15 @@ public class DubboConnectManager {
         channels = new Channel[connectionNum];
     }
 
-    public void connect(String host, int port) {
+    public void connect(String host, int port) throws InterruptedException {
         initBootstrap();
         for (int i = 0;i < connectionNum;i++) {
             try {
+                logger.info("Connecting to Dubbo..");
                 channels[i] = bootstrap.connect(host, port).sync().channel();
             } catch (InterruptedException e) {
                 logger.error("Failed to connect to dubbo! host:{}  port:{}", host, port);
+                Thread.sleep(1000);
                 i--;
             }
         }
@@ -49,12 +52,13 @@ public class DubboConnectManager {
 
     public void initBootstrap() {
 
+        EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(16);
         bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .channel(NioSocketChannel.class)
+                .channel(EpollSocketChannel.class)
                 .handler(new RpcClientInitializer());
     }
 }

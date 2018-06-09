@@ -66,7 +66,7 @@ public class AgentApp {
             //    }
             //}
             /*往服务交换机注册支持的通道*/
-            ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
+            ServiceSwitcher.setRpcClientChannel(dubboConnectManager);
 
             /*启动4个Agent服务*/
             for (int i = 0;i < 4;i++){

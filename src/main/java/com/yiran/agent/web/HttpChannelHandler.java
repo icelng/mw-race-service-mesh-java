@@ -20,7 +20,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private LoadBalance loadBalance;
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
-    private int contentLength = 0;
 
     private HttpRequest request = null;
 
@@ -31,9 +30,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg)
             throws Exception {
-        if (msg instanceof HttpRequest) {
-            contentLength = HttpUtil.getContentLength((HttpMessage) msg, 0);
-        }
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;
             ByteBuf buf = content.content();

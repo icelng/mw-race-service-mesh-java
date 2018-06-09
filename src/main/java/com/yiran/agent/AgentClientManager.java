@@ -5,8 +5,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class AgentClientManager {
 
@@ -36,7 +36,7 @@ public class AgentClientManager {
     private void initBootstrap() {
         bootstrap = new Bootstrap();
         bootstrap.group(this.workerEventLoopGroup);
-        bootstrap.channel(NioSocketChannel.class);
+        bootstrap.channel(EpollSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
         bootstrap.option(ChannelOption.TCP_NODELAY, true);
         bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);

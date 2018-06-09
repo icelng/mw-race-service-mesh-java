@@ -17,6 +17,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
     private Boolean isHeader = true;
     private long requestId;
     private int dataLength;
+    private byte[] header = new byte[HEADER_LENGTH];
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
@@ -25,7 +26,6 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
                 return;
             }
             /*解析报头*/
-            byte[] header = new byte[HEADER_LENGTH];
             byteBuf.readBytes(header, 0, HEADER_LENGTH);
             requestId = Bytes.bytes2long(header, 4);
             dataLength = Bytes.bytes2int(header, 12);

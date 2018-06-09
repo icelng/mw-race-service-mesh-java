@@ -1,8 +1,10 @@
 package com.yiran.agent;
 
+import com.yiran.agent.web.FormDataParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.slf4j.Logger;
@@ -22,6 +24,8 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
 
     private boolean isHeader = true;
     private AgentServiceRequest agentServiceRequest;
+    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
+    private FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
 
     private int dataLength;
 
@@ -50,6 +54,11 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < dataLength) {
             return;
         }
+        int writerIndexSave = in.writerIndex();
+        in.writerIndex(in.readerIndex() + dataLength);
+        agentServiceRequest.setFormDataMap(formDataParser.parse(in));
+        in.writerIndex(writerIndexSave);
+        in.readerIndex(in.readerIndex() + dataLength);
         in.readBytes(agentServiceRequest.getData(), dataLength);
 
         out.add(agentServiceRequest);

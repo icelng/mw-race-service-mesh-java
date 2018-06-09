@@ -111,7 +111,7 @@ public class AgentClient {
         agentServiceRequest.setData(data);
         //agentServiceRequest.getData().writeBytes(data);
 
-        AgentServiceRequestFuture future = AgentServiceRequestFuture.getFuture(this, agentServiceRequest, httpChannel);
+        AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
 //        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);

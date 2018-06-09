@@ -9,7 +9,6 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
             future.done(msg);
-            future.release();
         }
     }
 }

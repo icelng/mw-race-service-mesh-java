@@ -127,7 +127,8 @@ public class LoadBalance {
     }
 
     private AgentClient getOptimalByRandom() throws Exception {
-        int randomNum = ThreadLocalRandom.current().nextInt(60);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int randomNum = random.nextInt(60);
         int selectedLoadLevel = 0;
 
         if (randomNum >= 0 && randomNum < 10) {
@@ -144,7 +145,7 @@ public class LoadBalance {
             return null;
         }
 
-        String agentClientName = loadLevelAgentClients.get(0);
+        String agentClientName = loadLevelAgentClients.get(random.nextInt(loadLevelAgentClients.size()));
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
         return agentClient;

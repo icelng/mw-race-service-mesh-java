@@ -52,13 +52,13 @@ public class DubboConnectManager {
 
     public void initBootstrap() {
 
-        EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(16);
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(16);
         bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .channel(EpollSocketChannel.class)
+                .channel(NioSocketChannel.class)
                 .handler(new RpcClientInitializer());
     }
 }

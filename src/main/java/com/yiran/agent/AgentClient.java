@@ -58,7 +58,7 @@ public class AgentClient {
 
     public void connect(String host, int port) throws InterruptedException {
         logger.info("Connecting to provider-agent, host:{}  port:{}", host, port);
-        channel = bootstrap.connect(host, port).channel();
+        channel = bootstrap.connect(host, port).sync().channel();
         logger.info("Connected successfully!");
         this.host = host;
         this.port = port;
@@ -106,7 +106,7 @@ public class AgentClient {
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
         long requestId = this.requestId.addAndGet(1);
 
-        AgentServiceRequest agentServiceRequest = AgentServiceRequest.get();
+        AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setRequestId(requestId);
         agentServiceRequest.setData(data);
         //agentServiceRequest.getData().writeBytes(data);

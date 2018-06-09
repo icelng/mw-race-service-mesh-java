@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
 import io.netty.util.Recycler;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +99,13 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
 //            logger.info("Return hash code:{}", hashCodeString);
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
-            httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            httpChannel.writeAndFlush(httpResponse).addListener(new GenericFutureListener<io.netty.util.concurrent.Future<? super Void>>() {
+                @Override
+                public void operationComplete(io.netty.util.concurrent.Future<? super Void> future) throws Exception {
+                    agentServiceRequest.getData().release();
+                    httpChannel.close();
+                }
+            });
             agentServiceRequest.release();
         } else {
             logger.error("Request:{} error!", requestId);

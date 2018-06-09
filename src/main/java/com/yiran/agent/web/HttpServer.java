@@ -24,8 +24,9 @@ public class HttpServer {
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        EventLoopGroup agentClientWorkerGroup = new NioEventLoopGroup(16);
 
-        AgentClientManager agentClientManager = new AgentClientManager(workerGroup);
+        AgentClientManager agentClientManager = new AgentClientManager(agentClientWorkerGroup);
         LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);
 
         ServerBootstrap b = new ServerBootstrap();

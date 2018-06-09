@@ -21,7 +21,6 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
         out.writeInt(msg.getData().readableBytes());
         /*写入数据*/
         out.writeBytes(msg.getData());
-        msg.getData().release();
 
     }
 

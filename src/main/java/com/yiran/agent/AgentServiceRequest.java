@@ -27,6 +27,9 @@ public class AgentServiceRequest {
         return RECYCLER.get();
     }
 
+    public AgentServiceRequest(){
+    }
+
     public AgentServiceRequest(Recycler.Handle<AgentServiceRequest> handle){
         this.data = PooledByteBufAllocator.DEFAULT.buffer(2048);
         this.recyclerHandle = handle;

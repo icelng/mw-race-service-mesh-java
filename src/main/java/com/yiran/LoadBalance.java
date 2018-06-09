@@ -1,6 +1,7 @@
 package com.yiran;
 
 import com.yiran.agent.AgentClient;
+import com.yiran.agent.AgentClientManager;
 import com.yiran.registry.Endpoint;
 import com.yiran.registry.EtcdRegistry;
 import com.yiran.registry.IRegistry;
@@ -21,6 +22,7 @@ public class LoadBalance {
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
 
     private IRegistry registry;
+    private AgentClientManager agentClientManager;
     private ConcurrentHashMap<String, HashSet<String>>  serviceNameToAgentClientsMap;
     private ConcurrentHashMap<String, AgentClient> clientNameToAgentClientMap;
     private ConcurrentHashMap<Integer, List<String>> loadLevelToAgentClientsMap;
@@ -29,11 +31,12 @@ public class LoadBalance {
     private Random random1 = new Random();
     private Random random2 = new Random();
 
-    public LoadBalance(String registryAddress){
+    public LoadBalance(String registryAddress, AgentClientManager agentClientManager){
         registry = new EtcdRegistry(registryAddress);
         serviceNameToAgentClientsMap = new ConcurrentHashMap<>();
         clientNameToAgentClientMap = new ConcurrentHashMap<>();
         loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
+        this.agentClientManager = agentClientManager;
     }
 
     public boolean findService(String serviceName) throws Exception {
@@ -51,10 +54,10 @@ public class LoadBalance {
         String clientName = endpoint.getHost() + ":" + String.valueOf(endpoint.getPort());
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(clientName, null);
         if(agentClient == null){
-            agentClient = new AgentClient(endpoint.getHost(), endpoint.getPort());
+            agentClient = agentClientManager.newClient();
             clientNameToAgentClientMap.put(clientName, agentClient);
             agentClient.setLoadLevel(endpoint.getLoadLevel());
-            agentClient.run();
+            agentClient.connect(endpoint.getHost(), endpoint.getPort());
         }
 
         ServiceInfo service = endpoint.getSupportedService();

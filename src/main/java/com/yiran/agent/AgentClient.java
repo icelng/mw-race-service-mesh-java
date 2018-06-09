@@ -44,35 +44,46 @@ public class AgentClient {
     private static Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
 
-    public AgentClient(String host, int port){
+    //public AgentClient(String host, int port){
+    //    this.host = host;
+    //    this.port = port;
+    //    this.name = host + ":" + String.valueOf(port);
+    //    processingRequestNum = new AtomicLong(0);
+    //    supportedServiceMap = new ConcurrentHashMap<>();
+    //}
+
+    public AgentClient(Bootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
+
+    public void connect(String host, int port) throws InterruptedException {
+        channel = bootstrap.connect(host, port).sync().channel();
         this.host = host;
         this.port = port;
         this.name = host + ":" + String.valueOf(port);
-        processingRequestNum = new AtomicLong(0);
-        supportedServiceMap = new ConcurrentHashMap<>();
     }
 
-    public void run() throws InterruptedException {
+    //public void run() throws InterruptedException {
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
-        bootstrap = new Bootstrap();
-        bootstrap.group(workerGroup);
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-        bootstrap.option(ChannelOption.TCP_NODELAY, true);
-        bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-            protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new ConsumerAgentDecoder());
-                ch.pipeline().addLast(new ConsumerAgentEncoder());
-                ch.pipeline().addLast(new ConsumerAgentClientHandler());
-            }
-        });
+    //    EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+    //    bootstrap = new Bootstrap();
+    //    bootstrap.group(workerGroup);
+    //    bootstrap.channel(NioSocketChannel.class);
+    //    bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+    //    bootstrap.option(ChannelOption.TCP_NODELAY, true);
+    //    bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+    //    bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+    //        protected void initChannel(SocketChannel ch) throws Exception {
+    //            ch.pipeline().addLast(new ConsumerAgentDecoder());
+    //            ch.pipeline().addLast(new ConsumerAgentEncoder());
+    //            ch.pipeline().addLast(new ConsumerAgentClientHandler());
+    //        }
+    //    });
 
-        /*连接*/
-        channel = bootstrap.connect(host, port).sync().channel();
+    //    /*连接*/
+    //    channel = bootstrap.connect(host, port).sync().channel();
 
-    }
+    //}
 
     /**
      * 异步发起请求

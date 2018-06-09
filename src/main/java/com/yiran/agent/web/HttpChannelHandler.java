@@ -2,6 +2,7 @@ package com.yiran.agent.web;
 
 import com.yiran.LoadBalance;
 import com.yiran.agent.AgentClient;
+import com.yiran.agent.AgentClientManager;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -15,9 +16,11 @@ import java.util.Map;
 
 public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
-    private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"));
+    private static AgentClientManager agentClientManager = new AgentClientManager(HttpServer.WORKER_GROUP);
+    private static LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);
 
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
+    private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private int contentLength = 0;
 
     private HttpRequest request = null;
@@ -36,7 +39,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (msg instanceof LastHttpContent) {
                 try{
-                    FormDataParser formDataParser = FormDataParser.get();
+                    FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
                     String serviceName = formDataParser.parseInterface(contentBuf);
                     if(serviceName == null) {
                         logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
@@ -51,7 +54,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                     /*调用服务*/
                     agentClient.request(ctx.channel(), contentBuf);
-                    formDataParser.release();
+                    //formDataParser.release();
                     contentBuf.release();
 
                 } catch (Exception e) {

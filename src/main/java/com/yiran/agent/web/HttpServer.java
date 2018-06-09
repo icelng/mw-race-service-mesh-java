@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 public class HttpServer {
     private static Logger logger = LoggerFactory.getLogger(HttpServer.class);
+    public static EventLoopGroup BOSS_GROUP = new NioEventLoopGroup(1);
+    public static EventLoopGroup WORKER_GROUP = new NioEventLoopGroup(16);
 
     private int port;
 
@@ -20,10 +22,8 @@ public class HttpServer {
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         ServerBootstrap b = new ServerBootstrap();
-        b.group(bossGroup, workerGroup)
+        b.group(BOSS_GROUP, WORKER_GROUP)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new HttpChannelInitService())
                 .option(ChannelOption.SO_BACKLOG, 512)

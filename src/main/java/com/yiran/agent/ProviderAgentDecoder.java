@@ -59,7 +59,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         agentServiceRequest.setFormDataMap(formDataParser.parse(in));
         in.writerIndex(writerIndexSave);
         in.readerIndex(in.readerIndex() + dataLength);
-        in.readBytes(agentServiceRequest.getData(), dataLength);
+        //in.readBytes(agentServiceRequest.getData(), dataLength);
 
         out.add(agentServiceRequest);
 

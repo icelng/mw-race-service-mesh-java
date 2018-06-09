@@ -46,6 +46,9 @@ public class DubboConnectManager {
     }
 
     public Channel getChannel(){
+        if (connectionNum == 1) {
+            return channels[0];
+        }
         ThreadLocalRandom random = ThreadLocalRandom.current();
         return channels[random.nextInt(connectionNum)];
     }

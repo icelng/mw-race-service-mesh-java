@@ -53,7 +53,7 @@ public class AgentApp {
             //new ProviderAgentBootstrap().boot();
 
             /*先与Dubbo进行连接*/
-            DubboConnectManager dubboConnectManager = new DubboConnectManager(4);
+            DubboConnectManager dubboConnectManager = new DubboConnectManager(1);
             dubboConnectManager.connect("127.0.0.1", Integer.valueOf(System.getProperty("dubbo.protocol.port")));
             //Channel dubboChannel = null;
             //while(dubboChannel == null) {

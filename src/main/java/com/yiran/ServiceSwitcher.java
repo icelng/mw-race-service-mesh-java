@@ -66,9 +66,10 @@ public class ServiceSwitcher {
 
         long requestId = agentServiceRequest.getRequestId();
         //logger.info("Switch service for requestId:{}", requestId);
-        FormDataParser formDataParser = FormDataParser.get();
-        Map<String, String> argumentsMap = formDataParser.parse(agentServiceRequest.getData());
-        formDataParser.release();
+        //FormDataParser formDataParser = FormDataParser.get();
+        //Map<String, String> argumentsMap = formDataParser.parse(agentServiceRequest.getData());
+        Map<String, String> argumentsMap = agentServiceRequest.getFormDataMap();
+        //formDataParser.release();
 
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(argumentsMap.get("method"));
@@ -118,7 +119,7 @@ public class ServiceSwitcher {
         /*生成响应报文*/
         AgentServiceResponse agentServiceResponse = new AgentServiceResponse();
         agentServiceResponse.setRequestId(agentServiceRequest.getRequestId());
-        agentServiceRequest.release();
+        //agentServiceRequest.release();
 
         /*设置返回值为整形，hashcode*/
         String returnStr = new String(rpcResponse.getBytes(), "utf-8");

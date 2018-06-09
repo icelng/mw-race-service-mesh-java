@@ -5,6 +5,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.util.Recycler;
 
+import java.util.Map;
+
 
 public class AgentServiceRequest {
     private static final Recycler<AgentServiceRequest> RECYCLER = new Recycler<AgentServiceRequest>() {
@@ -22,6 +24,7 @@ public class AgentServiceRequest {
 
     private long requestId;
     private ByteBuf data;
+    private Map<String, String> formDataMap;
 
     public static AgentServiceRequest get(){
         return RECYCLER.get();
@@ -62,5 +65,13 @@ public class AgentServiceRequest {
 
     public void setRequestId(long requestId) {
         this.requestId = requestId;
+    }
+
+    public Map<String, String> getFormDataMap() {
+        return formDataMap;
+    }
+
+    public void setFormDataMap(Map<String, String> formDataMap) {
+        this.formDataMap = formDataMap;
     }
 }

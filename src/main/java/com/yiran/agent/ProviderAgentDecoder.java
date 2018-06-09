@@ -1,6 +1,8 @@
 package com.yiran.agent;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import java.util.List;
  */
 public class ProviderAgentDecoder extends ByteToMessageDecoder {
     private static Logger logger = LoggerFactory.getLogger(ProviderAgentDecoder.class);
+    private ByteBufAllocator byteBufAllocator = PooledByteBufAllocator.DEFAULT;
 
     private static final int HEADER_LENGTH = 12;
 
@@ -33,11 +36,12 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 /*解析头部*/
-                agentServiceRequest = AgentServiceRequest.get();
+                agentServiceRequest = new AgentServiceRequest();
                 /*获取requestId*/
                 agentServiceRequest.setRequestId(in.readLong());
                 /*获取数据长度*/
                 dataLength = in.readInt();
+                agentServiceRequest.setData(byteBufAllocator.buffer(dataLength));
                 isHeader = false;
             }
         }

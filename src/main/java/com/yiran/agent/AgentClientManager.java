@@ -34,6 +34,7 @@ public class AgentClientManager {
     }
 
     private void initBootstrap() {
+        bootstrap = new Bootstrap();
         bootstrap.group(this.workerEventLoopGroup);
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);

@@ -145,7 +145,8 @@ public class LoadBalance {
             return null;
         }
 
-        String agentClientName = loadLevelAgentClients.get(random.nextInt(loadLevelAgentClients.size()));
+//        String agentClientName = loadLevelAgentClients.get(random.nextInt(loadLevelAgentClients.size()));
+        String agentClientName = loadLevelAgentClients.get(0);
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
         return agentClient;

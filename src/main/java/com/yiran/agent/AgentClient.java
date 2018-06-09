@@ -58,14 +58,15 @@ public class AgentClient {
 
     public void connect(String host, int port) throws InterruptedException {
         logger.info("Connecting to provider-agent, host:{}  port:{}", host, port);
-        while (true) {
-            try {
-                channel = bootstrap.connect(host, port).sync().channel();
-                break;
-            } catch (Exception e) {
-                logger.error("Failed to connect to provider-agent!");
-            }
-        }
+        //while (true) {
+        //    try {
+        //        channel = bootstrap.connect(host, port).sync().channel();
+        //        break;
+        //    } catch (Exception e) {
+        //        logger.error("Failed to connect to provider-agent!");
+        //    }
+        //}
+        channel = bootstrap.connect(host, port).channel();
         logger.info("Connected successfully!");
         this.host = host;
         this.port = port;

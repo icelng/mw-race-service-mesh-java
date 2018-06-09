@@ -21,7 +21,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
 
-    private HttpRequest request = null;
 
     public HttpChannelHandler (LoadBalance loadBalance) {
         this.loadBalance = loadBalance;
@@ -53,7 +52,6 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                     /*调用服务*/
                     agentClient.request(ctx.channel(), contentBuf);
-                    parseTempBuf.release();
                     //formDataParser.release();
                     //contentBuf.release();
 
@@ -73,6 +71,12 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
 //        }
     }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        parseTempBuf.release();
+        contentBuf.release();
+    }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {

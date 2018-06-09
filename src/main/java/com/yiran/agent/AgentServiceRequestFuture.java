@@ -106,7 +106,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
                     httpChannel.close();
                 }
             });
-            agentServiceRequest.release();
+            //agentServiceRequest.release();
         } else {
             logger.error("Request:{} error!", requestId);
         }

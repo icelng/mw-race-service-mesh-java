@@ -8,42 +8,43 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DubboConnectManager {
+    private static Logger logger = LoggerFactory.getLogger(DubboConnectManager.class);
+
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(16);
 
     private Bootstrap bootstrap;
 
-    private Channel channel;
+    private int connectionNum;
+    private Channel channels[];
+    //private Channel channel;
     private Object lock = new Object();
 
-    public DubboConnectManager() {
+    public DubboConnectManager(int connectionNum) {
+        this.connectionNum = connectionNum;
+        channels = new Channel[connectionNum];
     }
 
-    public Channel getChannel() throws Exception {
-        if (null != channel) {
-            return channel;
-        }
-
-        if (null == bootstrap) {
-            synchronized (lock) {
-                if (null == bootstrap) {
-                    initBootstrap();
-                }
+    public void connect(String host, int port) {
+        initBootstrap();
+        for (int i = 0;i < connectionNum;i++) {
+            try {
+                channels[i] = bootstrap.connect(host, port).sync().channel();
+            } catch (InterruptedException e) {
+                logger.error("Failed to connect to dubbo! host:{}  port:{}", host, port);
+                i--;
             }
         }
+    }
 
-        if (null == channel) {
-            synchronized (lock){
-                if (null == channel){
-//                    int port = 20880;
-                    int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
-                    channel = bootstrap.connect("127.0.0.1", port).sync().channel();
-                }
-            }
-        }
-
-        return channel;
+    public Channel getChannel(){
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        return channels[random.nextInt(connectionNum)];
     }
 
     public void initBootstrap() {

@@ -63,11 +63,13 @@ public class LoadBalance {
         ServiceInfo service = endpoint.getSupportedService();
         agentClient.addSupportedService(service);
         String serviceName = service.getServiceName();
-        HashSet<String> serviceNameAgentClients = serviceNameToAgentClientsMap.computeIfAbsent(serviceName, k -> new HashSet<>());
-        serviceNameAgentClients.add(clientName);
 
         List<String> loadLevelAgentClients = loadLevelToAgentClientsMap.computeIfAbsent(endpoint.getLoadLevel(), k -> new ArrayList<>());
         loadLevelAgentClients.add(clientName);
+
+        HashSet<String> serviceNameAgentClients = serviceNameToAgentClientsMap.computeIfAbsent(serviceName, k -> new HashSet<>());
+        serviceNameAgentClients.add(clientName);
+
 
         return agentClient;
     }

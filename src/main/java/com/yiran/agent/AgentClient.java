@@ -57,7 +57,9 @@ public class AgentClient {
     }
 
     public void connect(String host, int port) throws InterruptedException {
+        logger.info("Connecting to provider-agent, host:{}  port:{}", host, port);
         channel = bootstrap.connect(host, port).sync().channel();
+        logger.info("Connected successfully!");
         this.host = host;
         this.port = port;
         this.name = host + ":" + String.valueOf(port);
@@ -114,6 +116,7 @@ public class AgentClient {
 
 //        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
 //        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
+        logger.info("before write and flush for reqId:{}", requestId);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
 
         return future;

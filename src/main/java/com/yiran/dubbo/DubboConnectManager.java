@@ -37,7 +37,7 @@ public class DubboConnectManager {
             try {
                 logger.info("Connecting to Dubbo..");
                 channels[i] = bootstrap.connect(host, port).sync().channel();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 logger.error("Failed to connect to dubbo! host:{}  port:{}", host, port);
                 Thread.sleep(1000);
                 i--;

@@ -41,11 +41,12 @@ public class ServiceSwitcher {
 
     /**
      * 设置实现Dubbo协议的Netty客户端通道(Channel)
-     * @param connectManager
+     * @param channel
      * 客户端Channel
      */
-    public static void setRpcClientChannel(DubboConnectManager connectManager){
-        dubboConnectManager = connectManager;
+    public static void setRpcClientChannel(Channel channel){
+        //dubboConnectManager = connectManager;
+        rpcClientChannel = channel;
         rpcChannelReady.countDown();
     }
 
@@ -96,8 +97,8 @@ public class ServiceSwitcher {
         agentServiceRequest.setChannel(agentChannel);
         processingRequest.put(String.valueOf(requestId), agentServiceRequest);
 
-        //rpcClientChannel.writeAndFlush(request);
-        dubboConnectManager.getChannel().writeAndFlush(request);
+        rpcClientChannel.writeAndFlush(request);
+        //dubboConnectManager.getChannel().writeAndFlush(request);
 
     }
 

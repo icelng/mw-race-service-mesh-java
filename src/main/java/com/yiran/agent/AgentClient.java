@@ -116,7 +116,7 @@ public class AgentClient {
 
 //        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
 //        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
-        logger.info("before write and flush for reqId:{}", requestId);
+        //logger.info("before write and flush for reqId:{}", requestId);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
 
         return future;

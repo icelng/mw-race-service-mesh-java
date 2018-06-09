@@ -14,7 +14,7 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
 
     protected void encode(ChannelHandlerContext ctx, AgentServiceRequest msg, ByteBuf out) throws Exception {
 
-        logger.info("Request reqId:{},  data:{}", msg.getRequestId(), msg.getData().toString(CharsetUtil.UTF_8));
+        //logger.info("Request reqId:{},  data:{}", msg.getRequestId(), msg.getData().toString(CharsetUtil.UTF_8));
         /*写requestId*/
         out.writeLong(msg.getRequestId());
         /*写入数据长度*/

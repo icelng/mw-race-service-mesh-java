@@ -51,7 +51,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     }
                     /*开始调用服务*/
 
-                    logger.info("serviceName:{}", serviceName);
+                    //logger.info("serviceName:{}", serviceName);
 
                     /*选出最优客户端*/
                     AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);

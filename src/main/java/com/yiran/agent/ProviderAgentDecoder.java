@@ -46,7 +46,7 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < dataLength) {
             return;
         }
-        in.readBytes(agentServiceRequest.getData());
+        in.readBytes(agentServiceRequest.getData(), dataLength);
 
         out.add(agentServiceRequest);
 

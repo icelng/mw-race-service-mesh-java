@@ -21,12 +21,14 @@ public class DubboConnectManager {
 
     private Bootstrap bootstrap;
 
+    private EventLoopGroup eventLoopGroup;
     private int connectionNum;
     private Channel channels[];
     //private Channel channel;
     private Object lock = new Object();
 
-    public DubboConnectManager(int connectionNum) {
+    public DubboConnectManager(int connectionNum, EventLoopGroup eventLoopGroup) {
+        this.eventLoopGroup = eventLoopGroup;
         this.connectionNum = connectionNum;
         channels = new Channel[connectionNum];
     }
@@ -55,13 +57,12 @@ public class DubboConnectManager {
 
     public void initBootstrap() {
 
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(16);
         bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .channel(NioSocketChannel.class)
+                .channel(EpollSocketChannel.class)
                 .handler(new RpcClientInitializer());
     }
 }

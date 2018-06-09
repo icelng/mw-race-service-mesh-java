@@ -4,6 +4,8 @@ import com.yiran.agent.AgentServer;
 import com.yiran.agent.web.HttpServer;
 import com.yiran.dubbo.DubboConnectManager;
 import io.netty.channel.Channel;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -53,7 +55,8 @@ public class AgentApp {
             //new ProviderAgentBootstrap().boot();
 
             /*先与Dubbo进行连接*/
-            DubboConnectManager dubboConnectManager = new DubboConnectManager(1);
+            EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(16);
+            DubboConnectManager dubboConnectManager = new DubboConnectManager(1, eventLoopGroup);
             dubboConnectManager.connect("127.0.0.1", Integer.valueOf(System.getProperty("dubbo.protocol.port")));
             //Channel dubboChannel = null;
             //while(dubboChannel == null) {
@@ -72,7 +75,7 @@ public class AgentApp {
             for (int i = 0;i < 1;i++){
                 try {
                     int port = Integer.valueOf(System.getProperty("server.port" + i));
-                    new AgentServer(port).run();
+                    new AgentServer(port, eventLoopGroup).run();
                 } catch (Exception e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }

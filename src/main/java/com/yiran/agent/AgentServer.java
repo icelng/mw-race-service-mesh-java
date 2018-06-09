@@ -21,9 +21,11 @@ public class AgentServer {
     private static Logger logger = LoggerFactory.getLogger(AgentServer.class);
     private IRegistry registry;
 
+    private EventLoopGroup eventLoopGroup;
     private int port;
 
-    public AgentServer(int port){
+    public AgentServer(int port, EventLoopGroup eventLoopGroup){
+        this.eventLoopGroup = eventLoopGroup;
         this.port = port;
     }
 
@@ -32,10 +34,9 @@ public class AgentServer {
         /*启动netty服务*/
         logger.info("Starting netty server for agent...");
         EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
-        EventLoopGroup workerGroup = new EpollEventLoopGroup(16);
         ServerBootstrap b = new ServerBootstrap();
 
-        b.group(bossGroup, workerGroup)
+        b.group(bossGroup, eventLoopGroup)
                 .channel(EpollServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override

@@ -44,6 +44,9 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                         ctx.close();
                         return;
                     }
+                    /*截出parameter*/
+                    parseParameter(contentBuf);
+
                     /*开始调用服务*/
 
                     //logger.info("serviceName:{}", serviceName);
@@ -61,6 +64,21 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             }
         }
     }
+
+    private void parseParameter(ByteBuf content) {
+        byte c;
+        int equalCnt = 0;
+
+        while (true) {
+            c = content.readByte();
+            if (c == '=') {
+                if (++equalCnt == 4) {
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * 设置HTTP返回头信息
      */

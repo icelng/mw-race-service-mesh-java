@@ -10,7 +10,6 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,12 +53,12 @@ public class ProviderAgentDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < dataLength) {
             return;
         }
-        int writerIndexSave = in.writerIndex();
-        in.writerIndex(in.readerIndex() + dataLength);
-        agentServiceRequest.setFormDataMap(formDataParser.parse(in));
-        in.writerIndex(writerIndexSave);
-        in.readerIndex(in.readerIndex() + dataLength);
-        //in.readBytes(agentServiceRequest.getData(), dataLength);
+        //int writerIndexSave = in.writerIndex();
+        //in.writerIndex(in.readerIndex() + dataLength);
+        //agentServiceRequest.setFormDataMap(formDataParser.parse(in));
+        //in.writerIndex(writerIndexSave);
+        //in.readerIndex(in.readerIndex() + dataLength);
+        in.readBytes(agentServiceRequest.getData(), dataLength);
 
         out.add(agentServiceRequest);
 

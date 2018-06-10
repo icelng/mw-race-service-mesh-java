@@ -100,24 +100,24 @@ public class LoadBalance {
 
         ///*现在已经找到服务名对应agent客户端的集合，下面选出最优的agent客户端*/
         AgentClient optimalAgentClient = null;
-        float minPPL = MAX_PPL;  //  minimum processingRequestNum per loadLevel
-        for (String clientName : agentClientNames) {
-            AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
-            if(agentClient == null){
-                logger.error("AgentClient {} not found!", clientName);
-                return null;
-            }
+        //float minPPL = MAX_PPL;  //  minimum processingRequestNum per loadLevel
+        //for (String clientName : agentClientNames) {
+        //    AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
+        //    if(agentClient == null){
+        //        logger.error("AgentClient {} not found!", clientName);
+        //        return null;
+        //    }
 
-            /*计算最小的ppl*/
-            long processingRequestNum = agentClient.getProcessingRequestNum().get();
-            int loadLevel = agentClient.getLoadLevel();
-            float currentPPL = ((float) processingRequestNum)/((float) loadLevel);
-            if (currentPPL < minPPL) {
-                minPPL = currentPPL;
-                optimalAgentClient = agentClient;
-            }
-        }
-        //optimalAgentClient = getOptimalByRandom();
+        //    /*计算最小的ppl*/
+        //    long processingRequestNum = agentClient.getProcessingRequestNum().get();
+        //    int loadLevel = agentClient.getLoadLevel();
+        //    float currentPPL = ((float) processingRequestNum)/((float) loadLevel);
+        //    if (currentPPL < minPPL) {
+        //        minPPL = currentPPL;
+        //        optimalAgentClient = agentClient;
+        //    }
+        //}
+        optimalAgentClient = getOptimalByRandom();
         if (optimalAgentClient != null) {
             /*这里提前增加了请求数*/
             optimalAgentClient.requestReady();

@@ -38,8 +38,8 @@ public class HttpServer {
                 .option(ChannelOption.SO_BACKLOG, 512)
                 .option(EpollChannelOption.SO_REUSEPORT, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-//                .childOption(ChannelOption.TCP_NODELAY, true);
+                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.TCP_NODELAY, true);
         b.bind(this.port).sync();
     }
 

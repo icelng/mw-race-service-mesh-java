@@ -16,7 +16,6 @@ public class ProviderAgentAdvanceDecoder extends ChannelInboundHandlerAdapter {
     private boolean isHeader = true;
     private int decodeIndex = 0;
     private byte[] header = new byte[HEADER_LENGTH];
-    private AgentServiceRequest agentServiceRequest;
 
     /*报文成员*/
     private long requestId;
@@ -31,6 +30,7 @@ public class ProviderAgentAdvanceDecoder extends ChannelInboundHandlerAdapter {
                 if (isHeader) {
                     while (decodeIndex < HEADER_LENGTH) {
                         if (in.readableBytes() == 0) {
+                            in.release();
                             return;
                         }
                         header[decodeIndex++] = in.readByte();
@@ -49,7 +49,7 @@ public class ProviderAgentAdvanceDecoder extends ChannelInboundHandlerAdapter {
                     /*一个报文接收完毕*/
                     decodeIndex += needReadLen;
                     in.readBytes(data, needReadLen);
-                    agentServiceRequest = new AgentServiceRequest();
+                    AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
                     agentServiceRequest.setRequestId(requestId);
                     agentServiceRequest.setData(data);
                     isHeader = true;
@@ -58,6 +58,7 @@ public class ProviderAgentAdvanceDecoder extends ChannelInboundHandlerAdapter {
                 } else {
                     decodeIndex += in.readableBytes();
                     in.readBytes(data, in.readableBytes());
+                    in.release();
                     return;
                 }
             }

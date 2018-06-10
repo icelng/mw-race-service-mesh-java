@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
 
-    private Executor executor = Executors.newFixedThreadPool(512);
+    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);

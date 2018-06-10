@@ -100,6 +100,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
             httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            agentClient.requestDone();
             //agentServiceRequest.release();
         } else {
             logger.error("Request:{} error!", requestId);

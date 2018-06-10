@@ -83,7 +83,7 @@ public class ServiceSwitcher {
         invocation.setMethodName("hash");
         invocation.setAttachment("path", "com.alibaba.dubbo.performance.demo.provider.IHelloService");
         /*先写死一个参数*/
-        String parameterTypeName = "Ljava/lang/String";
+        String parameterTypeName = "Ljava/lang/String;";
         invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String
 
         /*转换参数，先固定成一个，并且是String类型的*/

@@ -6,16 +6,23 @@ import com.yiran.agent.AgentClientManager;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
+
+    private Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
     private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
@@ -46,15 +53,32 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
                     }
                     /*截出parameter*/
                     parseParameter(contentBuf);
+                    executor.execute(() -> {
+                        int hashCode = contentBuf.toString(CharsetUtil.UTF_8).hashCode();
+                        String hashCodeString = String.valueOf(hashCode);
+                        DefaultFullHttpResponse httpResponse = null;
+                        try {
+                            httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
+                            setHeaders(httpResponse);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ctx.channel().writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+                    });
 
-                    /*开始调用服务*/
+                    ///*开始调用服务*/
 
-                    //logger.info("serviceName:{}", serviceName);
+                    ////logger.info("serviceName:{}", serviceName);
 
-                    /*选出最优客户端*/
-                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
-                    /*调用服务*/
-                    agentClient.request(ctx.channel(), contentBuf);
+                    ///*选出最优客户端*/
+                    //AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+                    ///*调用服务*
+                    //agentClient.request(ctx.channel(), contentBuf);
                     //formDataParser.release();
                     //contentBuf.release();
 

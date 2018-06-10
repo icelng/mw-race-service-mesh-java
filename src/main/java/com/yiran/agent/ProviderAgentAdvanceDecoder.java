@@ -53,6 +53,7 @@ public class ProviderAgentAdvanceDecoder extends ChannelInboundHandlerAdapter {
                     agentServiceRequest.setRequestId(requestId);
                     agentServiceRequest.setData(data);
                     isHeader = true;
+                    decodeIndex = 0;
                     ctx.fireChannelRead(agentServiceRequest);
                 } else {
                     decodeIndex += in.readableBytes();

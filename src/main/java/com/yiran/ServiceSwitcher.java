@@ -89,6 +89,7 @@ public class ServiceSwitcher {
         /*转换参数，先固定成一个，并且是String类型的*/
         //String parameter = argumentsMap.get("parameter");
         String parameter = agentServiceRequest.getData().toString(CharsetUtil.UTF_8);
+        agentServiceRequest.getData().release();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
         JsonUtils.writeObject(parameter, writer);

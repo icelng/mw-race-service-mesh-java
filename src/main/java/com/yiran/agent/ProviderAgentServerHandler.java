@@ -10,6 +10,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -17,6 +20,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<AgentServiceRequest> {
     private static Logger logger = LoggerFactory.getLogger(ProviderAgentServerHandler.class);
+
+    private Executor executor = Executors.newFixedThreadPool(200);
+
 //    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
 //    private FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
 
@@ -27,7 +33,18 @@ public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<Agen
         //agentServiceRequest.setFormDataMap(formDataParser.parse(agentServiceRequest.getData()));
         //agentServiceRequest.getData().release();  // 其实这个是多了一次的拷贝
 
-        /*协议转换*/
-        ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
+        executor.execute(() -> {
+            /*协议转换*/
+            try {
+                Thread.sleep(10);  // 多睡10ms
+                ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
+            } catch (IOException e) {
+                logger.info("", e);
+                //e.printStackTrace();
+            } catch (InterruptedException e) {
+                logger.info("", e);
+            }
+        });
+
     }
 }

@@ -101,10 +101,11 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
         contentBuf.release();
     }
 
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();//刷新后才将数据发出到SocketChannel
-    }
+    //@Override
+    //public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    //    ctx.flush();//刷新后才将数据发出到SocketChannel
+    //}
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {

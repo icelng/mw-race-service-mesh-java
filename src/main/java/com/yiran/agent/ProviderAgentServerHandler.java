@@ -38,13 +38,10 @@ public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<Agen
             ThreadLocalRandom random = ThreadLocalRandom.current();
             /*协议转换*/
             try {
-                Thread.sleep(random.nextInt(10));  // 随机睡眠
                 ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
             } catch (IOException e) {
                 logger.info("", e);
                 //e.printStackTrace();
-            } catch (InterruptedException e) {
-                logger.info("", e);
             }
         });
 

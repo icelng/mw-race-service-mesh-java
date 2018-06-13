@@ -20,7 +20,7 @@ public class HttpChannelInitService extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel sc)
             throws Exception {
-        sc.pipeline().addLast(new IdleStateHandler(100, 100, 0, TimeUnit.MILLISECONDS));
+        sc.pipeline().addLast(new IdleStateHandler(100, 0, 0, TimeUnit.MILLISECONDS));
 
         sc.pipeline().addLast(new HttpResponseEncoder());
 

@@ -22,8 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<AgentServiceRequest> {
     private static Logger logger = LoggerFactory.getLogger(ProviderAgentServerHandler.class);
 
-    private Executor executor = Executors.newFixedThreadPool(200);
-
 //    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
 //    private FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
 
@@ -34,16 +32,7 @@ public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<Agen
         //agentServiceRequest.setFormDataMap(formDataParser.parse(agentServiceRequest.getData()));
         //agentServiceRequest.getData().release();  // 其实这个是多了一次的拷贝
 
-        executor.execute(() -> {
-            ThreadLocalRandom random = ThreadLocalRandom.current();
-            /*协议转换*/
-            try {
-                ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
-            } catch (IOException e) {
-                logger.info("", e);
-                //e.printStackTrace();
-            }
-        });
+        ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
 
     }
 }

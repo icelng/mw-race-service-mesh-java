@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
@@ -34,9 +35,10 @@ public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<Agen
         //agentServiceRequest.getData().release();  // 其实这个是多了一次的拷贝
 
         executor.execute(() -> {
+            ThreadLocalRandom random = ThreadLocalRandom.current();
             /*协议转换*/
             try {
-                Thread.sleep(10);  // 多睡10ms
+                Thread.sleep(random.nextInt(10));  // 随机睡眠
                 ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
             } catch (IOException e) {
                 logger.info("", e);

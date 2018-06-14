@@ -112,7 +112,7 @@ public class LoadBalance {
             long processingRequestNum = agentClient.getProcessingRequestNum().get();
             int loadLevel = agentClient.getLoadLevel();
             float currentPPL = ((float) processingRequestNum)/((float) loadLevel * 10);
-            if (currentPPL < minPPL) {
+            if (currentPPL < minPPL && processingRequestNum < 200) {
                 minPPL = currentPPL;
                 optimalAgentClient = agentClient;
             }

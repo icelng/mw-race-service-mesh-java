@@ -41,6 +41,8 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.READER_IDLE) {
                 ctx.close();
+            } else if (event.state() == IdleState.WRITER_IDLE) {
+                ctx.close();
             }
         } else {
             super.userEventTriggered(ctx, evt);

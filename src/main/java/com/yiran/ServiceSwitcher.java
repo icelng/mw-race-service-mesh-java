@@ -141,7 +141,7 @@ public class ServiceSwitcher {
 
         /*向客户端发送响应*/
         agentChannel.write(agentServiceResponse);
-        if (writeCnt++ % 30 == 0) {
+        if (writeCnt++ % 15 == 0) {
             /*写若干次才进行flush*/
             agentChannel.flush();
         }

@@ -38,6 +38,7 @@ public class ServiceSwitcher {
     /*service*/
     private static Map<Integer, ServiceInfo> serviceIdMap = new HashMap<>();
     private static Map<String, ServiceInfo> serviceNameMap = new HashMap<>();
+    private static long writeCnt = 0;
 
 
     /**
@@ -103,7 +104,12 @@ public class ServiceSwitcher {
         agentServiceRequest.setChannel(agentChannel);
         processingRequest.put(String.valueOf(requestId), agentServiceRequest);
 
-        rpcClientChannel.writeAndFlush(request);
+        rpcClientChannel.write(request);
+        if (writeCnt++ % 20 == 0) {
+            /*写若干次才进行flush*/
+            rpcClientChannel.flush();
+
+        }
         //dubboConnectManager.getChannel().writeAndFlush(request);
 
     }

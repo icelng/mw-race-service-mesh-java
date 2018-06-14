@@ -104,12 +104,7 @@ public class ServiceSwitcher {
         agentServiceRequest.setChannel(agentChannel);
         processingRequest.put(String.valueOf(requestId), agentServiceRequest);
 
-        rpcClientChannel.write(request);
-        if (writeCnt++ % 10 == 0) {
-            /*写若干次才进行flush*/
-            rpcClientChannel.flush();
-
-        }
+        rpcClientChannel.writeAndFlush(request);
         //dubboConnectManager.getChannel().writeAndFlush(request);
 
     }
@@ -145,7 +140,11 @@ public class ServiceSwitcher {
         agentServiceResponse.setHashCode(Integer.valueOf(intStr));
 
         /*向客户端发送响应*/
-        agentChannel.writeAndFlush(agentServiceResponse);
+        agentChannel.write(agentServiceResponse);
+        if (writeCnt++ % 10 == 0) {
+            /*写若干次才进行flush*/
+            agentChannel.flush();
+        }
 
     }
 

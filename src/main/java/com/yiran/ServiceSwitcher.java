@@ -140,11 +140,11 @@ public class ServiceSwitcher {
         agentServiceResponse.setHashCode(Integer.valueOf(intStr));
 
         /*向客户端发送响应*/
-        agentChannel.writeAndFlush(agentServiceResponse);
-        //if (writeCnt++ % 10 == 0) {
-        //    /*写若干次才进行flush*/
-        //    agentChannel.flush();
-        //}
+        agentChannel.write(agentServiceResponse);
+        if (writeCnt++ % 20 == 0) {
+            /*写若干次才进行flush*/
+            agentChannel.flush();
+        }
 
     }
 

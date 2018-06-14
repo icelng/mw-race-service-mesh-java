@@ -28,6 +28,7 @@ public class AgentClient {
     private String name;
     private String host;
     private int port;
+    private long writeCnt = 0;
     private Channel channel;
     private static AtomicLong requestId = new AtomicLong(0);
 
@@ -125,7 +126,10 @@ public class AgentClient {
 //        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
 //        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
         //logger.info("before write and flush for reqId:{}", requestId);
-        channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
+        channel.write(agentServiceRequest);  // 开始发送报文
+        if (writeCnt++ % 5 == 0) {
+            channel.flush();
+        }
 
         return future;
     }

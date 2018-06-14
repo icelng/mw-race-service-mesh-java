@@ -67,6 +67,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
                             logger.info("The content length is {}", remainContentSize);
                             httpContent = PooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
+                            isContentLen = false;
                         }
                         headerParseBuf.clear();
                         isKey = true;

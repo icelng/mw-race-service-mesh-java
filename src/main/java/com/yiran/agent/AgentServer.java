@@ -41,9 +41,7 @@ public class AgentServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-//                        ch.pipeline().addLast(new ProviderAgentAdvanceDecoder());
                         ch.pipeline().addLast(new AgentServiceDecoder());
-//                        ch.pipeline().addLast(new ProviderAgentDecoder());
                         ch.pipeline().addLast(new ProviderAgentEncoder());
                         ch.pipeline().addLast(new ProviderAgentServerHandler());
                     }

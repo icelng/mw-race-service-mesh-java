@@ -46,6 +46,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                             logger.info("detect content-length");
                             isContentLen = true;
                         }
+                        in.readByte();  // 多读一个空格
                         headerParseBuf.clear();
                         continue;
                     }

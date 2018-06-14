@@ -149,17 +149,16 @@ public class LoadBalance {
         String agentClientName = loadLevelAgentClients.get(0);
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
-        while (agentClient.getProcessingRequestNum().get() > 200) {
-            loadLevelAgentClients = loadLevelToAgentClientsMap.getOrDefault((selectedLoadLevel++) % 3 + 1, null);
-            if (loadLevelAgentClients == null || loadLevelAgentClients.size() == 0) {
-                logger.error("No agentClient for loadLevel:{} when getting optimal client!", selectedLoadLevel);
-                return null;
-            }
+        //while (agentClient.getProcessingRequestNum().get() > 200) {
+        //    loadLevelAgentClients = loadLevelToAgentClientsMap.getOrDefault((++selectedLoadLevel) % 3 + 1, null);
+        //    if (loadLevelAgentClients == null || loadLevelAgentClients.size() == 0) {
+        //        logger.error("No agentClient for loadLevel:{} when getting optimal client!", selectedLoadLevel);
+        //        return null;
+        //    }
 
-//        String agentClientName = loadLevelAgentClients.get(random.nextInt(loadLevelAgentClients.size()));
-            agentClientName = loadLevelAgentClients.get(0);
-            agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
-        }
+        //    agentClientName = loadLevelAgentClients.get(0);
+        //    agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
+        //}
 
         return agentClient;
     }

@@ -19,10 +19,8 @@ public class ConsumerAgentEncoder extends MessageToByteEncoder<AgentServiceReque
         //logger.info("Request reqId:{},  data:{}", msg.getRequestId(), msg.getData().toString(CharsetUtil.UTF_8));
         /*写requestId*/
         Bytes.long2bytes(msg.getRequestId(), header, 0);
-        //out.writeLong(msg.getRequestId());
         /*写入数据长度*/
         Bytes.int2bytes(msg.getData().readableBytes(), header, 8);
-        //out.writeInt(msg.getData().readableBytes());
         /*写入数据*/
         out.writeBytes(header);
         out.writeBytes(msg.getData());

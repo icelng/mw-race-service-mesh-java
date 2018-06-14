@@ -19,8 +19,6 @@ public class ProviderAgentEncoder extends MessageToByteEncoder {
         Bytes.long2bytes(agentServiceResponse.getRequestId(), header, 0);
         Bytes.int2bytes(4, header, 8);
         out.writeBytes(header);
-//        out.writeLong(agentServiceResponse.getRequestId());
-//        out.writeInt(data.length);
         out.writeInt(agentServiceResponse.getHashCode());
     }
 }

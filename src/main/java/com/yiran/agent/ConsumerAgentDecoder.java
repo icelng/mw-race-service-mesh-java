@@ -17,32 +17,32 @@ public class ConsumerAgentDecoder extends ByteToMessageDecoder {
 
     /*接收响应解码*/
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        /*接收头部*/
-        if (isHeader) {
-            if(in.readableBytes() <  HEADER_LENGTH){
-                return;
-            }
-            /*解析头部*/
-            agentServiceResponse = new AgentServiceResponse();
-            agentServiceResponse.setRequestId(in.readLong());
-            dataLength = in.readInt();
-
-            isHeader = false;
-        }
-
-        /*接收返回值*/
-        if (in.readableBytes() < dataLength) {
-            return;
-        }
-        byte[] returnValue = new byte[dataLength];
-        in.readBytes(returnValue, 0, dataLength);
-        agentServiceResponse.setReturnValue(returnValue);
-
-        out.add(agentServiceResponse);
-        /*释放引用*/
-        agentServiceResponse = null;
-
-        /*下一个字节开始是头*/
-        isHeader = true;
+//        /*接收头部*/
+//        if (isHeader) {
+//            if(in.readableBytes() <  HEADER_LENGTH){
+//                return;
+//            }
+//            /*解析头部*/
+//            agentServiceResponse = new AgentServiceResponse();
+//            agentServiceResponse.setRequestId(in.readLong());
+//            dataLength = in.readInt();
+//
+//            isHeader = false;
+//        }
+//
+//        /*接收返回值*/
+//        if (in.readableBytes() < dataLength) {
+//            return;
+//        }
+//        byte[] returnValue = new byte[dataLength];
+//        in.readBytes(returnValue, 0, dataLength);
+//        agentServiceResponse.setData(returnValue);
+//
+//        out.add(agentServiceResponse);
+//        /*释放引用*/
+//        agentServiceResponse = null;
+//
+//        /*下一个字节开始是头*/
+//        isHeader = true;
     }
 }

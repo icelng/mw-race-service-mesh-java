@@ -5,7 +5,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
 import io.netty.util.Recycler;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +91,9 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     }
 
 
-    public void done(AgentServiceResponse response) throws UnsupportedEncodingException {
+    public void done(AgentServiceBaseMsg response) throws UnsupportedEncodingException {
         if (response != null) {
-            int hashCode = Bytes.bytes2int(response.getReturnValue(), 0);
+            int hashCode = response.getData().readInt();
             String hashCodeString = String.valueOf(hashCode);
 //            logger.info("Return hash code:{}", hashCodeString);
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));

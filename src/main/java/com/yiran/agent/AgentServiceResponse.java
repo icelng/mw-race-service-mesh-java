@@ -1,27 +1,18 @@
 package com.yiran.agent;
 
-public class AgentServiceResponse {
-    private long requestId;
-    private byte[] returnValue;
+public class AgentServiceResponse extends AgentServiceBaseMsg{
+    private int hashCode;
 
     public AgentServiceResponse(){
 
     }
 
-
-    public byte[] getReturnValue() {
-        return returnValue;
+    public int getHashCode() {
+        return hashCode;
     }
 
-    public void setReturnValue(byte[] returnValue) {
-        this.returnValue = returnValue;
+    public void setHashCode(int hashCode) {
+        this.hashCode = hashCode;
     }
 
-    public long getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(long requestId) {
-        this.requestId = requestId;
-    }
 }

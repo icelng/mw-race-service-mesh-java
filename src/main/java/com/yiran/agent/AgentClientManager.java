@@ -42,7 +42,7 @@ public class AgentClientManager {
         bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new ConsumerAgentDecoder());
+                ch.pipeline().addLast(new AgentServiceDecoder());
                 ch.pipeline().addLast(new ConsumerAgentEncoder());
                 ch.pipeline().addLast(new ConsumerAgentClientHandler());
             }

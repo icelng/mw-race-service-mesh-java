@@ -136,9 +136,7 @@ public class ServiceSwitcher {
         /*设置返回值为整形，hashcode*/
         String returnStr = new String(rpcResponse.getBytes(), "utf-8");
         String intStr = returnStr.substring(2, returnStr.length() - 1);
-        byte[] intBytes = new byte[4];
-        Bytes.int2bytes(Integer.valueOf(intStr), intBytes, 0);
-        agentServiceResponse.setReturnValue(intBytes);
+        agentServiceResponse.setHashCode(Integer.valueOf(intStr));
 
         /*向客户端发送响应*/
         agentChannel.writeAndFlush(agentServiceResponse);

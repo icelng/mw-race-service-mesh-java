@@ -19,18 +19,22 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * 对发给Provider-Agent的服务请求报文的处理
  */
-public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<AgentServiceRequest> {
+public class ProviderAgentServerHandler extends SimpleChannelInboundHandler<AgentServiceBaseMsg> {
     private static Logger logger = LoggerFactory.getLogger(ProviderAgentServerHandler.class);
 
 //    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
 //    private FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, AgentServiceRequest agentServiceRequest) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, AgentServiceBaseMsg agentServiceBaseMsg) throws Exception {
 
         /*解析表单*/
         //agentServiceRequest.setFormDataMap(formDataParser.parse(agentServiceRequest.getData()));
         //agentServiceRequest.getData().release();  // 其实这个是多了一次的拷贝
+        AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
+        agentServiceRequest.setRequestId(agentServiceBaseMsg.getRequestId());
+        agentServiceRequest.setData(agentServiceBaseMsg.getData());
+        agentServiceRequest.setChannel(ctx.channel());
 
         ServiceSwitcher.switchToDubbo(agentServiceRequest, ctx.channel());
 

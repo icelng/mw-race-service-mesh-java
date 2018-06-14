@@ -8,14 +8,19 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * 自定义协议编码
  */
 public class ProviderAgentEncoder extends MessageToByteEncoder {
-    private static final int RETURN_VALUE_SIZE_ALIGN_BIT = 2;  // 返回值大小对齐 2^2=4
+    private static final int HEADER_LENGTH = 12;
+    private byte[] header = new byte[HEADER_LENGTH];
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         AgentServiceResponse agentServiceResponse = (AgentServiceResponse) msg;
-        byte[] data = agentServiceResponse.getReturnValue();
-        out.writeLong(agentServiceResponse.getRequestId());
-        out.writeInt(data.length);
-        out.writeBytes(data);
+
+        /*写头*/
+        Bytes.long2bytes(agentServiceResponse.getRequestId(), header, 0);
+        Bytes.int2bytes(4, header, 8);
+        out.writeBytes(header);
+//        out.writeLong(agentServiceResponse.getRequestId());
+//        out.writeInt(data.length);
+        out.writeInt(agentServiceResponse.getHashCode());
     }
 }

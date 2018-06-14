@@ -13,7 +13,7 @@ if [[ "$1" == "consumer" ]]; then
        -Xmx1536M \
        -Dtype=consumer \
        -Dserver.port=20000 \
-       -Dio.netty.leakDetection.level=advance \
+       -Dio.netty.leakDetection.level=advanced \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar

@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
-import io.netty.util.Recycler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private static Logger logger = LoggerFactory.getLogger(AgentServiceRequestFuture.class);
-    private static final Recycler<AgentServiceRequestFuture> RECYCLER = new Recycler<AgentServiceRequestFuture>() {
-        @Override
-        protected AgentServiceRequestFuture newObject(Handle<AgentServiceRequestFuture> handle) {
-            return new AgentServiceRequestFuture(handle);
-        }
-    };
 
-    private static ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(4);
-
-    private Recycler.Handle<AgentServiceRequestFuture> recyclerHandle;
     private long requestId;
     private AgentClient agentClient;
 
@@ -41,30 +31,6 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         this.requestId = agentServiceRequest.getRequestId();
         this.agentClient = agentClient;
         this.httpChannel = httpChannel;
-    }
-
-    public AgentServiceRequestFuture(Recycler.Handle<AgentServiceRequestFuture> handle) {
-        recyclerHandle = handle;
-    }
-
-    public static AgentServiceRequestFuture getFuture(AgentClient agentClient, AgentServiceRequest agentServiceRequest, Channel httpChannel){
-        AgentServiceRequestFuture agentServiceRequestFuture = RECYCLER.get();
-        agentServiceRequestFuture.agentServiceRequest = agentServiceRequest;
-        agentServiceRequestFuture.requestId = agentServiceRequest.getRequestId();
-        agentServiceRequestFuture.agentClient = agentClient;
-        agentServiceRequestFuture.httpChannel = httpChannel;
-        return agentServiceRequestFuture;
-    }
-
-    public void release(){
-        latch = null;
-        agentServiceResponse = null;
-        agentServiceRequest = null;
-        agentClient = null;
-        httpChannel = null;
-        isCancelled.set(false);
-        isDone.set(false);
-        recyclerHandle.recycle(this);
     }
 
 

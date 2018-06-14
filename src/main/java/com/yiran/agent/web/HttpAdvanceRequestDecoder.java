@@ -43,7 +43,6 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                     if (c == ':') {
                         isKey = false;
                         if ("content-length".equals(headerParseBuf.toString(CharsetUtil.UTF_8))) {
-                            logger.info("detect content-length");
                             isContentLen = true;
                         }
                         in.readByte();  // 多读一个空格
@@ -65,7 +64,6 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                         /*为value*/
                         if (isContentLen) {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
-                            logger.info("The content length is {}", remainContentSize);
                             httpContent = PooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
                             isContentLen = false;
                         }

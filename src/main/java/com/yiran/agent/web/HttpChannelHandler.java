@@ -21,13 +21,13 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
+public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
 
 //    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
-    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
+//    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
     private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
 
 
@@ -49,45 +49,81 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
+//    @Override
+//    public void channelRead0(ChannelHandlerContext ctx, Object msg)
+//            throws Exception {
+//        if (msg instanceof HttpContent) {
+//            HttpContent content = (HttpContent) msg;
+//            ByteBuf buf = content.content();
+//            if (buf.isReadable()) {
+//                contentBuf.writeBytes(buf);
+//            }
+//            if (msg instanceof LastHttpContent) {
+//                try{
+//                    FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+//                    String serviceName = formDataParser.parseInterface(contentBuf);
+//                    if(serviceName == null) {
+//                        logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
+//                        ctx.close();
+//                        return;
+//                    }
+//                    /*截出parameter*/
+//                    parseParameter(contentBuf);
+//
+//                    ///*开始调用服务*/
+//
+//                    ////logger.info("serviceName:{}", serviceName);
+//
+//                    ///*选出最优客户端*/
+//                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+//                    if (agentClient == null) {
+//                        ctx.close();
+//                        return;
+//                    }
+//                    ///*调用服务*
+//                    agentClient.request(ctx.channel(), contentBuf);
+//
+//                } catch (Exception e) {
+//                    logger.error("", e);
+//                }
+//            }
+//        }
+//    }
+
+
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Object msg)
-            throws Exception {
-        if (msg instanceof HttpContent) {
-            HttpContent content = (HttpContent) msg;
-            ByteBuf buf = content.content();
-            if (buf.isReadable()) {
-                contentBuf.writeBytes(buf);
-            }
-            if (msg instanceof LastHttpContent) {
-                try{
-                    FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
-                    String serviceName = formDataParser.parseInterface(contentBuf);
-                    if(serviceName == null) {
-                        logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-                        ctx.close();
-                        return;
-                    }
-                    /*截出parameter*/
-                    parseParameter(contentBuf);
-
-                    ///*开始调用服务*/
-
-                    ////logger.info("serviceName:{}", serviceName);
-
-                    ///*选出最优客户端*/
-                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
-                    if (agentClient == null) {
-                        ctx.close();
-                        return;
-                    }
-                    ///*调用服务*
-                    agentClient.request(ctx.channel(), contentBuf);
-
-                } catch (Exception e) {
-                    logger.error("", e);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof ByteBuf) {
+            ByteBuf contentBuf = (ByteBuf) msg;
+            try{
+                FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+                String serviceName = formDataParser.parseInterface(contentBuf);
+                if(serviceName == null) {
+                    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
+                    ctx.close();
+                    return;
                 }
+                /*截出parameter*/
+                parseParameter(contentBuf);
+
+                ///*开始调用服务*/
+
+                ////logger.info("serviceName:{}", serviceName);
+
+                ///*选出最优客户端*/
+                AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+                if (agentClient == null) {
+                    ctx.close();
+                    return;
+                }
+                ///*调用服务*
+                agentClient.request(ctx.channel(), contentBuf);
+
+            } catch (Exception e) {
+                logger.error("", e);
             }
         }
+
     }
 
     private void parseParameter(ByteBuf content) {
@@ -118,7 +154,7 @@ public class HttpChannelHandler extends SimpleChannelInboundHandler<Object> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         parseTempBuf.release();
-        contentBuf.release();
+//        contentBuf.release();
     }
 
     //@Override

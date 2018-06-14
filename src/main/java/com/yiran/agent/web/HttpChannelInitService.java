@@ -24,7 +24,9 @@ public class HttpChannelInitService extends ChannelInitializer<SocketChannel> {
 
         sc.pipeline().addLast(new HttpResponseEncoder());
 
-        sc.pipeline().addLast(new HttpRequestDecoder());
+//        sc.pipeline().addLast(new HttpRequestDecoder());
+
+        sc.pipeline().addLast(new HttpAdvanceRequestDecoder());
 
         sc.pipeline().addLast(new HttpChannelHandler(loadBalance));
     }

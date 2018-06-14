@@ -150,7 +150,7 @@ public class LoadBalance {
         AgentClient agentClient = clientNameToAgentClientMap.getOrDefault(agentClientName, null);
 
         while (agentClient.getProcessingRequestNum().get() > 200) {
-            loadLevelAgentClients = loadLevelToAgentClientsMap.getOrDefault((selectedLoadLevel + 1) % 3 + 1, null);
+            loadLevelAgentClients = loadLevelToAgentClientsMap.getOrDefault((selectedLoadLevel++) % 3 + 1, null);
             if (loadLevelAgentClients == null || loadLevelAgentClients.size() == 0) {
                 logger.error("No agentClient for loadLevel:{} when getting optimal client!", selectedLoadLevel);
                 return null;

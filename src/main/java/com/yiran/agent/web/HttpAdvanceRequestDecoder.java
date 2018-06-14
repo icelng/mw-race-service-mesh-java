@@ -47,6 +47,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                             isContentLen = true;
                         }
                         headerParseBuf.clear();
+                        continue;
                     }
 
                     if (c == '\r') {

@@ -7,6 +7,9 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
+
+import java.util.concurrent.TimeUnit;
 
 public class AgentClientManager {
 
@@ -42,6 +45,7 @@ public class AgentClientManager {
         bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(new IdleStateHandler(100, 0, 0, TimeUnit.MILLISECONDS));
                 ch.pipeline().addLast(new AgentServiceDecoder());
                 ch.pipeline().addLast(new ConsumerAgentEncoder());
                 ch.pipeline().addLast(new ConsumerAgentClientHandler());

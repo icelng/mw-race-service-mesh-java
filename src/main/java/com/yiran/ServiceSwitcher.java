@@ -105,7 +105,7 @@ public class ServiceSwitcher {
         processingRequest.put(String.valueOf(requestId), agentServiceRequest);
 
         rpcClientChannel.write(request);
-        if (writeCnt++ % 20 == 0) {
+        if (writeCnt++ % 10 == 0) {
             /*写若干次才进行flush*/
             rpcClientChannel.flush();
 

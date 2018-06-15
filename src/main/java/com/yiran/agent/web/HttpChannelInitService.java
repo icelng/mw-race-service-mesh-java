@@ -22,7 +22,7 @@ public class HttpChannelInitService extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel sc)
             throws Exception {
         GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(sc.eventLoop().parent(), 1536, 1024*1024);
-        globalTrafficShapingHandler.configure(0);
+        globalTrafficShapingHandler.configure(10);
 
 //        sc.pipeline().addLast(new IdleStateHandler(100, 0, 0, TimeUnit.MILLISECONDS));
 

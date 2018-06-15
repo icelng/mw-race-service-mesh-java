@@ -55,7 +55,7 @@ public class AgentApp {
             //new ProviderAgentBootstrap().boot();
 
             /*先与Dubbo进行连接*/
-            EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(2);
+            EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(4);
             DubboConnectManager dubboConnectManager = new DubboConnectManager(1, eventLoopGroup);
             dubboConnectManager.connect("127.0.0.1", Integer.valueOf(System.getProperty("dubbo.protocol.port")));
             //Channel dubboChannel = null;

@@ -113,7 +113,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 ///*选出最优客户端*/
                 AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                 if (agentClient == null) {
-                    responseFailure(ctx);
+                    ctx.close();
+                    //responseFailure(ctx);
                     return;
                 }
                 ///*调用服务*

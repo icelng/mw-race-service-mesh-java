@@ -120,9 +120,9 @@ public class LoadBalance {
         // optimalAgentClient = getOptimalByRandom();
 
         /*限流*/
-        if (AgentClient.getTotalProccessingNum() > 512) {
-            return null;
-        }
+        //if (AgentClient.getTotalProccessingNum() > 512) {
+        //    return null;
+        //}
 
         if (optimalAgentClient != null) {
             /*这里提前增加了请求数*/

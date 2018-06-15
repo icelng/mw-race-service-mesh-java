@@ -30,6 +30,7 @@ public class AgentClient {
     private int port;
     private long writeCnt = 0;
     private Channel channel;
+    private static AtomicLong totalProccessingNum = new AtomicLong(0);
     private static AtomicLong requestId = new AtomicLong(0);
 
     /*表示正在处理的请求数，负载均衡用*/
@@ -162,11 +163,17 @@ public class AgentClient {
         this.name = name;
     }
 
+    public static long getTotalProccessingNum() {
+        return totalProccessingNum.get();
+    }
+
     public void requestReady(){
+        totalProccessingNum.addAndGet(1);
         this.processingRequestNum.addAndGet(1);
     }
 
     public void requestDone(){
+        totalProccessingNum.decrementAndGet();
         this.processingRequestNum.decrementAndGet();
     }
 }

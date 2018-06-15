@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<AgentServiceBaseMsg> {
     private static Logger logger = LoggerFactory.getLogger(ConsumerAgentClientHandler.class);
     private static Executor executor = Executors.newFixedThreadPool(512);
+    private static long MIN_QPS = 2500;
 
     private RateLimiter rateLimiter = RateLimiter.create(6000);
     private LoadBalance loadBalance;
@@ -42,10 +43,12 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
             if (loadBalance.isNeedToSetRespRate()) {
-                float needToSetRate = loadBalance.getRequestRate();
-                if (needToSetRate > 3500) {
-                    /*只设置超过3500的速率*/
+                float needToSetRate = loadBalance.getRequestRate() - 300;
+                if (needToSetRate > MIN_QPS) {
+                    /*只设置超过2500的速率*/
                     rateLimiter.setRate(needToSetRate);
+                } else {
+                    rateLimiter.setRate(MIN_QPS);
                 }
             }
             if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {

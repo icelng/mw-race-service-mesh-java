@@ -100,7 +100,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 String serviceName = formDataParser.parseInterface(contentBuf);
                 if(serviceName == null) {
                     logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-                    ctx.close();
+                    responseFailure(ctx);
                     return;
                 }
                 /*截出parameter*/
@@ -113,7 +113,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 ///*选出最优客户端*/
                 AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                 if (agentClient == null) {
-                    ctx.close();
+                    responseFailure(ctx);
                     return;
                 }
                 ///*调用服务*
@@ -123,6 +123,12 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 logger.error("", e);
             }
         }
+
+    }
+
+    private void responseFailure (ChannelHandlerContext ctx) throws UnsupportedEncodingException {
+        DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer("Failure".getBytes("utf-8")));
+        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
 
     }
 

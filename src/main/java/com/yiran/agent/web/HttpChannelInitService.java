@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +21,11 @@ public class HttpChannelInitService extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel sc)
             throws Exception {
+        GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(sc.eventLoop().parent(), 512, 10 * 512);
+
 //        sc.pipeline().addLast(new IdleStateHandler(100, 0, 0, TimeUnit.MILLISECONDS));
+
+        sc.pipeline().addLast(globalTrafficShapingHandler);
 
         sc.pipeline().addLast(new HttpResponseEncoder());
 

@@ -96,6 +96,9 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof ByteBuf) {
             ByteBuf contentBuf = (ByteBuf) msg;
             try{
+                /*首先计算请求速率*/
+                loadBalance.calRequestRate();
+
                 FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
                 String serviceName = formDataParser.parseInterface(contentBuf);
                 if(serviceName == null) {

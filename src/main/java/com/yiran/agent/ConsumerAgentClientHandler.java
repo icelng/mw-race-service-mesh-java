@@ -1,6 +1,7 @@
 package com.yiran.agent;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.yiran.LoadBalance;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
@@ -15,9 +16,14 @@ import java.util.concurrent.TimeUnit;
 
 public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<AgentServiceBaseMsg> {
     private static Logger logger = LoggerFactory.getLogger(ConsumerAgentClientHandler.class);
+    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private RateLimiter rateLimiter = RateLimiter.create(6000);
-    private static Executor executor = Executors.newFixedThreadPool(512);
+    private LoadBalance loadBalance;
+
+    public ConsumerAgentClientHandler (LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
+    }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -35,6 +41,9 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(msg.getRequestId()));
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
+            if (loadBalance.isNeedToSetRespRate()) {
+                rateLimiter.setRate(loadBalance.getRequestRate());
+            }
             if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
                 executor.execute(() -> {
                     rateLimiter.acquire();

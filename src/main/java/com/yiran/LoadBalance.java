@@ -12,13 +12,13 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
  */
 public class LoadBalance {
     private static float MAX_PPL = 999999999;
-    private static int MAX_TRY_COUNT = 5;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
 
     private IRegistry registry;
@@ -28,8 +28,10 @@ public class LoadBalance {
     private ConcurrentHashMap<Integer, List<String>> loadLevelToAgentClientsMap;
     private final Object lock = new Object();
     private int tryCount = 0;
-    private Random random1 = new Random();
-    private Random random2 = new Random();
+    private AtomicLong requestRateCalPeriod = new AtomicLong(0);
+    private AtomicLong reponseRateSetPeriod = new AtomicLong(0);
+    private long lastNanoTime = 0;
+    private float requestRate = 6000;  // 初始6000
 
     public LoadBalance(String registryAddress, AgentClientManager agentClientManager){
         registry = new EtcdRegistry(registryAddress);
@@ -167,6 +169,32 @@ public class LoadBalance {
         //}
 
         return agentClient;
+    }
+
+    public void calRequestRate() {
+
+        if (requestRateCalPeriod.addAndGet(1) == 512) {
+            long intervalNanoTime = System.nanoTime() - lastNanoTime;
+            lastNanoTime += intervalNanoTime;
+            requestRate = (float) 512 / ((float) intervalNanoTime * 1000000);
+            requestRateCalPeriod.set(0);
+        }
+
+    }
+
+    public float getRequestRate() {
+        return requestRate;
+    }
+
+    public boolean isNeedToSetRespRate() {
+
+        if (reponseRateSetPeriod.getAndAdd(1) == 512) {
+            reponseRateSetPeriod.set(0);
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
 }

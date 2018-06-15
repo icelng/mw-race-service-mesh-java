@@ -1,5 +1,6 @@
 package com.yiran.agent;
 
+import com.yiran.LoadBalance;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
@@ -19,8 +20,14 @@ public class AgentClientManager {
     private Bootstrap bootstrap;
 
 
+    private LoadBalance loadBalance;
+
     public AgentClientManager(EventLoopGroup workerEventLoopGroup) {
         this.workerEventLoopGroup = workerEventLoopGroup;
+    }
+
+    public void setLoadBalance(LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
     }
 
     public AgentClient newClient() {
@@ -48,7 +55,7 @@ public class AgentClientManager {
 //                ch.pipeline().addLast(new IdleStateHandler(0, 100, 0, TimeUnit.MILLISECONDS));
                 ch.pipeline().addLast(new AgentServiceDecoder());
                 ch.pipeline().addLast(new ConsumerAgentEncoder());
-                ch.pipeline().addLast(new ConsumerAgentClientHandler());
+                ch.pipeline().addLast(new ConsumerAgentClientHandler(loadBalance));
             }
         });
     }

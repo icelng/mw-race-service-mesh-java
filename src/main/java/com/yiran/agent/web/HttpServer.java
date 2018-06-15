@@ -31,6 +31,7 @@ public class HttpServer {
 
         AgentClientManager agentClientManager = new AgentClientManager(agentClientWorkerGroup);
         LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);
+        agentClientManager.setLoadBalance(loadBalance);
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)

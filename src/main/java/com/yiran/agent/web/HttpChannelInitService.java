@@ -26,11 +26,11 @@ public class HttpChannelInitService extends ChannelInitializer<SocketChannel> {
 
 //        sc.pipeline().addLast(new IdleStateHandler(100, 0, 0, TimeUnit.MILLISECONDS));
 
-        sc.pipeline().addLast(globalTrafficShapingHandler);
+//        sc.pipeline().addLast(globalTrafficShapingHandler);
 
         sc.pipeline().addLast(new HttpResponseEncoder());
 
-        sc.pipeline().addLast(new HttpWriteStreamController());
+//        sc.pipeline().addLast(new HttpWriteStreamController());
 //        sc.pipeline().addLast(new HttpRequestDecoder());
 
         sc.pipeline().addLast(new HttpAdvanceRequestDecoder());

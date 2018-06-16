@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LoadBalance {
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
-    private static int TOKEN_BUCKET_CAPACITY = 32;
+    private static int TOKEN_BUCKET_CAPACITY = 16;
 
     private IRegistry registry;
     private AgentClientManager agentClientManager;

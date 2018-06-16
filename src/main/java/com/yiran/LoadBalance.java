@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LoadBalance {
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
-    private static int TOKEN_BUCKET_CAPACITY = 512;
+    private static int TOKEN_BUCKET_CAPACITY = 16;
 
     private IRegistry registry;
     private AgentClientManager agentClientManager;
@@ -47,8 +47,12 @@ public class LoadBalance {
         this.agentClientManager = agentClientManager;
         tokenBucket = new Semaphore(TOKEN_BUCKET_CAPACITY);
         scheduledExecutor.scheduleAtFixedRate(() -> {
-            this.supplementToken();
-        }, 0, 100, TimeUnit.MILLISECONDS);
+            synchronized (tokenBucketLock) {
+                if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
+                    tokenBucket.release(TOKEN_BUCKET_CAPACITY - tokenBucket.availablePermits());
+                }
+            }
+        }, 0, 1000, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
             logger.info("The request rate is {}", requestRate);
         }, 0, 1, TimeUnit.SECONDS);

@@ -46,28 +46,12 @@ public class AgentClient {
     private static Logger logger = LoggerFactory.getLogger(AgentClient.class);
 
 
-    //public AgentClient(String host, int port){
-    //    this.host = host;
-    //    this.port = port;
-    //    this.name = host + ":" + String.valueOf(port);
-    //    processingRequestNum = new AtomicLong(0);
-    //    supportedServiceMap = new ConcurrentHashMap<>();
-    //}
-
     public AgentClient(Bootstrap bootstrap) {
         this.bootstrap = bootstrap;
     }
 
     public void connect(String host, int port) throws InterruptedException {
         logger.info("Connecting to provider-agent, host:{}  port:{}", host, port);
-        //while (true) {
-        //    try {
-        //        channel = bootstrap.connect(host, port).sync().channel();
-        //        break;
-        //    } catch (Exception e) {
-        //        logger.error("Failed to connect to provider-agent!");
-        //    }
-        //}
         channel = bootstrap.connect(host, port).channel();
         logger.info("Connected successfully!");
         this.host = host;
@@ -77,27 +61,6 @@ public class AgentClient {
         supportedServiceMap = new ConcurrentHashMap<>();
     }
 
-    //public void run() throws InterruptedException {
-
-    //    EventLoopGroup workerGroup = new NioEventLoopGroup(16);
-    //    bootstrap = new Bootstrap();
-    //    bootstrap.group(workerGroup);
-    //    bootstrap.channel(NioSocketChannel.class);
-    //    bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-    //    bootstrap.option(ChannelOption.TCP_NODELAY, true);
-    //    bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-    //    bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-    //        protected void initChannel(SocketChannel ch) throws Exception {
-    //            ch.pipeline().addLast(new ConsumerAgentDecoder());
-    //            ch.pipeline().addLast(new ConsumerAgentEncoder());
-    //            ch.pipeline().addLast(new ConsumerAgentClientHandler());
-    //        }
-    //    });
-
-    //    /*连接*/
-    //    channel = bootstrap.connect(host, port).sync().channel();
-
-    //}
 
     /**
      * 异步发起请求
@@ -124,13 +87,7 @@ public class AgentClient {
         AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
 
-//        float ppl = ((float) processingRequestNum.get())/((float) loadLevel);
-//        logger.info("requestId:{}>>>>>>>>>:{}, loadLevel:{} ppl:{}", agentServiceRequest.getRequestId(), this.getName(), this.getLoadLevel(), ppl);
-        //logger.info("before write and flush for reqId:{}", requestId);
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
-//        if (writeCnt++ % 5 == 0) {
-//            channel.flush();
-//        }
 
         return future;
     }

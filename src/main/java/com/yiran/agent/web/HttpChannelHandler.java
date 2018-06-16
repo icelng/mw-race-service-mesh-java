@@ -1,8 +1,7 @@
 package com.yiran.agent.web;
 
 import com.yiran.LoadBalance;
-import com.yiran.agent.AgentClient;
-import com.yiran.agent.AgentClientManager;
+import com.yiran.agent.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -24,7 +23,7 @@ import java.util.concurrent.Executors;
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
 
-//    private static Executor executor = Executors.newFixedThreadPool(512);
+    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
 //    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
@@ -123,8 +122,24 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     //responseFailure(ctx);
                     return;
                 }
+
                 ///*调用服务*
-                agentClient.request(ctx.channel(), contentBuf);
+                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
+                future.addListener(() -> {
+                    try {
+                        AgentServiceResponse response = future.get();
+                        String hashCodeString = String.valueOf(response.getHashCode());
+                        DefaultFullHttpResponse httpResponse = null;
+                        try {
+                            httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
+                        } catch (UnsupportedEncodingException e) {
+                            logger.error("", e);
+                        }
+                        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+                    } catch (InterruptedException e) {
+                        logger.error("", e);
+                    }
+                }, executor);
 
             } catch (Exception e) {
                 logger.error("", e);

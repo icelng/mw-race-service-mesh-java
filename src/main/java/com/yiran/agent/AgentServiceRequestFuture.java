@@ -21,6 +21,8 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     private AgentServiceResponse agentServiceResponse = null;
     private AtomicBoolean isCancelled = new AtomicBoolean(false);
     private AtomicBoolean isDone = new AtomicBoolean(false);
+    private Executor executor = null;
+    private Runnable listener = null;
 
     private AgentServiceRequest agentServiceRequest;
 
@@ -31,6 +33,10 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         this.requestId = agentServiceRequest.getRequestId();
         this.agentClient = agentClient;
         this.httpChannel = httpChannel;
+    }
+
+    public AgentServiceRequestFuture () {
+
     }
 
 
@@ -56,18 +62,27 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         return agentServiceResponse;
     }
 
+    public void addListener(Runnable listener, Executor executor) {
+        this.listener = listener;
+        this.executor = executor;
+    }
+
+    public void done2 (AgentServiceResponse response) {
+        latch.countDown();
+        this.agentServiceResponse = response;
+        executor.execute(listener);
+    }
+
 
     public void done(AgentServiceBaseMsg response) throws UnsupportedEncodingException {
         if (response != null) {
             int hashCode = response.getData().readInt();
             response.getData().release();
             String hashCodeString = String.valueOf(hashCode);
-//            logger.info("Return hash code:{}", hashCodeString);
             DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
             setHeaders(httpResponse);
             httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
             agentClient.requestDone();
-            //agentServiceRequest.release();
         } else {
             logger.error("Request:{} error!", requestId);
         }

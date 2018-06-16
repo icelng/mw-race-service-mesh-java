@@ -181,7 +181,7 @@ public class LoadBalance {
         if (requestRateCalPeriod.addAndGet(1) == 512) {
             long intervalNanoTime = System.nanoTime() - lastNanoTime;
             lastNanoTime += intervalNanoTime;
-            requestRate = (float) 512 / (float) intervalNanoTime * 1000000;
+            requestRate = (float) 512 / (float) intervalNanoTime * 1000000000;
             if (requestRate > 8000) {
                 logger.info("The request rate(QPS:{}) is higher than 7000", requestRate);
             }

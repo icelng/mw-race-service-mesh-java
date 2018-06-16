@@ -49,10 +49,11 @@ public class LoadBalance {
         scheduledExecutor.scheduleAtFixedRate(() -> {
             synchronized (tokenBucketLock) {
                 if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
-                    tokenBucket.release(TOKEN_BUCKET_CAPACITY - tokenBucket.availablePermits());
+                    int supplementNum = Math.min(TOKEN_BUCKET_CAPACITY, TOKEN_BUCKET_CAPACITY - tokenBucket.availablePermits());
+                    tokenBucket.release(supplementNum);
                 }
             }
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 0, 50, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
             logger.info("The request rate is {}", requestRate);
         }, 0, 1, TimeUnit.SECONDS);

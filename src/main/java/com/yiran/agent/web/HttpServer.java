@@ -4,6 +4,7 @@ import com.yiran.LoadBalance;
 import com.yiran.agent.AgentClientManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollChannelOption;
@@ -40,7 +41,7 @@ public class HttpServer {
                 //.option(ChannelOption.SO_BACKLOG, 512)
                 .option(EpollChannelOption.SO_REUSEPORT, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
                 .childOption(ChannelOption.TCP_NODELAY, false);
         b.bind(this.port).sync();
     }

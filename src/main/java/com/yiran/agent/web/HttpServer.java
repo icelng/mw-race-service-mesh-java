@@ -26,7 +26,7 @@ public class HttpServer {
 
     public void run() throws Exception {
         EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
-        EventLoopGroup workerGroup = new EpollEventLoopGroup(4);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup(1);
         EventLoopGroup agentClientWorkerGroup = new EpollEventLoopGroup(1);
 
         AgentClientManager agentClientManager = new AgentClientManager(agentClientWorkerGroup);

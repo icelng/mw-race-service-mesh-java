@@ -10,8 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -33,12 +32,18 @@ public class LoadBalance {
     private long lastNanoTime = 0;
     private float requestRate = 6000;  // 初始6000
 
+    private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
     public LoadBalance(String registryAddress, AgentClientManager agentClientManager){
         registry = new EtcdRegistry(registryAddress);
         serviceNameToAgentClientsMap = new ConcurrentHashMap<>();
         clientNameToAgentClientMap = new ConcurrentHashMap<>();
         loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
         this.agentClientManager = agentClientManager;
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+            logger.info("Request rate:{}", requestRate);
+
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     public boolean findService(String serviceName) throws Exception {

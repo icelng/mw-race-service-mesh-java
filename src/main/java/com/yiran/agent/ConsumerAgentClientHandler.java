@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<AgentServiceBaseMsg> {
@@ -19,7 +20,7 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
     private static Executor executor = Executors.newFixedThreadPool(512);
     private static long MIN_QPS = 2500;
 
-    private RateLimiter rateLimiter = RateLimiter.create(4000);
+    private RateLimiter rateLimiter = RateLimiter.create(400);
     private LoadBalance loadBalance;
 
     public ConsumerAgentClientHandler (LoadBalance loadBalance) {

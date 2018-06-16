@@ -65,16 +65,19 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             //} else {
             //    future.done(msg);
             //}
-            executor.execute(() -> {
-                /*获取令牌*/
-                loadBalance.acquireToken();
-
-                try {
-                    future.done(msg);
-                } catch (UnsupportedEncodingException e) {
-                    logger.error("", e);
-                }
-            });
+            if (!loadBalance.tryAcquireToken()) {
+                executor.execute(() -> {
+                    /*获取令牌*/
+                    loadBalance.acquireToken();
+                    try {
+                        future.done(msg);
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("", e);
+                    }
+                });
+            } else {
+                future.done(msg);
+            }
         }
     }
 }

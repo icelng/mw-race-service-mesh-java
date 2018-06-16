@@ -198,6 +198,10 @@ public class LoadBalance {
 
     }
 
+    public boolean tryAcquireToken () {
+        return tokenBucket.tryAcquire();
+    };
+
     public void acquireToken() {
         tokenBucket.acquireUninterruptibly();
     }

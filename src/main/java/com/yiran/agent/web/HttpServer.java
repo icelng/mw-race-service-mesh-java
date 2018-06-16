@@ -26,8 +26,8 @@ public class HttpServer {
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(1);
+        EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup(1);
         EventLoopGroup agentClientWorkerGroup = new EpollEventLoopGroup(1);
 
         AgentClientManager agentClientManager = new AgentClientManager(agentClientWorkerGroup);
@@ -36,7 +36,7 @@ public class HttpServer {
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(EpollServerSocketChannel.class)
                 .childHandler(new HttpChannelInitService(loadBalance))
                 //.option(ChannelOption.SO_BACKLOG, 512)
                 .option(EpollChannelOption.SO_REUSEPORT, true)

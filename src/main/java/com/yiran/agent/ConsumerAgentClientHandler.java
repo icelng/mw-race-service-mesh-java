@@ -54,19 +54,21 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             //        rateLimiter.setRate(MIN_QPS);
             //    }
             //}
-            if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
-                executor.execute(() -> {
-                    rateLimiter.acquire();
-                    try {
-                        future.done(msg);
-                    } catch (UnsupportedEncodingException e) {
-                        logger.error("", e);
-                    }
+            //if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
+            //    executor.execute(() -> {
+            //        rateLimiter.acquire();
+            //        try {
+            //            future.done(msg);
+            //        } catch (UnsupportedEncodingException e) {
+            //            logger.error("", e);
+            //        }
 
-                });
-            } else {
-                future.done(msg);
-            }
+            //    });
+            //} else {
+            //    future.done(msg);
+            //}
+            rateLimiter.acquire();
+            future.done(msg);
         }
     }
 }

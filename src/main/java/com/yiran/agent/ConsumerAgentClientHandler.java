@@ -20,7 +20,7 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
     private static Executor executor = Executors.newFixedThreadPool(512);
     private static long MIN_QPS = 2500;
 
-    private static RateLimiter rateLimiter = RateLimiter.create(6000);
+    private static RateLimiter rateLimiter = RateLimiter.create(6500);
     private LoadBalance loadBalance;
 
     public ConsumerAgentClientHandler (LoadBalance loadBalance) {
@@ -52,32 +52,34 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             //        rateLimiter.setRate(MIN_QPS);
             //    }
             //}
-            //if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
-            //    executor.execute(() -> {
-            //        rateLimiter.acquire();
-            //        try {
-            //            future.done(msg);
-            //        } catch (UnsupportedEncodingException e) {
-            //            logger.error("", e);
-            //        }
 
-            //    });
-            //} else {
-            //    future.done(msg);
-            //}
-            if (!loadBalance.tryAcquireToken()) {
+            if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
                 executor.execute(() -> {
-                    /*获取令牌*/
-                    loadBalance.acquireToken();
+                    rateLimiter.acquire();
                     try {
                         future.done(msg);
                     } catch (UnsupportedEncodingException e) {
                         logger.error("", e);
                     }
+
                 });
             } else {
                 future.done(msg);
             }
+
+            //if (!loadBalance.tryAcquireToken()) {
+            //    executor.execute(() -> {
+            //        /*获取令牌*/
+            //        loadBalance.acquireToken();
+            //        try {
+            //            future.done(msg);
+            //        } catch (UnsupportedEncodingException e) {
+            //            logger.error("", e);
+            //        }
+            //    });
+            //} else {
+            //    future.done(msg);
+            //}
         }
     }
 }

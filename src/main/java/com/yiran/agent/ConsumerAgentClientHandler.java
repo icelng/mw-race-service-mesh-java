@@ -19,7 +19,7 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
     private static Executor executor = Executors.newFixedThreadPool(512);
     private static long MIN_QPS = 2500;
 
-    private RateLimiter rateLimiter = RateLimiter.create(6000);
+    private RateLimiter rateLimiter = RateLimiter.create(5500);
     private LoadBalance loadBalance;
 
     public ConsumerAgentClientHandler (LoadBalance loadBalance) {
@@ -42,18 +42,18 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(msg.getRequestId()));
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
-            if (loadBalance.isNeedToSetRespRate()) {
-                float needToSetRate = loadBalance.getRequestRate();
-                if (needToSetRate > 7000) {
-                    needToSetRate = needToSetRate - 200;
-                }
-                if (needToSetRate > MIN_QPS) {
-                    /*只设置超过2500的速率*/
-                    rateLimiter.setRate(needToSetRate);
-                } else {
-                    rateLimiter.setRate(MIN_QPS);
-                }
-            }
+            //if (loadBalance.isNeedToSetRespRate()) {
+            //    float needToSetRate = loadBalance.getRequestRate();
+            //    if (needToSetRate > 7000) {
+            //        needToSetRate = needToSetRate - 200;
+            //    }
+            //    if (needToSetRate > MIN_QPS) {
+            //        /*只设置超过2500的速率*/
+            //        rateLimiter.setRate(needToSetRate);
+            //    } else {
+            //        rateLimiter.setRate(MIN_QPS);
+            //    }
+            //}
             if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
                 executor.execute(() -> {
                     rateLimiter.acquire();

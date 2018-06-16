@@ -45,9 +45,7 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
             if (loadBalance.isNeedToSetRespRate()) {
                 float needToSetRate = loadBalance.getRequestRate();
-                if (needToSetRate > 7000) {
-                    needToSetRate = needToSetRate - 200;
-                }
+                needToSetRate = needToSetRate - 200;
                 if (needToSetRate > MIN_QPS) {
                     /*只设置超过2500的速率*/
                     rateLimiter.setRate(needToSetRate);

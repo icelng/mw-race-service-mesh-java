@@ -28,7 +28,7 @@ public class LoadBalance {
     private final Object lock = new Object();
     private int tryCount = 0;
     private AtomicLong requestRateCalPeriod = new AtomicLong(0);
-    private AtomicLong reponseRateSetPeriod = new AtomicLong(0);
+    private AtomicLong responseRateSetPeriod = new AtomicLong(0);
     private long lastNanoTime = 0;
     private float requestRate = 6000;  // 初始6000
 
@@ -181,8 +181,8 @@ public class LoadBalance {
         if (requestRateCalPeriod.addAndGet(1) == 512) {
             long intervalNanoTime = System.nanoTime() - lastNanoTime;
             lastNanoTime += intervalNanoTime;
-            requestRate = (float) 512 / ((float) intervalNanoTime * 1000000);
-            if (requestRate > 7000) {
+            requestRate = (float) 512 / (float) intervalNanoTime * 1000000;
+            if (requestRate > 8000) {
                 logger.info("The request rate(QPS:{}) is higher than 7000", requestRate);
             }
             requestRateCalPeriod.set(0);
@@ -196,8 +196,8 @@ public class LoadBalance {
 
     public boolean isNeedToSetRespRate() {
 
-        if (reponseRateSetPeriod.getAndAdd(1) == 512) {
-            reponseRateSetPeriod.set(0);
+        if (responseRateSetPeriod.getAndAdd(1) == 512) {
+            responseRateSetPeriod.set(0);
             return true;
         } else {
             return false;

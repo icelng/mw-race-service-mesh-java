@@ -43,28 +43,38 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(msg.getRequestId()));
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(msg.getRequestId()));
-            if (loadBalance.isNeedToSetRespRate()) {
-                float needToSetRate = loadBalance.getRequestRate();
-                if (needToSetRate > MIN_QPS) {
-                    /*只设置超过2500的速率*/
-                    rateLimiter.setRate(needToSetRate);
-                } else {
-                    rateLimiter.setRate(MIN_QPS);
-                }
-            }
-            if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
-                executor.execute(() -> {
-                    rateLimiter.acquire();
-                    try {
-                        future.done(msg);
-                    } catch (UnsupportedEncodingException e) {
-                        logger.error("", e);
-                    }
+            //if (loadBalance.isNeedToSetRespRate()) {
+            //    float needToSetRate = loadBalance.getRequestRate();
+            //    if (needToSetRate > MIN_QPS) {
+            //        /*只设置超过2500的速率*/
+            //        rateLimiter.setRate(needToSetRate);
+            //    } else {
+            //        rateLimiter.setRate(MIN_QPS);
+            //    }
+            //}
+            //if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
+            //    executor.execute(() -> {
+            //        rateLimiter.acquire();
+            //        try {
+            //            future.done(msg);
+            //        } catch (UnsupportedEncodingException e) {
+            //            logger.error("", e);
+            //        }
 
-                });
-            } else {
-                future.done(msg);
-            }
+            //    });
+            //} else {
+            //    future.done(msg);
+            //}
+            executor.execute(() -> {
+                /*获取令牌*/
+                loadBalance.acquireToken();
+
+                try {
+                    future.done(msg);
+                } catch (UnsupportedEncodingException e) {
+                    logger.error("", e);
+                }
+            });
         }
     }
 }

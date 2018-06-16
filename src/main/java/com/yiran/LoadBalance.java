@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LoadBalance {
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
+    private static int TOKEN_BUCKET_CAPACITY = 8;
 
     private IRegistry registry;
     private AgentClientManager agentClientManager;
@@ -31,8 +32,12 @@ public class LoadBalance {
     private AtomicLong responseRateSetPeriod = new AtomicLong(0);
     private long lastNanoTime = 0;
     private float requestRate = 6000;  // 初始6000
+    private Semaphore tokenBucket;
+    private Object tokenBucketLock = new Object();
 
     private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduledPrintRate = Executors.newSingleThreadScheduledExecutor();
+
 
     public LoadBalance(String registryAddress, AgentClientManager agentClientManager){
         registry = new EtcdRegistry(registryAddress);
@@ -40,9 +45,12 @@ public class LoadBalance {
         clientNameToAgentClientMap = new ConcurrentHashMap<>();
         loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
         this.agentClientManager = agentClientManager;
+        tokenBucket = new Semaphore(TOKEN_BUCKET_CAPACITY);
         scheduledExecutor.scheduleAtFixedRate(() -> {
-            logger.info("Request rate:{}", requestRate);
-
+            this.supplementToken();
+        }, 0, 100, TimeUnit.MILLISECONDS);
+        scheduledPrintRate.scheduleAtFixedRate(() -> {
+            logger.info("The request rate is {}", requestRate);
         }, 0, 1, TimeUnit.SECONDS);
     }
 
@@ -188,6 +196,18 @@ public class LoadBalance {
             requestRateCalPeriod.set(0);
         }
 
+    }
+
+    public void acquireToken() {
+        tokenBucket.acquireUninterruptibly();
+    }
+
+    public void supplementToken() {
+        synchronized (tokenBucketLock) {
+            if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
+                tokenBucket.release();
+            }
+        }
     }
 
     public float getRequestRate() {

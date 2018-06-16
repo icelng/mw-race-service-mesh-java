@@ -20,7 +20,7 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
     private static Executor executor = Executors.newFixedThreadPool(512);
     private static long MIN_QPS = 2500;
 
-    private static RateLimiter rateLimiter = RateLimiter.create(6500);
+    private static RateLimiter rateLimiter = RateLimiter.create(7000);
     private LoadBalance loadBalance;
 
     public ConsumerAgentClientHandler (LoadBalance loadBalance) {

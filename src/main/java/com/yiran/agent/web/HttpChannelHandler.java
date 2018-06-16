@@ -94,56 +94,54 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof ByteBuf) {
             ByteBuf contentBuf = (ByteBuf) msg;
-            try{
-                /*补充令牌*/
-                loadBalance.supplementToken();
+            executor.execute(() -> {
+                try {
+                    /*补充令牌*/
+                    loadBalance.supplementToken();
 
-                /*计算qps*/
-                loadBalance.calRequestRate();
+                    /*计算qps*/
+                    loadBalance.calRequestRate();
 
-                FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
-                String serviceName = formDataParser.parseInterface(contentBuf);
-                if(serviceName == null) {
-                    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-                    responseFailure(ctx);
-                    return;
-                }
-                /*截出parameter*/
-                parseParameter(contentBuf);
+                    FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+                    String serviceName = formDataParser.parseInterface(contentBuf);
+                    if(serviceName == null) {
+                        logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
+                        responseFailure(ctx);
+                        return;
+                    }
+                    /*截出parameter*/
+                    parseParameter(contentBuf);
 
-                ///*开始调用服务*/
+                    ///*选出最优客户端*/
+                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+                    if (agentClient == null) {
+                        ctx.close();
+                        //responseFailure(ctx);
+                        return;
+                    }
 
-//                logger.info("serviceName:{}", serviceName);
-
-                ///*选出最优客户端*/
-                AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
-                if (agentClient == null) {
-                    ctx.close();
-                    //responseFailure(ctx);
-                    return;
-                }
-
-                ///*调用服务*
-                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
-                future.addListener(() -> {
-                    try {
-                        AgentServiceResponse response = future.get();
-                        String hashCodeString = String.valueOf(response.getHashCode());
-                        DefaultFullHttpResponse httpResponse = null;
+                    ///*调用服务*
+                    AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
+                    future.addListener(() -> {
                         try {
-                            httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
-                        } catch (UnsupportedEncodingException e) {
+                            AgentServiceResponse response = future.get();
+                            String hashCodeString = String.valueOf(response.getHashCode());
+                            DefaultFullHttpResponse httpResponse = null;
+                            try {
+                                httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
+                            } catch (UnsupportedEncodingException e) {
+                                logger.error("", e);
+                            }
+                            ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+                        } catch (InterruptedException e) {
                             logger.error("", e);
                         }
-                        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
-                    } catch (InterruptedException e) {
-                        logger.error("", e);
-                    }
-                }, executor);
+                    }, executor);
 
-            } catch (Exception e) {
+                } catch (Exception e) {
                 logger.error("", e);
-            }
+                }
+            });
         }
 
     }

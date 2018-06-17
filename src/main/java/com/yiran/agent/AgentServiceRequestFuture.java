@@ -79,7 +79,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     }
 
     public float getLatency () {
-        latency = (System.nanoTime() - startTime) / 1000000000.f;
+        latency = (float) (System.nanoTime() - startTime) / 1000000.f;
         return latency;
     }
 

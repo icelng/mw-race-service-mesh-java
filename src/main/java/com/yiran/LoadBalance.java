@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
  */
 public class LoadBalance {
-    private static float SMALL_LATENCY = 50;
-    private static float MEDIUM_LATENCY = 80;
+    private static float SMALL_LATENCY = 50.5f;
+    private static float MEDIUM_LATENCY = 80f;
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
     private static int TOKEN_BUCKET_CAPACITY = 32;

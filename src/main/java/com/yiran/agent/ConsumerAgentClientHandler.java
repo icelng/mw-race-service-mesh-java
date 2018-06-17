@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<AgentServiceBaseMsg> {
     private static Logger logger = LoggerFactory.getLogger(ConsumerAgentClientHandler.class);
-    private static Executor executor = Executors.newFixedThreadPool(512);
+//    private static Executor executor = Executors.newFixedThreadPool(512);
     private static long MIN_QPS = 2500;
 
     private static RateLimiter rateLimiter = RateLimiter.create(7000);
@@ -27,17 +27,17 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
         this.loadBalance = loadBalance;
     }
 
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            IdleStateEvent event = (IdleStateEvent) evt;
-            if (event.state() == IdleState.WRITER_IDLE) {
-                ctx.flush();
-            }
-        } else {
-            super.userEventTriggered(ctx, evt);
-        }
-    }
+    //@Override
+    //public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    //    if (evt instanceof IdleStateEvent) {
+    //        IdleStateEvent event = (IdleStateEvent) evt;
+    //        if (event.state() == IdleState.WRITER_IDLE) {
+    //            ctx.flush();
+    //        }
+    //    } else {
+    //        super.userEventTriggered(ctx, evt);
+    //    }
+    //}
 
     protected void channelRead0(ChannelHandlerContext ctx, AgentServiceBaseMsg msg) throws Exception {
         AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(msg.getRequestId()));
@@ -56,15 +56,16 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             response.setRequestId(msg.getRequestId());
             response.setHashCode(msg.getData().readInt());
             msg.getData().release();
+            future.done2(response);
 
-            if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
-                executor.execute(() -> {
-                    rateLimiter.acquire();
-                    future.done2(response);
-                });
-            } else {
-                future.done2(response);
-            }
+            //if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {
+            //    executor.execute(() -> {
+            //        rateLimiter.acquire();
+            //        future.done2(response);
+            //    });
+            //} else {
+            //    future.done2(response);
+            //}
 
             //if (!loadBalance.tryAcquireToken()) {
             //    executor.execute(() -> {

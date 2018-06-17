@@ -24,7 +24,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 
     private LoadBalance loadBalance;
 //    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
-    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
+    private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
 
 
     public HttpChannelHandler (LoadBalance loadBalance) {
@@ -127,7 +127,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     } catch (Exception e) {
                         logger.error("", e);
                     }
-                }, executor);
+                }, ctx.executor());
 
             } catch (Exception e) {
                 logger.error("", e);

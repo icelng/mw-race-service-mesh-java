@@ -13,7 +13,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpAdvanceRequestDecoder.class);
 
     private ByteBuf httpContent = null;
-    private ByteBuf headerParseBuf = UnpooledByteBufAllocator.DEFAULT.buffer(64);
+    private ByteBuf headerParseBuf = PooledByteBufAllocator.DEFAULT.buffer(64);
     private boolean isRequestLine = true;
     private boolean isHeader = false;
     private boolean isContent = false;
@@ -65,7 +65,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                         /*为value*/
                         if (isContentLen) {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
-                            httpContent = UnpooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
+                            httpContent = PooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
                             isContentLen = false;
                         }
                         headerParseBuf.clear();

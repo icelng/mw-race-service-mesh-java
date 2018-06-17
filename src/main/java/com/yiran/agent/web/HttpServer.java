@@ -27,8 +27,8 @@ public class HttpServer {
 
     public void run() throws Exception {
         EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
-        EventLoopGroup workerGroup = new EpollEventLoopGroup(3);
-        EventLoopGroup agentClientWorkerGroup = new EpollEventLoopGroup(3);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup(16);
+        EventLoopGroup agentClientWorkerGroup = new EpollEventLoopGroup(16);
 
         AgentClientManager agentClientManager = new AgentClientManager(agentClientWorkerGroup);
         LoadBalance loadBalance = new LoadBalance(System.getProperty("etcd.url"), agentClientManager);

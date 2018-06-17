@@ -8,6 +8,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +94,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof ByteBuf) {
             ByteBuf contentBuf = (ByteBuf) msg;
             try{
+                AgentServiceRequestFuture future = new AgentServiceRequestFuture();
+
                 /*补充令牌*/
                 loadBalance.supplementToken();
 
@@ -117,20 +121,23 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 }
 
                 ///*调用服务*
-                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
+//                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
                 future.addListener(() -> {
                     try {
                         AgentServiceResponse response = future.get();
-                        loadBalance.calLatencyDistribution(future.getLatency());
                         String hashCodeString = String.valueOf(response.getHashCode());
                         ByteBuf responseContent = ctx.alloc().directBuffer(hashCodeString.length() + 2);
                         responseContent.writeBytes(hashCodeString.getBytes("utf-8"));
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);
-                        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+                        ctx.writeAndFlush(httpResponse).addListener(future1 -> {
+                            loadBalance.calLatencyDistribution(future.getLatency());
+                            ctx.close();
+                        });
                     } catch (Exception e) {
                         logger.error("", e);
                     }
                 }, ctx.executor());
+                agentClient.request(contentBuf, future);
 
             } catch (Exception e) {
                 logger.error("", e);

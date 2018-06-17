@@ -41,7 +41,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     }
 
     public AgentServiceRequestFuture () {
-
+        startTime = System.nanoTime();
     }
 
 

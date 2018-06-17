@@ -75,6 +75,17 @@ public class AgentClient {
         return null;
     }
 
+    public void request(ByteBuf data, AgentServiceRequestFuture future) {
+        long reqId = requestId.addAndGet(1);
+
+        AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
+        agentServiceRequest.setRequestId(reqId);
+        agentServiceRequest.setData(data);
+
+        AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
+
+        channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
+    }
 
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
         long reqId = requestId.addAndGet(1);
@@ -82,7 +93,6 @@ public class AgentClient {
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setRequestId(reqId);
         agentServiceRequest.setData(data);
-        //agentServiceRequest.getData().writeBytes(data);
 
         AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
         AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);

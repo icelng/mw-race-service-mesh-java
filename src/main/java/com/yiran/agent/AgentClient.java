@@ -78,6 +78,8 @@ public class AgentClient {
     public void request(ByteBuf data, AgentServiceRequestFuture future) {
         long reqId = requestId.addAndGet(1);
 
+        future.setAgentClient(this);
+
         AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
         agentServiceRequest.setRequestId(reqId);
         agentServiceRequest.setData(data);

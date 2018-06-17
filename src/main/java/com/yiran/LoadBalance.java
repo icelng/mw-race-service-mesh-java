@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
  */
 public class LoadBalance {
+    private static float SMALL_LATENCY = 50;
+    private static float MEDIUM_LATENCY = 80;
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
     private static int TOKEN_BUCKET_CAPACITY = 32;
@@ -60,7 +62,7 @@ public class LoadBalance {
         //    }
         //}, 0, 50, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
-            logger.info("QPS:{} <50.5:{} <80:{} >80:{}", requestRate, smallLatencyCnt, mediumLatencyCnt, largeLatencyCnt);
+            logger.info("QPS:{} <{}:{} <{}:{} >{}:{}", requestRate, SMALL_LATENCY, smallLatencyCnt, MEDIUM_LATENCY, mediumLatencyCnt, MEDIUM_LATENCY, largeLatencyCnt);
         }, 0, 1, TimeUnit.SECONDS);
     }
 
@@ -240,9 +242,9 @@ public class LoadBalance {
     }
 
     public void calLatencyDistribution (float latency) {
-        if (latency < 50.5) {
+        if (latency < SMALL_LATENCY) {
             smallLatencyCnt++;
-        } else if (latency < 80) {
+        } else if (latency < MEDIUM_LATENCY) {
             mediumLatencyCnt++;
         } else {
             largeLatencyCnt++;

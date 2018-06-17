@@ -91,27 +91,4 @@ public class AgentServiceRequestFuture implements Future<RpcResponse> {
         this.agentClient = agentClient;
     }
 
-    public void done(AgentServiceBaseMsg response) throws UnsupportedEncodingException {
-        if (response != null) {
-            int hashCode = response.getData().readInt();
-            response.getData().release();
-            String hashCodeString = String.valueOf(hashCode);
-            DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
-            setHeaders(httpResponse);
-            httpChannel.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
-            agentClient.requestDone();
-        } else {
-            logger.error("Request:{} error!", requestId);
-        }
-    }
-
-
-
-    public long getRequestId() {
-        return requestId;
-    }
-
-    private void setHeaders(FullHttpResponse response) {
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
-    }
 }

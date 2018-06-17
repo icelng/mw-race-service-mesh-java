@@ -2,23 +2,14 @@ package com.yiran;
 
 import com.alibaba.fastjson.JSON;
 import com.yiran.agent.AgentServiceRequest;
-import com.yiran.agent.AgentServiceResponse;
-import com.yiran.agent.Bytes;
-import com.yiran.agent.web.FormDataParser;
 import com.yiran.dubbo.DubboConnectManager;
-import com.yiran.dubbo.model.JsonUtils;
-import com.yiran.dubbo.model.Request;
-import com.yiran.dubbo.model.RpcInvocation;
-import com.yiran.dubbo.model.RpcResponse;
 import com.yiran.registry.ServiceInfo;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,62 +45,6 @@ public class ServiceSwitcher {
         rpcChannelReady.countDown();
     }
 
-    /**
-     * 服务协议转换至Dubbo
-     * @param agentServiceRequest
-     * agent 接收到的请求
-     * @param agentChannel
-     * 接收请求对应的Netty Channel
-     * @throws IOException
-     */
-    public static void switchToDubbo(AgentServiceRequest agentServiceRequest, Channel agentChannel) throws IOException {
-        try {
-            /*转换服务协议之前，一定要保证已经跟dubbo建立好连接*/
-            rpcChannelReady.await();
-        } catch (InterruptedException e) {
-            logger.error(e.getMessage());
-            return;
-        }
-
-        long requestId = agentServiceRequest.getRequestId();
-        //logger.info("Switch service for requestId:{}", requestId);
-        //FormDataParser formDataParser = FormDataParser.get();
-        //Map<String, String> argumentsMap = formDataParser.parse(agentServiceRequest.getData());
-        Map<String, String> argumentsMap = agentServiceRequest.getFormDataMap();
-        //formDataParser.release();
-
-        RpcInvocation invocation = new RpcInvocation();
-        //invocation.setMethodName(argumentsMap.get("method"));
-        //invocation.setAttachment("path", argumentsMap.get("interface"));
-        ///*先写死一个参数*/
-        //String parameterTypeName = argumentsMap.get("parameterTypesString");
-        invocation.setMethodName("hash");
-        invocation.setAttachment("path", "com.alibaba.dubbo.performance.demo.provider.IHelloService");
-        /*先写死一个参数*/
-        String parameterTypeName = "Ljava/lang/String;";
-        invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String
-
-        /*转换参数，先固定成一个，并且是String类型的*/
-        //String parameter = argumentsMap.get("parameter");
-        String parameter = agentServiceRequest.getData().toString(CharsetUtil.UTF_8);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
-        JsonUtils.writeObject(parameter, writer);
-        invocation.setArguments(out.toByteArray());
-
-        Request request = Request.get();
-        request.setVersion("2.0.0");
-        request.setTwoWay(true);
-        request.setData(invocation);
-        request.setId(requestId);
-
-        agentServiceRequest.setChannel(agentChannel);
-        processingRequest.put(String.valueOf(requestId), agentServiceRequest);
-
-        rpcClientChannel.writeAndFlush(request);
-        //dubboConnectManager.getChannel().writeAndFlush(request);
-
-    }
 
     /**
      * 透传
@@ -132,89 +67,6 @@ public class ServiceSwitcher {
     }
 
 
-    public static String serviceIdToName(int serviceId){
-        ServiceInfo service = serviceIdMap.getOrDefault(serviceId, null);
-        if (service == null) {
-            logger.error("No service for id:" + serviceId);
-            return null;
-        }
-
-        return service.getServiceName();
-    }
-
-    public static int serviceNameToId(String serviceName){
-        ServiceInfo service = serviceNameMap.getOrDefault(serviceName, null);
-        if (service == null) {
-            logger.error("No service for serviceName:" + serviceName);
-            return 0;
-        }
-
-        return service.getServiceId();
-    }
-
-    public static String methodIdToName(int serviceId, int methodId){
-        ServiceInfo service = serviceIdMap.getOrDefault(serviceId, null);
-        if (service == null) {
-            logger.error("No service for id:" + serviceId);
-            return null;
-        }
-
-        String methodName = service.getMethodName(methodId);
-        if (methodName == null) {
-            logger.error("No methodName for id:{} in service:{}", methodId, service.getServiceName());
-            return null;
-        }
-
-        return methodName;
-    }
-
-    public static int methodNameToId(int serviceId, String methodName){
-        ServiceInfo service = serviceIdMap.getOrDefault(serviceId, null);
-        if (service == null) {
-            logger.error("No service for id:" + serviceId);
-            return 0;
-        }
-
-        int methodId = service.getMethodId(methodName);
-        if (methodId == 0) {
-            logger.error("No methodId for name:{} in service:{}", methodName, service.getServiceName());
-            return 0;
-        }
-
-        return methodId;
-    }
-
-    public static String parameterTypeIdToName(int serviceId, int id){
-        ServiceInfo service = serviceIdMap.getOrDefault(serviceId, null);
-        if (service == null) {
-            logger.error("No service for id:" + serviceId);
-            return null;
-        }
-
-        String typeName = service.getParameterTypeName(id);
-        if(typeName == null){
-            logger.error("No name for parameterTypeId:{} in service:{}", id, service.getServiceName());
-            return null;
-        }
-
-        return typeName;
-    }
-
-    public static int parameterTypeNameToId(int serviceId, String name){
-        ServiceInfo service = serviceIdMap.getOrDefault(serviceId, null);
-        if (service == null) {
-            logger.error("No service for id:" + serviceId);
-            return 0;
-        }
-
-        int typeId = service.getParameterTypeId(name);
-        if(typeId == 0){
-            logger.error("No id for parameterType:{} in service:{}", name, service.getServiceName());
-            return 0;
-        }
-
-        return typeId;
-    }
 
     /**
      * 添加服务支持

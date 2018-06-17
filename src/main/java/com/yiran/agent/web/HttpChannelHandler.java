@@ -23,11 +23,10 @@ import java.util.concurrent.Executors;
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
 
-    private static Executor executor = Executors.newFixedThreadPool(512);
+//    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
-//    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
-    private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
+    private ByteBuf parseTempBuf;
 
 
     public HttpChannelHandler (LoadBalance loadBalance) {
@@ -48,47 +47,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-//    @Override
-//    public void channelRead0(ChannelHandlerContext ctx, Object msg)
-//            throws Exception {
-//        if (msg instanceof HttpContent) {
-//            HttpContent content = (HttpContent) msg;
-//            ByteBuf buf = content.content();
-//            if (buf.isReadable()) {
-//                contentBuf.writeBytes(buf);
-//            }
-//            if (msg instanceof LastHttpContent) {
-//                try{
-//                    FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
-//                    String serviceName = formDataParser.parseInterface(contentBuf);
-//                    if(serviceName == null) {
-//                        logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-//                        ctx.close();
-//                        return;
-//                    }
-//                    /*截出parameter*/
-//                    parseParameter(contentBuf);
-//
-//                    ///*开始调用服务*/
-//
-//                    ////logger.info("serviceName:{}", serviceName);
-//
-//                    ///*选出最优客户端*/
-//                    AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
-//                    if (agentClient == null) {
-//                        ctx.close();
-//                        return;
-//                    }
-//                    ///*调用服务*
-//                    agentClient.request(ctx.channel(), contentBuf);
-//
-//                } catch (Exception e) {
-//                    logger.error("", e);
-//                }
-//            }
-//        }
-//    }
-
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -98,11 +56,12 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 AgentServiceRequestFuture future = new AgentServiceRequestFuture();
 
                 /*补充令牌*/
-                loadBalance.supplementToken();
+                //loadBalance.supplementToken();
 
                 /*计算qps*/
                 loadBalance.calRequestRate();
 
+                parseTempBuf = ctx.alloc().directBuffer(2048);
                 FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
                 String serviceName = formDataParser.parseInterface(contentBuf);
                 if(serviceName == null) {
@@ -110,35 +69,41 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     responseFailure(ctx);
                     return;
                 }
-                /*截出parameter*/
-                parseParameter(contentBuf);
 
-                ///*选出最优客户端*/
+                /*选出最优客户端*/
                 AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                 if (agentClient == null) {
-                    //ctx.close();
                     responseFailure(ctx);
                     return;
                 }
 
-                ///*调用服务*
-//                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
+                /*注册回调*/
                 future.addListener(() -> {
                     try {
                         RpcResponse response = future.get();
-                        loadBalance.calLatencyDistribution(future.getLatency());
+
+                        /*生成http响应报文*/
                         String hashCodeString = new String(response.getBytes());
                         hashCodeString = hashCodeString.substring(2, hashCodeString.length() - 1);
                         ByteBuf responseContent = ctx.alloc().directBuffer(hashCodeString.length() + 2);
                         responseContent.writeBytes(hashCodeString.getBytes("utf-8"));
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);
+
                         ctx.writeAndFlush(httpResponse).addListener(future1 -> {
+                            /*计算时延*/
+                            loadBalance.calLatencyDistribution(future.getLatency());
+
                             ctx.close();
                         });
                     } catch (Exception e) {
                         logger.error("", e);
                     }
                 }, ctx.executor());
+
+                /*截出parameter*/
+                parseParameter(contentBuf);
+
+                /*调用服务*/
                 agentClient.request(contentBuf, future);
 
             } catch (Exception e) {

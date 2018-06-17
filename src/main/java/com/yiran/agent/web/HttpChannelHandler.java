@@ -129,6 +129,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         loadBalance.calLatencyDistribution(future.getLatency());
                         String hashCodeString = new String(response.getBytes());
                         hashCodeString = hashCodeString.substring(2, hashCodeString.length() - 1);
+                        logger.info("Recv hash code:{}", hashCodeString);
                         ByteBuf responseContent = ctx.alloc().directBuffer(hashCodeString.length() + 2);
                         responseContent.writeBytes(hashCodeString.getBytes("utf-8"));
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);

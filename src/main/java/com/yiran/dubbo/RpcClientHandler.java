@@ -17,7 +17,6 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof ByteBuf) {
-            logger.info("Get Response data");
             ServiceSwitcher.responseFromDubbo((ByteBuf) msg);
         }
     }

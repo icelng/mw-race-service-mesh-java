@@ -19,7 +19,6 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<RpcR
 
 
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
-        logger.info("Recv response data!");
         AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(response.getRequestId()));
         if (future != null) {
             AgentServiceRequestHolder.remove(String.valueOf(response.getRequestId()));

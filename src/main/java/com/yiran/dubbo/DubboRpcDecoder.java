@@ -21,6 +21,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
+        logger.info("-------------");
         if (isHeader) {
             if (byteBuf.readableBytes() < HEADER_LENGTH) {
                 return;

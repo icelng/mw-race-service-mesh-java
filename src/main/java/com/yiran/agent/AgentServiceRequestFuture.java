@@ -75,12 +75,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void done2 (AgentServiceResponse response) {
         latch.countDown();
         this.agentServiceResponse = response;
-        latency = (System.nanoTime() - startTime) / 1000000000.f;
         executor.execute(listener);
     }
 
     public float getLatency () {
-        return this.latency;
+        latency = (System.nanoTime() - startTime) / 1000000000.f;
+        return latency;
     }
 
 

@@ -35,6 +35,11 @@ public class LoadBalance {
     private Semaphore tokenBucket;
     private Object tokenBucketLock = new Object();
 
+    /*延时分布*/
+    private int smallLatencyCnt = 0;
+    private int mediumLatencyCnt = 0;
+    private int largeLatencyCnt = 0;
+
     private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledExecutorService scheduledPrintRate = Executors.newSingleThreadScheduledExecutor();
 
@@ -46,16 +51,16 @@ public class LoadBalance {
         loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
         this.agentClientManager = agentClientManager;
         tokenBucket = new Semaphore(TOKEN_BUCKET_CAPACITY);
-        scheduledExecutor.scheduleAtFixedRate(() -> {
-            synchronized (tokenBucketLock) {
-                if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
-                    int supplementNum = Math.min(TOKEN_BUCKET_CAPACITY, TOKEN_BUCKET_CAPACITY - tokenBucket.availablePermits());
-                    tokenBucket.release(supplementNum);
-                }
-            }
-        }, 0, 50, TimeUnit.MILLISECONDS);
+        //scheduledExecutor.scheduleAtFixedRate(() -> {
+        //    synchronized (tokenBucketLock) {
+        //        if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
+        //            int supplementNum = Math.min(TOKEN_BUCKET_CAPACITY, TOKEN_BUCKET_CAPACITY - tokenBucket.availablePermits());
+        //            tokenBucket.release(supplementNum);
+        //        }
+        //    }
+        //}, 0, 50, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
-            logger.info("The request rate is {}", requestRate);
+            logger.info("QPS:{} <55:{} <80:{} >80:{}", requestRate, smallLatencyCnt, mediumLatencyCnt, largeLatencyCnt);
         }, 0, 1, TimeUnit.SECONDS);
     }
 
@@ -232,6 +237,16 @@ public class LoadBalance {
             return false;
         }
 
+    }
+
+    public void calLatencyDistribution (float latency) {
+        if (latency < 55) {
+            smallLatencyCnt++;
+        } else if (latency < 80) {
+            mediumLatencyCnt++;
+        } else {
+            largeLatencyCnt++;
+        }
     }
 
 }

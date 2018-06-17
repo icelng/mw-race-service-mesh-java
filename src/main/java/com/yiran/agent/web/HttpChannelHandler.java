@@ -121,6 +121,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 future.addListener(() -> {
                     try {
                         AgentServiceResponse response = future.get();
+                        loadBalance.calLatencyDistribution(future.getLatency());
                         String hashCodeString = String.valueOf(response.getHashCode());
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
                         ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);

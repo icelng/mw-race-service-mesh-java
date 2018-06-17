@@ -28,11 +28,16 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
 
     private Channel httpChannel;
 
+    /*时延*/
+    private long startTime;
+    private float latency;
+
     public AgentServiceRequestFuture(AgentClient agentClient, AgentServiceRequest agentServiceRequest, Channel httpChannel){
         this.agentServiceRequest = agentServiceRequest;
         this.requestId = agentServiceRequest.getRequestId();
         this.agentClient = agentClient;
         this.httpChannel = httpChannel;
+        startTime = System.nanoTime();
     }
 
     public AgentServiceRequestFuture () {
@@ -70,7 +75,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void done2 (AgentServiceResponse response) {
         latch.countDown();
         this.agentServiceResponse = response;
+        latency = (System.nanoTime() - startTime) / 1000000000.f;
         executor.execute(listener);
+    }
+
+    public float getLatency () {
+        return this.latency;
     }
 
 

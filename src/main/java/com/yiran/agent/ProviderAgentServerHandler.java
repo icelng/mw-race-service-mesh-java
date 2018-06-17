@@ -31,6 +31,7 @@ public class ProviderAgentServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        logger.info("Get data");
         dubboChannel.writeAndFlush(msg);
     }
 }

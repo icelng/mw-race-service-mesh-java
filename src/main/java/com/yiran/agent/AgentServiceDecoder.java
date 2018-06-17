@@ -36,7 +36,7 @@ public class AgentServiceDecoder extends ChannelInboundHandlerAdapter {
                     /*接收到一个头*/
                     requestId = Bytes.bytes2long(header, 0);
                     dataLength = Bytes.bytes2int(header, 8);
-                    data = byteBufAllocator.buffer(dataLength);
+                    data = ctx.alloc().directBuffer(dataLength);
                     isHeader = false;
                 }
 

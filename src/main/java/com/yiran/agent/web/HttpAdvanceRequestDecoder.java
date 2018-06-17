@@ -13,7 +13,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpAdvanceRequestDecoder.class);
 
     private ByteBuf httpContent = null;
-    private ByteBuf headerParseBuf = PooledByteBufAllocator.DEFAULT.buffer(64);
+    private ByteBuf headerParseBuf;
     private boolean isRequestLine = true;
     private boolean isHeader = false;
     private boolean isContent = false;
@@ -33,6 +33,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                     if (in.readByte() == '\n') {
                         isHeader = true;
                         isRequestLine = false;
+                        headerParseBuf = ctx.alloc().directBuffer(1024);
                         break;
                     }
                 }
@@ -65,7 +66,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                         /*为value*/
                         if (isContentLen) {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
-                            httpContent = PooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
+                            httpContent = ctx.alloc().directBuffer(remainContentSize);
                             isContentLen = false;
                         }
                         headerParseBuf.clear();

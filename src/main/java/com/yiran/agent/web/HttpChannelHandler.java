@@ -147,7 +147,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         parseTempBuf.release();
-//        contentBuf.release();
     }
 
     //@Override

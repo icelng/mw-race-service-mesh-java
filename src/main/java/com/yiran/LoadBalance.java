@@ -60,7 +60,7 @@ public class LoadBalance {
         //    }
         //}, 0, 50, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
-            logger.info("QPS:{} <55:{} <80:{} >80:{}", requestRate, smallLatencyCnt, mediumLatencyCnt, largeLatencyCnt);
+            logger.info("QPS:{} <50.5:{} <80:{} >80:{}", requestRate, smallLatencyCnt, mediumLatencyCnt, largeLatencyCnt);
         }, 0, 1, TimeUnit.SECONDS);
     }
 
@@ -240,7 +240,7 @@ public class LoadBalance {
     }
 
     public void calLatencyDistribution (float latency) {
-        if (latency < 55) {
+        if (latency < 50.5) {
             smallLatencyCnt++;
         } else if (latency < 80) {
             mediumLatencyCnt++;

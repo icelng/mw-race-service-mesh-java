@@ -2,6 +2,9 @@ package com.yiran.agent;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.yiran.ServiceSwitcher;
+import com.yiran.dubbo.model.JsonUtils;
+import com.yiran.dubbo.model.Request;
+import com.yiran.dubbo.model.RpcInvocation;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -13,11 +16,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,18 +83,33 @@ public class AgentClient {
         return null;
     }
 
-    public void request(ByteBuf data, AgentServiceRequestFuture future) {
+    public void request(ByteBuf data, AgentServiceRequestFuture future) throws IOException {
         long reqId = requestId.addAndGet(1);
 
         future.setAgentClient(this);
 
-        AgentServiceRequest agentServiceRequest = new AgentServiceRequest();
-        agentServiceRequest.setRequestId(reqId);
-        agentServiceRequest.setData(data);
 
-        AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("hash");
+        invocation.setAttachment("path", "com.alibaba.dubbo.performance.demo.provider.IHelloService");
+        String parameterTypeName = "Ljava/lang/String;";
+        invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String
+        String parameter = data.toString(CharsetUtil.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
+        JsonUtils.writeObject(parameter, writer);
+        invocation.setArguments(out.toByteArray());
 
-        channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
+        Request request = new Request();
+        request.setVersion("2.0.0");
+        request.setTwoWay(true);
+        request.setData(invocation);
+        request.setId(reqId);
+
+
+        AgentServiceRequestHolder.put(String.valueOf(reqId), future);
+
+        channel.writeAndFlush(request);  // 开始发送报文
     }
 
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {

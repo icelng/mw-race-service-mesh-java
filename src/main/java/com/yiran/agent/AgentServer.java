@@ -23,10 +23,12 @@ public class AgentServer {
 
     private EventLoopGroup eventLoopGroup;
     private int port;
+    private Channel dubboChannel;
 
-    public AgentServer(int port, EventLoopGroup eventLoopGroup){
+    public AgentServer(int port, EventLoopGroup eventLoopGroup, Channel dubboChannel){
         this.eventLoopGroup = eventLoopGroup;
         this.port = port;
+        this.dubboChannel = dubboChannel;
     }
 
     public void run() throws Exception {
@@ -41,16 +43,18 @@ public class AgentServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new AgentServiceDecoder());
-                        ch.pipeline().addLast(new ProviderAgentEncoder());
-                        ch.pipeline().addLast(new ProviderAgentServerHandler());
+//                        ch.pipeline().addLast(new AgentServiceDecoder());
+//                        ch.pipeline().addLast(new ProviderAgentEncoder());
+                        ch.pipeline().addLast(new ProviderAgentServerHandler(dubboChannel));
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        b.bind(port).sync();
+        Channel channel = b.bind(port).sync().channel();
+
+        ServiceSwitcher.setAgentChannel(channel);
 
         /*向etcd注册服务*/
         logger.info("Register service!");

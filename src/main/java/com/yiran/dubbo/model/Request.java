@@ -28,6 +28,10 @@ public class Request {
 
     private Object mData;
 
+    public Request(){
+
+    }
+
     public Request(Recycler.Handle<Request> handle){
         this.recyclerHandle = handle;
     }

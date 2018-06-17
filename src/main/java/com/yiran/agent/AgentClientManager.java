@@ -1,6 +1,8 @@
 package com.yiran.agent;
 
 import com.yiran.LoadBalance;
+import com.yiran.dubbo.DubboRpcDecoder;
+import com.yiran.dubbo.DubboRpcEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
@@ -53,8 +55,8 @@ public class AgentClientManager {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel ch) throws Exception {
 //                ch.pipeline().addLast(new IdleStateHandler(0, 100, 0, TimeUnit.MILLISECONDS));
-                ch.pipeline().addLast(new AgentServiceDecoder());
-                ch.pipeline().addLast(new ConsumerAgentEncoder());
+                ch.pipeline().addLast(new DubboRpcEncoder());
+                ch.pipeline().addLast(new DubboRpcDecoder());
                 ch.pipeline().addLast(new ConsumerAgentClientHandler(loadBalance));
             }
         });

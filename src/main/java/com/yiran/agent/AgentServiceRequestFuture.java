@@ -1,5 +1,6 @@
 package com.yiran.agent;
 
+import com.yiran.dubbo.model.RpcResponse;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -11,14 +12,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
+public class AgentServiceRequestFuture implements Future<RpcResponse> {
     private static Logger logger = LoggerFactory.getLogger(AgentServiceRequestFuture.class);
 
     private long requestId;
     private AgentClient agentClient;
 
     private CountDownLatch latch = new CountDownLatch(1);
-    private AgentServiceResponse agentServiceResponse = null;
+    private RpcResponse agentServiceResponse = null;
     private AtomicBoolean isCancelled = new AtomicBoolean(false);
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private Executor executor = null;
@@ -57,12 +58,12 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         return isDone.get();
     }
 
-    public AgentServiceResponse get() throws InterruptedException{
+    public RpcResponse get() throws InterruptedException{
         latch.await();
         return agentServiceResponse;
     }
 
-    public AgentServiceResponse get(long timeout, TimeUnit unit) throws InterruptedException{
+    public RpcResponse get(long timeout, TimeUnit unit) throws InterruptedException{
         latch.await(timeout, unit);
         return agentServiceResponse;
     }
@@ -72,7 +73,7 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         this.executor = executor;
     }
 
-    public void done2 (AgentServiceResponse response) {
+    public void done2 (RpcResponse response) {
         latch.countDown();
         this.agentServiceResponse = response;
         if (agentClient != null) {

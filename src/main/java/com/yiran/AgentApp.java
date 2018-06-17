@@ -58,16 +58,6 @@ public class AgentApp {
             EventLoopGroup eventLoopGroup = new EpollEventLoopGroup(4);
             DubboConnectManager dubboConnectManager = new DubboConnectManager(1, eventLoopGroup);
             dubboConnectManager.connect("127.0.0.1", Integer.valueOf(System.getProperty("dubbo.protocol.port")));
-            //Channel dubboChannel = null;
-            //while(dubboChannel == null) {
-            //    logger.info("Connecting to Dubbo..");
-            //    try{
-            //        dubboChannel = dubboConnectManager.getChannel();
-            //    } catch (Exception e){
-            //        logger.error(e.getMessage());
-            //        Thread.sleep(500);
-            //    }
-            //}
             /*往服务交换机注册支持的通道*/
             ServiceSwitcher.setRpcClientChannel(dubboConnectManager.getChannel());
 
@@ -75,7 +65,7 @@ public class AgentApp {
             for (int i = 0;i < 1;i++){
                 try {
                     int port = Integer.valueOf(System.getProperty("server.port" + i));
-                    new AgentServer(port, eventLoopGroup).run();
+                    new AgentServer(port, eventLoopGroup, dubboConnectManager.getChannel()).run();
                 } catch (Exception e) {
                     logger.error(e.getLocalizedMessage(), e);
                 }

@@ -2,6 +2,7 @@ package com.yiran.agent.web;
 
 import com.yiran.LoadBalance;
 import com.yiran.agent.*;
+import com.yiran.dubbo.model.RpcResponse;
 import io.netty.buffer.*;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
@@ -124,9 +125,10 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 //                AgentServiceRequestFuture future = agentClient.request(ctx.channel(), contentBuf);
                 future.addListener(() -> {
                     try {
-                        AgentServiceResponse response = future.get();
+                        RpcResponse response = future.get();
                         loadBalance.calLatencyDistribution(future.getLatency());
-                        String hashCodeString = String.valueOf(response.getHashCode());
+                        String hashCodeString = new String(response.getBytes());
+                        hashCodeString = hashCodeString.substring(2, hashCodeString.length() - 1);
                         ByteBuf responseContent = ctx.alloc().directBuffer(hashCodeString.length() + 2);
                         responseContent.writeBytes(hashCodeString.getBytes("utf-8"));
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);

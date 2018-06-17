@@ -11,6 +11,7 @@ import com.yiran.dubbo.model.Request;
 import com.yiran.dubbo.model.RpcInvocation;
 import com.yiran.dubbo.model.RpcResponse;
 import com.yiran.registry.ServiceInfo;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class ServiceSwitcher {
     private static Map<Integer, ServiceInfo> serviceIdMap = new HashMap<>();
     private static Map<String, ServiceInfo> serviceNameMap = new HashMap<>();
     private static long writeCnt = 0;
+    private static Channel agentChannel;
 
 
     /**
@@ -110,42 +112,23 @@ public class ServiceSwitcher {
     }
 
     /**
-     * 响应转换
-     * @param rpcResponse
-     * Dubbo响应报文
+     * 透传
      */
-    public static void responseFromDubbo(RpcResponse rpcResponse) throws UnsupportedEncodingException {
-
-        /*获取到rpc请求相应的agent的请求*/
-        AgentServiceRequest agentServiceRequest = processingRequest.get(String.valueOf(rpcResponse.getRequestId()));
-        if (agentServiceRequest == null){
-            logger.warn("No rpcResponse for requestId:{}", rpcResponse.getRequestId());
-            return;
-        }
-        //logger.info("Receive response(id:{}) from provider:{}", rpcResponse.getRequestId(), new String(rpcResponse.getBytes()));
-        processingRequest.remove(String.valueOf(rpcResponse.getRequestId()));
-
-        /*获取得到consumer-agent 与 provider-agent之间的Channel*/
-        Channel agentChannel =  agentServiceRequest.getChannel();
-
-        /*生成响应报文*/
-        AgentServiceResponse agentServiceResponse = new AgentServiceResponse();
-        agentServiceResponse.setRequestId(agentServiceRequest.getRequestId());
-        agentServiceRequest.getData().release();
-        //agentServiceRequest.release();
-
-        /*设置返回值为整形，hashcode*/
-        String returnStr = new String(rpcResponse.getBytes(), "utf-8");
-        String intStr = returnStr.substring(2, returnStr.length() - 1);
-        agentServiceResponse.setHashCode(Integer.valueOf(intStr));
+    public static void responseFromDubbo(ByteBuf data) throws UnsupportedEncodingException {
 
         /*向客户端发送响应*/
-        agentChannel.writeAndFlush(agentServiceResponse);
-        //if (writeCnt++ % 15 == 0) {
-        //    /*写若干次才进行flush*/
-        //    agentChannel.flush();
-        //}
+        if (agentChannel != null) {
+            agentChannel.writeAndFlush(data);
 
+        } else {
+            logger.error("The agent channel is null!!!");
+        }
+
+    }
+
+
+    public static void setAgentChannel (Channel channel) {
+        agentChannel = channel;
     }
 
 

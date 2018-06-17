@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * 负责服务发现，负责负载均衡，负责agent客户端的管理
  */
 public class LoadBalance {
-    private static float SMALL_LATENCY = 55f;
-    private static float MEDIUM_LATENCY = 80f;
+    private static float SMALL_LATENCY = 60f;
+    private static float MEDIUM_LATENCY = 100f;
     private static float MAX_PPL = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
     private static int TOKEN_BUCKET_CAPACITY = 32;
@@ -41,6 +41,10 @@ public class LoadBalance {
     private int smallLatencyCnt = 0;
     private int mediumLatencyCnt = 0;
     private int largeLatencyCnt = 0;
+    private int lastSmallLatencyCnt = 0;
+    private int lastMediumLatencyCnt = 0;
+    private int lastLargeLatencyCnt = 0;
+
 
     private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledExecutorService scheduledPrintRate = Executors.newSingleThreadScheduledExecutor();
@@ -62,6 +66,18 @@ public class LoadBalance {
         //    }
         //}, 0, 50, TimeUnit.MILLISECONDS);
         scheduledPrintRate.scheduleAtFixedRate(() -> {
+            if ((smallLatencyCnt - lastSmallLatencyCnt < 5) && (mediumLatencyCnt - lastMediumLatencyCnt < 5) && (largeLatencyCnt - lastLargeLatencyCnt < 5)) {
+                smallLatencyCnt = 0;
+                mediumLatencyCnt = 0;
+                largeLatencyCnt = 0;
+                lastSmallLatencyCnt = 0;
+                lastMediumLatencyCnt = 0;
+                lastLargeLatencyCnt = 0;
+            } else {
+                lastLargeLatencyCnt = largeLatencyCnt;
+                lastMediumLatencyCnt = mediumLatencyCnt;
+                lastSmallLatencyCnt = smallLatencyCnt;
+            }
             logger.info("QPS:{} <{}:{} <{}:{} >{}:{}", requestRate, SMALL_LATENCY, smallLatencyCnt, MEDIUM_LATENCY, mediumLatencyCnt, MEDIUM_LATENCY, largeLatencyCnt);
         }, 0, 1, TimeUnit.SECONDS);
     }

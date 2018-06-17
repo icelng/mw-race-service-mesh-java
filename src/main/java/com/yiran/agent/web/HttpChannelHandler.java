@@ -2,10 +2,7 @@ package com.yiran.agent.web;
 
 import com.yiran.LoadBalance;
 import com.yiran.agent.*;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.*;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleState;
@@ -27,7 +24,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 
     private LoadBalance loadBalance;
 //    private ByteBuf contentBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
-    private ByteBuf parseTempBuf = PooledByteBufAllocator.DEFAULT.buffer(2048);
+    private ByteBuf parseTempBuf = UnpooledByteBufAllocator.DEFAULT.buffer(2048);
 
 
     public HttpChannelHandler (LoadBalance loadBalance) {
@@ -114,8 +111,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 ///*选出最优客户端*/
                 AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
                 if (agentClient == null) {
-                    ctx.close();
-                    //responseFailure(ctx);
+                    //ctx.close();
+                    responseFailure(ctx);
                     return;
                 }
 
@@ -125,14 +122,9 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     try {
                         AgentServiceResponse response = future.get();
                         String hashCodeString = String.valueOf(response.getHashCode());
-                        DefaultFullHttpResponse httpResponse = null;
-                        try {
-                            httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
-                        } catch (UnsupportedEncodingException e) {
-                            logger.error("", e);
-                        }
+                        DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK, Unpooled.wrappedBuffer(hashCodeString.getBytes("utf-8")));
                         ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         logger.error("", e);
                     }
                 }, executor);

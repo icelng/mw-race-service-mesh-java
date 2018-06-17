@@ -2,6 +2,7 @@ package com.yiran.agent.web;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
@@ -12,7 +13,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpAdvanceRequestDecoder.class);
 
     private ByteBuf httpContent = null;
-    private ByteBuf headerParseBuf = PooledByteBufAllocator.DEFAULT.buffer(64);
+    private ByteBuf headerParseBuf = UnpooledByteBufAllocator.DEFAULT.buffer(64);
     private boolean isRequestLine = true;
     private boolean isHeader = false;
     private boolean isContent = false;
@@ -64,7 +65,7 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                         /*为value*/
                         if (isContentLen) {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
-                            httpContent = PooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
+                            httpContent = UnpooledByteBufAllocator.DEFAULT.buffer(remainContentSize);
                             isContentLen = false;
                         }
                         headerParseBuf.clear();

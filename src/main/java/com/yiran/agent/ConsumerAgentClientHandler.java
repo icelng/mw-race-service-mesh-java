@@ -56,6 +56,8 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<Agen
             response.setRequestId(msg.getRequestId());
             response.setHashCode(msg.getData().readInt());
             msg.getData().release();
+
+            /*done*/
             future.done2(response);
 
             //if (!rateLimiter.tryAcquire(0, TimeUnit.MILLISECONDS)) {

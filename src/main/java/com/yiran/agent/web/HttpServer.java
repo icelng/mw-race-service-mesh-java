@@ -37,12 +37,12 @@ public class HttpServer {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(EpollServerSocketChannel.class)
-                .childHandler(new HttpChannelInitService(loadBalance))
+                .childHandler(new HttpChannelInitService(loadBalance));
                 //.option(ChannelOption.SO_BACKLOG, 512)
-                .option(EpollChannelOption.SO_REUSEPORT, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .childOption(ChannelOption.TCP_NODELAY, false);
+                //.option(EpollChannelOption.SO_REUSEPORT, true)
+                //.childOption(ChannelOption.SO_KEEPALIVE, true);
+                //.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                //.childOption(ChannelOption.TCP_NODELAY, false);
         b.bind(this.port).sync();
     }
 

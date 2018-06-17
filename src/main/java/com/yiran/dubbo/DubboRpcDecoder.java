@@ -13,7 +13,7 @@ import java.util.List;
 public class DubboRpcDecoder extends ByteToMessageDecoder {
     private static Logger logger = LoggerFactory.getLogger(DubboRpcDecoder.class);
     // header length.
-    protected static final int HEADER_LENGTH = 16;
+    private static final int HEADER_LENGTH = 16;
     private Boolean isHeader = true;
     private long requestId;
     private int dataLength;
@@ -21,7 +21,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
-        logger.info("-------------");
+        logger.info("-----decode------");
         if (isHeader) {
             if (byteBuf.readableBytes() < HEADER_LENGTH) {
                 return;

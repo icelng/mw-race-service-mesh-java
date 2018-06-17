@@ -7,6 +7,7 @@ import com.yiran.registry.IRegistry;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -52,9 +53,8 @@ public class AgentServer {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        Channel channel = b.bind(port).sync().channel();
+        b.bind(port).sync();
 
-        ServiceSwitcher.setAgentChannel(channel);
 
         /*向etcd注册服务*/
         logger.info("Register service!");

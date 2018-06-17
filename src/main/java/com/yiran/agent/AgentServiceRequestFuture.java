@@ -75,6 +75,9 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
     public void done2 (AgentServiceResponse response) {
         latch.countDown();
         this.agentServiceResponse = response;
+        if (agentClient != null) {
+            agentClient.requestDone();
+        }
         executor.execute(listener);
     }
 
@@ -83,6 +86,9 @@ public class AgentServiceRequestFuture implements Future<AgentServiceResponse> {
         return latency;
     }
 
+    public void setAgentClient(AgentClient agentClient) {
+        this.agentClient = agentClient;
+    }
 
     public void done(AgentServiceBaseMsg response) throws UnsupportedEncodingException {
         if (response != null) {

@@ -80,6 +80,11 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                 in.readBytes(httpContent, in.readableBytes());
                 if (remainContentSize == 0) {
                     ctx.fireChannelRead(httpContent);
+                    isRequestLine = true;
+                    isHeader = false;
+                    isContent = false;
+                    isKey = true;
+                    isContentLen = false;
                 }
             }
             in.release();

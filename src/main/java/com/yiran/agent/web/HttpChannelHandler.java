@@ -101,7 +101,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 }, ctx.executor());
 
                 /*截出parameter*/
-                parseParameter(contentBuf);
+//                parseParameter(contentBuf);
 
                 /*调用服务*/
                 agentClient.request(argumentsMap, future);

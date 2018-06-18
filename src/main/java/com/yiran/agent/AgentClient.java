@@ -79,7 +79,7 @@ public class AgentClient {
         future.setAgentClient(this);
 
         RpcInvocation invocation = new RpcInvocation();
-        invocation.setMethodName(argumentsMap.get("hash"));
+        invocation.setMethodName(argumentsMap.get("method"));
         invocation.setAttachment("path", argumentsMap.get("interface"));
         String parameterTypeName = argumentsMap.get("parameterTypesString");
         invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String

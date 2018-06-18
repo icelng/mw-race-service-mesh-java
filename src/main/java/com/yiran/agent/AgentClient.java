@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -72,17 +73,17 @@ public class AgentClient {
         return null;
     }
 
-    public void request(ByteBuf data, AgentServiceRequestFuture future) throws IOException {
+    public void request(Map<String, String> argumentsMap, AgentServiceRequestFuture future) throws IOException {
         long reqId = requestId.addAndGet(1);
 
         future.setAgentClient(this);
 
         RpcInvocation invocation = new RpcInvocation();
-        invocation.setMethodName("hash");
-        invocation.setAttachment("path", "com.alibaba.dubbo.performance.demo.provider.IHelloService");
-        String parameterTypeName = "Ljava/lang/String;";
+        invocation.setMethodName(argumentsMap.get("hash"));
+        invocation.setAttachment("path", argumentsMap.get("interface"));
+        String parameterTypeName = argumentsMap.get("parameterTypesString");
         invocation.setParameterTypes(parameterTypeName);    // Dubbo内部用"Ljava/lang/String"来表示参数类型是String
-        String parameter = data.toString(CharsetUtil.UTF_8);
+        String parameter = argumentsMap.get("parameter");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
         JsonUtils.writeObject(parameter, writer);

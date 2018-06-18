@@ -62,18 +62,18 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 //loadBalance.calRequestRate();
 
                 /*解析content*/
-                //ByteBuf parseTempBuf = ctx.alloc().directBuffer(2048);
-                //FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
-                //String serviceName = formDataParser.parseInterface(contentBuf);
-                //parseTempBuf.release();
-                //if(serviceName == null) {
-                //    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-                //    responseFailure(ctx);
-                //    return;
-                //}
+                ByteBuf parseTempBuf = ctx.alloc().directBuffer(contentBuf.readableBytes());
+                FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+                Map<String, String> argumentsMap = formDataParser.parse(contentBuf);
+                parseTempBuf.release();
+                if(argumentsMap == null) {
+                    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
+                    responseFailure(ctx);
+                    return;
+                }
 
                 /*选出最优客户端*/
-                AgentClient agentClient = loadBalance.findOptimalAgentClient(SERVICE_NAME);
+                AgentClient agentClient = loadBalance.findOptimalAgentClient(argumentsMap.get("interface"));
                 if (agentClient == null) {
                     responseFailure(ctx);
                     return;
@@ -94,12 +94,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);
                         setHeaders(httpResponse);
 
-                        ctx.writeAndFlush(httpResponse).addListener(future1 -> {
-                            /*计算时延*/
-//                            loadBalance.calLatencyDistribution(future.getLatency());
-
-//                            ctx.close();
-                        });
+                        ctx.writeAndFlush(httpResponse);
                     } catch (Exception e) {
                         logger.error("", e);
                     }
@@ -109,8 +104,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 parseParameter(contentBuf);
 
                 /*调用服务*/
-                //agentClient.request(contentBuf, future);
-                agentClient.hardRequest(contentBuf, future);
+                agentClient.request(argumentsMap, future);
+//                agentClient.hardRequest(contentBuf, future);
 
             } catch (Exception e) {
                 logger.error("", e);

@@ -89,7 +89,6 @@ public class DubboRpcEncoder extends MessageToByteEncoder {
         out.writeByte('\n');
         out.writeBytes(attachBuf);
 
-        req.getParameter().release();
     }
 
     private void softEncode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception{

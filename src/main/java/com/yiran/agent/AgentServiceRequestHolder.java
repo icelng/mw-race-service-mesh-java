@@ -4,17 +4,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AgentServiceRequestHolder {
 
-    private static ConcurrentHashMap<String, AgentServiceRequestFuture> processingRequest = new ConcurrentHashMap<String, AgentServiceRequestFuture>();
+    private static ConcurrentHashMap<Long, AgentServiceRequestFuture> processingRequest = new ConcurrentHashMap<>();
 
-    public static void put(String requestId, AgentServiceRequestFuture future) {
+    public static void put(Long requestId, AgentServiceRequestFuture future) {
         processingRequest.put(requestId, future);
     }
 
-    public static AgentServiceRequestFuture get(String requestId) {
+    public static AgentServiceRequestFuture get(Long requestId) {
         return processingRequest.get(requestId);
     }
 
-    public static void remove(String requestId) {
+    public static void remove(Long requestId) {
         processingRequest.remove(requestId);
     }
 }

@@ -22,11 +22,11 @@ import java.util.concurrent.Executors;
 
 public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpChannelHandler.class);
+    private static String SERVICE_NAME = "com.alibaba.dubbo.performance.demo.provider.IHelloService";
 
 //    private static Executor executor = Executors.newFixedThreadPool(512);
 
     private LoadBalance loadBalance;
-    private ByteBuf parseTempBuf;
 
 
     public HttpChannelHandler (LoadBalance loadBalance) {
@@ -59,19 +59,20 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 //loadBalance.supplementToken();
 
                 /*计算qps*/
-                loadBalance.calRequestRate();
+                //loadBalance.calRequestRate();
 
-                parseTempBuf = ctx.alloc().directBuffer(2048);
-                FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
-                String serviceName = formDataParser.parseInterface(contentBuf);
-                if(serviceName == null) {
-                    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
-                    responseFailure(ctx);
-                    return;
-                }
+                //ByteBuf parseTempBuf = ctx.alloc().directBuffer(2048);
+                //FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+                //String serviceName = formDataParser.parseInterface(contentBuf);
+                //parseTempBuf.release();
+                //if(serviceName == null) {
+                //    logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
+                //    responseFailure(ctx);
+                //    return;
+                //}
 
                 /*选出最优客户端*/
-                AgentClient agentClient = loadBalance.findOptimalAgentClient(serviceName);
+                AgentClient agentClient = loadBalance.findOptimalAgentClient(SERVICE_NAME);
                 if (agentClient == null) {
                     responseFailure(ctx);
                     return;
@@ -104,7 +105,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 parseParameter(contentBuf);
 
                 /*调用服务*/
-                agentClient.request(contentBuf, future);
+                //agentClient.request(contentBuf, future);
+                agentClient.hardRequest(contentBuf, future);
 
             } catch (Exception e) {
                 logger.error("", e);
@@ -120,17 +122,18 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void parseParameter(ByteBuf content) {
-        byte c;
-        int equalCnt = 0;
+        //byte c;
+        //int equalCnt = 0;
 
-        while (true) {
-            c = content.readByte();
-            if (c == '=') {
-                if (++equalCnt == 4) {
-                    break;
-                }
-            }
-        }
+        //while (true) {
+        //    c = content.readByte();
+        //    if (c == '=') {
+        //        if (++equalCnt == 4) {
+        //            break;
+        //        }
+        //    }
+        //}
+        content.readBytes(136);
     }
 
     /**
@@ -146,7 +149,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        parseTempBuf.release();
     }
 
     //@Override

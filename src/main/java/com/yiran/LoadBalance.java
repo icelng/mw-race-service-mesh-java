@@ -162,7 +162,8 @@ public class LoadBalance {
             AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
             if(agentClient == null){
                 logger.error("AgentClient {} not found!", clientName);
-                return null;
+                /*生产环境中，在此回收断掉的AgentClient的资源*/
+                continue;
             }
 
             /*选出候选人*/

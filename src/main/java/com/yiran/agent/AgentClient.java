@@ -1,6 +1,7 @@
 package com.yiran.agent;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.yiran.dubbo.model.HardRequest;
 import com.yiran.dubbo.model.JsonUtils;
 import com.yiran.dubbo.model.Request;
 import com.yiran.dubbo.model.RpcInvocation;
@@ -76,7 +77,6 @@ public class AgentClient {
 
         future.setAgentClient(this);
 
-
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName("hash");
         invocation.setAttachment("path", "com.alibaba.dubbo.performance.demo.provider.IHelloService");
@@ -95,9 +95,22 @@ public class AgentClient {
         request.setId(reqId);
 
 
-        AgentServiceRequestHolder.put(String.valueOf(reqId), future);
+        AgentServiceRequestHolder.put(reqId, future);
 
         channel.writeAndFlush(request);  // 开始发送报文
+    }
+
+    public void hardRequest(ByteBuf parameter, AgentServiceRequestFuture future) {
+        long reqId = requestId.addAndGet(1);
+
+        future.setAgentClient(this);
+        AgentServiceRequestHolder.put(reqId, future);
+
+        HardRequest request = HardRequest.get();
+        request.setParameter(parameter);
+        request.setReqId(reqId);
+
+        channel.writeAndFlush(request);
     }
 
     public AgentServiceRequestFuture request(Channel httpChannel, ByteBuf data) throws Exception {
@@ -108,7 +121,7 @@ public class AgentClient {
         agentServiceRequest.setData(data);
 
         AgentServiceRequestFuture future = new AgentServiceRequestFuture(this, agentServiceRequest, httpChannel);
-        AgentServiceRequestHolder.put(String.valueOf(agentServiceRequest.getRequestId()), future);
+        AgentServiceRequestHolder.put(reqId, future);
 
         channel.writeAndFlush(agentServiceRequest);  // 开始发送报文
 

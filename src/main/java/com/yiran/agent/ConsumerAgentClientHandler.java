@@ -19,9 +19,9 @@ public class ConsumerAgentClientHandler extends SimpleChannelInboundHandler<RpcR
 
 
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
-        AgentServiceRequestFuture future = AgentServiceRequestHolder.get(String.valueOf(response.getRequestId()));
+        AgentServiceRequestFuture future = AgentServiceRequestHolder.get(response.getRequestId());
         if (future != null) {
-            AgentServiceRequestHolder.remove(String.valueOf(response.getRequestId()));
+            AgentServiceRequestHolder.remove(response.getRequestId());
 
             /*done*/
             future.done2(response);

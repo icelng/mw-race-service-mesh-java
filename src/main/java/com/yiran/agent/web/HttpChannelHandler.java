@@ -72,10 +72,6 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
 
-                for (String key : argumentsMap.keySet()) {
-                    logger.info("key:{} value:{}", key, argumentsMap.get(key));
-                }
-
                 /*选出最优客户端*/
                 AgentClient agentClient = loadBalance.findOptimalAgentClient(argumentsMap.get("interface"));
                 if (agentClient == null) {

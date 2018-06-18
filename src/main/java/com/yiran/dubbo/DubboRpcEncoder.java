@@ -15,7 +15,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder {
     private static Logger logger = LoggerFactory.getLogger(DubboRpcEncoder.class);
 
     // header length.
-    protected static final int HEADER_LENGTH = 4;
+    protected static final int HEADER_LENGTH = 16;
     // magic header.
     protected static final short MAGIC = (short) 0xdabb;
     // message flag.
@@ -37,7 +37,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder {
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Map<String, String> attachment = new HashMap<>();
 
-        header = new byte[HEADER_LENGTH];
+        header = new byte[4];
 
         // set magic number.
         Bytes.short2bytes(MAGIC, header);
@@ -96,7 +96,6 @@ public class DubboRpcEncoder extends MessageToByteEncoder {
     }
 
     private void softEncode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception{
-        logger.info("SoftEncoder");
 
         Request req = (Request)msg;
 

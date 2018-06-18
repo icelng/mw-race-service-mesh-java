@@ -82,6 +82,8 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 /*注册回调*/
                 future.addListener(() -> {
                     try {
+                        contentBuf.release();
+
                         RpcResponse response = future.get();
 
                         /*生成http响应报文*/

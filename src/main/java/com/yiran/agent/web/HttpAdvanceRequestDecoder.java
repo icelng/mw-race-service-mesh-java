@@ -76,8 +76,9 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
             }
 
             if (isContent) {
-                remainContentSize -= in.readableBytes();
-                in.readBytes(httpContent, in.readableBytes());
+                int readSize = Math.min(remainContentSize, in.readableBytes());
+                remainContentSize -= readSize;
+                in.readBytes(httpContent, readSize);
                 if (remainContentSize == 0) {
                     ctx.fireChannelRead(httpContent);
                     isRequestLine = true;
@@ -100,9 +101,9 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        if (httpContent != null) {
-            httpContent.release();
-        }
+        //if (httpContent != null) {
+        //    httpContent.release();
+        //}
         headerParseBuf.release();
     }
 }

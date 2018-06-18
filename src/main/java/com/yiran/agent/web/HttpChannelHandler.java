@@ -142,6 +142,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
      */
     private void setHeaders(FullHttpResponse response) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
+        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 //        if (HttpUtil.isKeepAlive(request)) {
 //            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 //        }

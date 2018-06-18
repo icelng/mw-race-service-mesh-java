@@ -125,7 +125,7 @@ public class LoadBalance {
      * @param serviceName
      * @return
      */
-    synchronized public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
+    public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
         HashSet<String> agentClientNames;
 
         do {

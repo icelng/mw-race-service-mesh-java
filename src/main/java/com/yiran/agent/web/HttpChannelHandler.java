@@ -61,6 +61,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                 /*计算qps*/
                 //loadBalance.calRequestRate();
 
+                /*解析content*/
                 //ByteBuf parseTempBuf = ctx.alloc().directBuffer(2048);
                 //FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
                 //String serviceName = formDataParser.parseInterface(contentBuf);
@@ -92,7 +93,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 
                         ctx.writeAndFlush(httpResponse).addListener(future1 -> {
                             /*计算时延*/
-                            loadBalance.calLatencyDistribution(future.getLatency());
+//                            loadBalance.calLatencyDistribution(future.getLatency());
 
                             ctx.close();
                         });

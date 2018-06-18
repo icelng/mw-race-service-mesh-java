@@ -42,7 +42,7 @@ public class AgentServiceRequestFuture implements Future<RpcResponse> {
     }
 
     public AgentServiceRequestFuture () {
-        startTime = System.nanoTime();
+       // startTime = System.nanoTime();
     }
 
 

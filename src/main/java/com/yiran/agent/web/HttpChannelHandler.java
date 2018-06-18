@@ -90,12 +90,13 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
                         ByteBuf responseContent = ctx.alloc().directBuffer(hashCodeString.length() + 2);
                         responseContent.writeBytes(hashCodeString.getBytes("utf-8"));
                         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, responseContent);
+                        setHeaders(httpResponse);
 
                         ctx.writeAndFlush(httpResponse).addListener(future1 -> {
                             /*计算时延*/
 //                            loadBalance.calLatencyDistribution(future.getLatency());
 
-                            ctx.close();
+//                            ctx.close();
                         });
                     } catch (Exception e) {
                         logger.error("", e);
@@ -143,6 +144,7 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
     private void setHeaders(FullHttpResponse response) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
         response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
 //        if (HttpUtil.isKeepAlive(request)) {
 //            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 //        }

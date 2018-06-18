@@ -4,12 +4,16 @@ import com.yiran.dubbo.model.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DubboRpcEncoder extends MessageToByteEncoder {
+    private static Logger logger = LoggerFactory.getLogger(DubboRpcEncoder.class);
+
     // header length.
     protected static final int HEADER_LENGTH = 4;
     // magic header.
@@ -92,6 +96,8 @@ public class DubboRpcEncoder extends MessageToByteEncoder {
     }
 
     private void softEncode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception{
+        logger.info("SoftEncoder");
+
         Request req = (Request)msg;
 
         // header.

@@ -31,7 +31,6 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                     if (in.readByte() == '\n') {
                         isHeader = true;
                         isRequestLine = false;
-                        headerParseBuf = ctx.alloc().directBuffer(1024);
                         break;
                     }
                 }
@@ -85,6 +84,12 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
             }
             in.release();
         }
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        headerParseBuf = ctx.alloc().directBuffer(1024);
     }
 
     @Override

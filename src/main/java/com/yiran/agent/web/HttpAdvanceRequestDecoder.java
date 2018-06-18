@@ -58,12 +58,13 @@ public class HttpAdvanceRequestDecoder extends ChannelInboundHandlerAdapter {
                             /*结束头*/
                             isHeader = false;
                             isContent = true;
+                            headerParseBuf.clear();
                             break;
                         }
                         /*为value*/
                         if (isContentLen) {
                             remainContentSize = Integer.valueOf(headerParseBuf.toString(CharsetUtil.UTF_8));
-                            httpContent = ctx.alloc().directBuffer(remainContentSize + 2);
+                            httpContent = ctx.alloc().directBuffer(remainContentSize);
                             isContentLen = false;
                         }
                         headerParseBuf.clear();

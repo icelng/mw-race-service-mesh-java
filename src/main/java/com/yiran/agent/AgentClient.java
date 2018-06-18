@@ -1,35 +1,23 @@
 package com.yiran.agent;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.yiran.ServiceSwitcher;
 import com.yiran.dubbo.model.JsonUtils;
 import com.yiran.dubbo.model.Request;
 import com.yiran.dubbo.model.RpcInvocation;
 import com.yiran.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AgentClient {
@@ -38,7 +26,7 @@ public class AgentClient {
     private int port;
     private long writeCnt = 0;
     private Channel channel;
-    private static AtomicLong totalProccessingNum = new AtomicLong(0);
+    private static AtomicLong totalProcessingNum = new AtomicLong(0);
     private static AtomicLong requestId = new AtomicLong(0);
 
     /*表示正在处理的请求数，负载均衡用*/
@@ -155,17 +143,17 @@ public class AgentClient {
         this.name = name;
     }
 
-    public static long getTotalProccessingNum() {
-        return totalProccessingNum.get();
+    public static long getTotalProcessingNum() {
+        return totalProcessingNum.get();
     }
 
     public void requestReady(){
-        totalProccessingNum.addAndGet(1);
+        totalProcessingNum.addAndGet(1);
         this.processingRequestNum.addAndGet(1);
     }
 
     public void requestDone(){
-        totalProccessingNum.decrementAndGet();
+        totalProcessingNum.decrementAndGet();
         this.processingRequestNum.decrementAndGet();
     }
 }

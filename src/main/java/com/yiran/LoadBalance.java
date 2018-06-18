@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LoadBalance {
     private static float SMALL_LATENCY = 60f;
     private static float MEDIUM_LATENCY = 100f;
-    private static float MAX_PPL = 999999999;
+    private static long MAX_PROCESSING_NUM = 999999999;
     private static Logger logger = LoggerFactory.getLogger(LoadBalance.class);
     private static int TOKEN_BUCKET_CAPACITY = 32;
 
@@ -37,7 +37,7 @@ public class LoadBalance {
     private Semaphore tokenBucket;
     private Object tokenBucketLock = new Object();
 
-    /*延时分布*/
+    /*延时分布计算*/
     private int smallLatencyCnt = 0;
     private int mediumLatencyCnt = 0;
     private int largeLatencyCnt = 0;
@@ -57,6 +57,8 @@ public class LoadBalance {
         loadLevelToAgentClientsMap = new ConcurrentHashMap<>();
         this.agentClientManager = agentClientManager;
         tokenBucket = new Semaphore(TOKEN_BUCKET_CAPACITY);
+
+        /*定时线程*/
         //scheduledExecutor.scheduleAtFixedRate(() -> {
         //    synchronized (tokenBucketLock) {
         //        if (tokenBucket.availablePermits() < TOKEN_BUCKET_CAPACITY) {
@@ -119,13 +121,13 @@ public class LoadBalance {
 
     /**
      * 查找最优的provider对应的agentClient
-     * 如果得出最优的客户端，最好要进行请求。如果不请求，则一定要调用放弃强求放弃方法
-     * 计算得到最优的客户端的过程中，如果没有带上服务发现，其时间是很短的。
+     * 计算得到最优的客户端的过程中，如果没有带上服务发现，其时间应该是很短的，并且线程如果不多，抢锁的概率就不会很大
      * @param serviceName
      * @return
      */
     synchronized public AgentClient findOptimalAgentClient(String serviceName) throws Exception {
         HashSet<String> agentClientNames;
+
         do {
             /*查询支持指定服务名的客户端集合*/
             agentClientNames = serviceNameToAgentClientsMap.getOrDefault(serviceName, null);
@@ -141,10 +143,21 @@ public class LoadBalance {
             }
         } while (agentClientNames == null || agentClientNames.size() == 0);
 
-        ///*现在已经找到服务名对应agent客户端的集合，下面选出最优的agent客户端*/
+//        return getOptimalByRandom();
+
+        return selectOptimalAgentClient(agentClientNames);
+    }
+
+    /**
+     * 请求数最少的为候选人
+     * 对候选人以LoadLevel为权重进行随机选择得出最佳客户端
+     */
+    private AgentClient selectOptimalAgentClient (HashSet<String> agentClientNames) {
         AgentClient optimalAgentClient = null;
-        float minPPL = MAX_PPL;  //  minimum processingRequestNum per loadLevel
-        float minProcessingRequestNum = MAX_PPL;
+        int totalWeight = 0;
+        long minProcessingRequestNum = MAX_PROCESSING_NUM;
+        HashSet<AgentClient> candidates = new HashSet<>();
+
         for (String clientName : agentClientNames) {
             AgentClient agentClient = clientNameToAgentClientMap.get(clientName);
             if(agentClient == null){
@@ -152,24 +165,30 @@ public class LoadBalance {
                 return null;
             }
 
-            /*计算最小的ppl*/
+            /*选出候选人*/
             long processingRequestNum = agentClient.getProcessingRequestNum().get();
-            //int loadLevel = agentClient.getLoadLevel();
-            //float currentPPL = ((float) processingRequestNum)/((float) loadLevel * 10);
-            //if (currentPPL < minPPL && processingRequestNum < 200) {
-            //    minPPL = currentPPL;
-            //    optimalAgentClient = agentClient;
-            //}
-
             if (processingRequestNum < minProcessingRequestNum && processingRequestNum < 200) {
                 minProcessingRequestNum = processingRequestNum;
+                candidates.clear();
+                candidates.add(agentClient);
+                totalWeight = agentClient.getLoadLevel();
+            } else if (processingRequestNum == minProcessingRequestNum) {
+                candidates.add(agentClient);
+                totalWeight += agentClient.getLoadLevel();
+            }
+        }
+
+        /*按权重随机选择出最优客户端*/
+        int weight = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (AgentClient agentClient : candidates) {
+            weight -= agentClient.getLoadLevel();
+            if (weight < 0) {
                 optimalAgentClient = agentClient;
             }
         }
-        //optimalAgentClient = getOptimalByRandom();
 
         if (optimalAgentClient != null) {
-            /*这里提前增加了请求数*/
+            /*提前增加请求数。当调用.requestDone()方法时，即为完成一次请求，请求数减一*/
             optimalAgentClient.requestReady();
         }
 

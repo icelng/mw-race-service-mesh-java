@@ -167,7 +167,7 @@ public class LoadBalance {
 
             /*选出候选人*/
             long processingRequestNum = agentClient.getProcessingRequestNum().get();
-            if (processingRequestNum < minProcessingRequestNum && processingRequestNum < 200) {
+            if (processingRequestNum < minProcessingRequestNum) {
                 minProcessingRequestNum = processingRequestNum;
                 candidates.clear();
                 candidates.add(agentClient);

@@ -63,13 +63,17 @@ public class HttpChannelHandler extends ChannelInboundHandlerAdapter {
 
                 /*解析content*/
                 ByteBuf parseTempBuf = ctx.alloc().directBuffer(contentBuf.readableBytes());
-                FormDataParser formDataParser = new FormDataParser(parseTempBuf, 2048);
+                FormDataParser formDataParser = new FormDataParser(parseTempBuf, contentBuf.readableBytes());
                 Map<String, String> argumentsMap = formDataParser.parse(contentBuf);
                 parseTempBuf.release();
                 if(argumentsMap == null) {
                     logger.error("Failed to parse form data!{}.", contentBuf.toString(Charset.forName("utf-8")));
                     responseFailure(ctx);
                     return;
+                }
+
+                for (String key : argumentsMap.keySet()) {
+                    logger.info("key:{} value:{}", key, argumentsMap.get(key));
                 }
 
                 /*选出最优客户端*/
